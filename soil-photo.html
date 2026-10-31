@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A closer look at your soil — TanimTech</title>
+  <script src="https://cdn.tailwindcss.com"></script><script>tailwind.config={theme:{extend:{colors:{paper:'#f6f5ee',forest:'#174b3a',ink:'#274c3e',muted:'#788073',line:'#dce0d4',leaf:'#e9efdc',lime:'#d9e99b'}}}}</script>
+  <link rel="stylesheet" href="css/site.css?v=4">
+</head>
+<body>
+  <header class="site-header"><div class="header-inner"><a class="brand" href="index.html"><span class="brand-mark">♧</span>tanimtech.</a><nav class="main-nav"><a href="index.html#crops">Explore crops</a><a href="index.html#calendar">Planting calendar</a><a href="index.html#methodology">Methodology</a></nav><div class="header-actions"><span class="workspace-pill">DEMO WORKSPACE</span><span class="avatar">MR</span></div></div></header>
+  <div class="subnav"><nav class="subnav-links"><a href="index.html">Overview</a><a class="active" href="conditions.html">Get recommendations</a><a href="conditions.html" data-dev-feature="Farm profiles">My farm profiles</a><a href="recommendations.html">Compare crops</a></nav><span>Malinao demo farm &nbsp;/&nbsp; Laguna</span></div>
+  <main class="page-shell py-10">
+    <a class="text-xs font-bold text-forest" href="conditions.html">← Back to your conditions</a>
+    <p class="eyebrow mt-6">CROP PLANNING / OPTIONAL SOIL PHOTO</p><h1 class="section-heading mt-3">A closer look at your soil.</h1><p class="muted mt-3">Take or upload a photo to review it in this browser. This optional add-on does not determine soil type and is not a reliable soil test.</p>
+    <div class="stepper mt-7"><span class="current"><b>1</b>Capture or upload</span><span><b>2</b>Review photo</span><span><b>3</b>Confirm soil context</span><span class="justify-end"><span class="badge">OPTIONAL · ADD-ON</span></span></div>
+    <div class="mt-8 grid items-start gap-8 lg:grid-cols-[2.1fr_1fr]">
+      <section class="card p-7">
+        <div class="flex items-start justify-between"><div><p class="eyebrow">01 / CHOOSE A PHOTO SOURCE</p><h2 class="serif mt-3 text-3xl">Start with one clear soil close-up</h2></div><span class="badge">DEMO DESIGN</span></div>
+        <div class="mt-6 grid gap-4 sm:grid-cols-2">
+          <div class="card p-5"><h3 class="font-bold">◎ &nbsp;Take a photo</h3><p class="muted mt-2 text-xs">Use your device camera. The photo stays in this browser.</p><button class="button mt-4" type="button" data-open-camera>Open camera <span>↗</span></button></div>
+          <div class="card p-5"><h3 class="font-bold">⇧ &nbsp;Upload a photo</h3><p class="muted mt-2 text-xs">Choose one soil close-up from your device. JPG or PNG · maximum 10 MB.</p><button class="button mt-4" type="button" data-open-file>Choose file <span>↗</span></button><input class="hidden" data-photo-file type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png"></div>
+        </div>
+        <div class="mt-6 flex items-center justify-between border-t border-line pt-5"><strong class="text-xs">Selected photo preview</strong><span class="badge" data-photo-status>NO PHOTO SELECTED</span></div>
+        <div class="photo-placeholder mt-4 h-56" data-photo-placeholder><span class="text-2xl">▧</span><strong class="mt-2 text-xs">Soil close-up goes here</strong><span class="muted mt-1 text-xs">Choose a photo or take one with your camera</span></div>
+        <img class="photo-preview hidden mt-4" data-photo-preview alt="Selected soil photo preview">
+        <div class="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs"><strong data-photo-name>No photo selected</strong><span class="muted" data-photo-details>JPG or PNG · Maximum 10 MB · stays on this device</span><span class="flex gap-4"><button class="font-bold" type="button" data-open-file>Replace</button><button class="font-bold" type="button" data-remove-photo>Remove</button></span></div>
+        <div class="mt-5 bg-leaf p-4"><label class="flex items-start gap-3 text-xs font-bold"><input type="checkbox" data-photo-consent><span>I agree to use this photo for an optional, tentative review in this browser.</span></label><p class="muted mt-3 text-xs">Your photo is stored only in this browser on this device. It is not uploaded or analyzed. Avoid faces, IDs and location-identifying details.</p></div>
+        <div class="flex flex-wrap items-center justify-between gap-4"><p class="field-note" data-photo-message>No photo is sent to a server. Analysis is not available.</p><a class="button button-primary" href="photo-review.html" data-review-photo>Review photo <span>↗</span></a></div>
+        <div class="hidden mt-5 rounded border border-line bg-white p-4" data-camera-panel><div class="flex items-center justify-between gap-3"><strong>Camera preview</strong><button class="font-bold" type="button" data-close-camera>Close</button></div><video class="camera-video mt-4" data-camera-video autoplay playsinline muted></video><p class="field-note mt-2" data-camera-message>Allow camera access when your browser asks.</p><button class="button button-primary mt-4" type="button" data-capture-photo>Take photo</button></div>
+        <div class="divider my-7"></div>
+        <p class="eyebrow">OR / CONTINUE WITHOUT A PHOTO</p><h2 class="serif mt-3 text-3xl">Know your soil? Choose it manually.</h2>
+        <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4"><label class="choice"><input type="radio" name="soilType" value="Clay" data-soil-choice>Clay</label><label class="choice"><input type="radio" name="soilType" value="Loam" data-soil-choice>Loam</label><label class="choice"><input type="radio" name="soilType" value="Sandy" data-soil-choice>Sandy</label><label class="choice selected"><input type="radio" name="soilType" value="Unknown" data-soil-choice>Unknown</label></div>
+        <div class="mt-5 flex flex-wrap items-center justify-between gap-4"><a class="text-xs font-bold text-forest" href="conditions.html">Use manual selection → Inputs</a><a class="text-xs font-bold text-forest" href="conditions.html">Skip photo &amp; return to inputs →</a></div>
+        <p class="field-note mt-3">Unknown is okay. Soil type is an optional Add-on and never blocks the Core recommendation flow.</p>
+      </section>
+      <aside class="space-y-5">
+        <section class="card p-7"><p class="eyebrow">A BETTER FIELD PHOTO</p><h2 class="serif mt-3 text-3xl">Keep the soil in focus</h2><div class="mt-4"><div class="mini-row"><b>01<br><br>Use natural daylight</b><span class="muted">Avoid harsh shadows, flash and color filters.</span></div><div class="mini-row"><b>02<br><br>Fill the frame with soil</b><span class="muted">Use a small representative sample on a plain surface; remove large leaves and debris.</span></div><div class="mini-row"><b>03<br><br>Hold steady, shoot close</b><span class="muted">Keep the camera parallel to the sample and tap to focus. Avoid blurry detail.</span></div></div><p class="muted mt-4 text-xs">A clearer image improves visibility, not the reliability of a soil test.</p></section>
+        <section class="warning"><h3 class="font-bold">⚠ &nbsp;A photo has limits</h3><p class="muted mt-2 text-xs">Photos alone cannot reliably determine soil texture, pH, nutrients, drainage, organic matter or chemistry. Keep pH as a separate measured Core input.</p></section>
+        <section class="card p-7"><p class="eyebrow">MALINAO DEMO FARM</p><h2 class="serif mt-3 text-3xl">Your field snapshot</h2><span class="badge mt-3">4 / 4 CORE VALUES ENTERED</span><div class="mt-4"><div class="mini-row"><span class="muted">Location</span><b>Bay, Laguna</b></div><div class="mini-row"><span class="muted">Planning window</span><b>November · wet season</b></div><div class="mini-row"><span class="muted">Soil pH</span><b>6.4 · manual demo value</b></div></div><p class="muted mt-4 text-xs">Demo values are not verified measurements. A photo never replaces a measured Core input.</p></section>
+      </aside>
+    </div>
+    <div class="notice mt-8"><strong class="text-xs">ⓘ &nbsp;Optional by design. Your photo stays on this device.</strong><p class="muted mt-2 text-xs">Camera capture and photo preview work in your browser. The photo is saved locally, never uploaded, and is not analyzed by AI. You can always return to your conditions and continue manually.</p></div>
+  </main>
+  <footer class="site-footer"><div class="footer-inner"><a class="footer-brand" href="index.html">tanimtech.</a><p>Thoughtful planting starts with understanding your land.</p><nav class="footer-links"><a href="index.html#methodology">Methodology</a><a href="index.html#methodology">Data &amp; limitations</a><a href="index.html#how-it-works">Help</a></nav></div><div class="footer-bottom"><p>© 2026 TanimTech · Philippine crop planning concept</p><p>Demo data only. Not a forecast, diagnosis, or yield guarantee.</p></div></footer>
+  <script src="js/site.js?v=7"></script>
+</body>
+</html>

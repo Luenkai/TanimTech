@@ -1,0 +1,155 @@
+- generic [active] [ref=f1e1]:
+  - banner [ref=f1e2]:
+    - generic [ref=f1e3]:
+      - link "♧ tanimtech." [ref=f1e4] [cursor=pointer]:
+        - /url: index.html
+        - generic [ref=f1e5]: ♧
+        - text: tanimtech.
+      - navigation [ref=f1e6]:
+        - link "Explore crops" [ref=f1e7] [cursor=pointer]:
+          - /url: index.html#crops
+        - link "Planting calendar" [ref=f1e8] [cursor=pointer]:
+          - /url: index.html#calendar
+        - link "Methodology" [ref=f1e9] [cursor=pointer]:
+          - /url: index.html#methodology
+      - generic [ref=f1e10]:
+        - generic [ref=f1e11]: DEMO WORKSPACE
+        - generic [ref=f1e12]: MR
+  - generic [ref=f1e13]:
+    - navigation [ref=f1e14]:
+      - link "Overview" [ref=f1e15] [cursor=pointer]:
+        - /url: index.html
+      - link "Get recommendations" [ref=f1e16] [cursor=pointer]:
+        - /url: conditions.html
+      - link "My farm profiles" [ref=f1e17] [cursor=pointer]:
+        - /url: conditions.html
+      - link "Compare crops" [ref=f1e18] [cursor=pointer]:
+        - /url: recommendations.html
+    - generic [ref=f1e19]: Malinao demo farm / Laguna
+  - main [ref=f1e20]:
+    - link "← Back to your conditions" [ref=f1e21] [cursor=pointer]:
+      - /url: soil-photo.html
+    - paragraph [ref=f1e22]: CROP PLANNING / OPTIONAL SOIL PHOTO
+    - heading "Review the details, not just the photo." [level=1] [ref=f1e23]
+    - paragraph [ref=f1e24]: Check that your sample is visible before a tentative assessment. You can cancel, replace it or continue without a photo.
+    - generic [ref=f1e25]:
+      - generic [ref=f1e26]:
+        - generic [ref=f1e27]: "1"
+        - text: Capture or upload
+      - generic [ref=f1e28]:
+        - generic [ref=f1e29]: "2"
+        - text: Review photo
+      - generic [ref=f1e30]:
+        - generic [ref=f1e31]: "3"
+        - text: Confirm soil context
+      - generic [ref=f1e32]: OPTIONAL · ADD-ON
+    - generic [ref=f1e34]:
+      - generic [ref=f1e35]:
+        - generic [ref=f1e36]:
+          - generic [ref=f1e37]:
+            - paragraph [ref=f1e38]: 02 / PHOTO REVIEW
+            - heading "Is this a useful close-up?" [level=2] [ref=f1e39]
+          - generic [ref=f1e40]: EXAMPLE REVIEW STATE
+        - generic [ref=f1e41]:
+          - generic [ref=f1e42]:
+            - img "Your selected soil photo" [ref=f1e43]
+            - paragraph [ref=f1e44]: soil-example.jpg
+            - paragraph [ref=f1e45]: image/jpeg · 0.16 MB · stored only on this device
+            - generic [ref=f1e46]:
+              - link "Retake / replace" [ref=f1e47] [cursor=pointer]:
+                - /url: soil-photo.html
+              - button "Remove photo" [ref=f1e48] [cursor=pointer]
+          - generic [ref=f1e49]:
+            - heading "Before you submit" [level=3] [ref=f1e50]
+            - paragraph [ref=f1e51]: Use this checklist to review your own photo. It is not automated image analysis.
+            - list [ref=f1e52]:
+              - listitem [ref=f1e53]: □ Soil fills most of the frame
+              - listitem [ref=f1e54]: □ Natural light; no strong shadow
+              - listitem [ref=f1e55]: □ Grains and clumps look in focus
+              - listitem [ref=f1e56]: □ No faces or identifying details
+            - paragraph [ref=f1e57]: Your photo stays on this device. No image is uploaded, classified or sent for analysis.
+        - generic [ref=f1e59]:
+          - link "← Back to capture / upload" [ref=f1e60] [cursor=pointer]:
+            - /url: soil-photo.html
+          - link "Choose soil manually → Inputs" [ref=f1e61] [cursor=pointer]:
+            - /url: soil-context.html
+      - complementary [ref=f1e62]:
+        - generic [ref=f1e63]:
+          - generic [ref=f1e64]: LOCAL PREVIEW
+          - heading "Review your soil photo" [level=2] [ref=f1e65]
+          - paragraph [ref=f1e66]: Check that your sample is in focus and free of identifying details. Image analysis is under development; this page does not determine soil type.
+          - link "Replace photo ↗" [ref=f1e67] [cursor=pointer]:
+            - /url: soil-photo.html
+            - text: Replace photo
+            - generic [ref=f1e68]: ↗
+        - generic [ref=f1e69]:
+          - paragraph [ref=f1e70]: ⓘ You can skip this step
+          - paragraph [ref=f1e71]: Photo assessment is optional. Cancel or skip to return to your conditions; your manual Core inputs should remain unchanged.
+        - link "Skip photo & return to inputs →" [ref=f1e72] [cursor=pointer]:
+          - /url: conditions.html
+    - generic [ref=f1e73]:
+      - generic [ref=f1e74]:
+        - generic [ref=f1e75]:
+          - paragraph [ref=f1e76]: IF SOMETHING NEEDS ATTENTION
+          - heading "A clear way back, at every step" [level=2] [ref=f1e77]
+          - paragraph [ref=f1e78]: These compact examples are separate recovery states, not four errors happening at once. Manual entry and skipping remain available in every case.
+        - generic [ref=f1e79]: ALTERNATE UI · DEMO STATES
+      - generic [ref=f1e80]:
+        - article [ref=f1e81]:
+          - generic [ref=f1e82]:
+            - heading "▧ Camera permission denied" [level=3] [ref=f1e83]
+            - generic [ref=f1e84]: DEMO
+          - paragraph [ref=f1e85]: Camera access is off or unavailable. Allow it in your browser settings, or use a photo already on your device.
+          - generic [ref=f1e86]:
+            - link "Try camera again" [ref=f1e87] [cursor=pointer]:
+              - /url: soil-photo.html
+            - link "Upload instead ↗" [ref=f1e88] [cursor=pointer]:
+              - /url: soil-photo.html
+        - article [ref=f1e89]:
+          - generic [ref=f1e90]:
+            - heading "▯ Unsupported or oversized file" [level=3] [ref=f1e91]
+            - generic [ref=f1e92]: DEMO
+          - paragraph [ref=f1e93]: Choose a JPG or PNG under 10 MB. Your browser checks the selected file before showing it.
+          - generic [ref=f1e94]:
+            - link "Choose another file ↗" [ref=f1e95] [cursor=pointer]:
+              - /url: soil-photo.html
+            - link "Use manual selection" [ref=f1e96] [cursor=pointer]:
+              - /url: conditions.html
+        - article [ref=f1e97]:
+          - generic [ref=f1e98]:
+            - heading "☼ Too dark or blurry to review" [level=3] [ref=f1e99]
+            - generic [ref=f1e100]: DEMO
+          - paragraph [ref=f1e101]: Soil detail is not clear enough. Retake in natural daylight, keep the camera steady and tap the sample to focus.
+          - generic [ref=f1e102]:
+            - link "Retake photo ↗" [ref=f1e103] [cursor=pointer]:
+              - /url: soil-photo.html
+            - link "Replace photo" [ref=f1e104] [cursor=pointer]:
+              - /url: soil-photo.html
+        - article [ref=f1e105]:
+          - generic [ref=f1e106]:
+            - heading "⌁ Local photo unavailable" [level=3] [ref=f1e107]
+            - generic [ref=f1e108]: DEMO
+          - paragraph [ref=f1e109]: The selected photo could not be kept in this browser. Choose it again, or continue without a photo. Core inputs remain available.
+          - generic [ref=f1e110]:
+            - link "Choose another photo ↗" [ref=f1e111] [cursor=pointer]:
+              - /url: soil-photo.html
+            - link "Continue without photo" [ref=f1e112] [cursor=pointer]:
+              - /url: conditions.html
+    - generic [ref=f1e113]:
+      - strong [ref=f1e114]: ⚠ A visible trait is not a laboratory measurement.
+      - paragraph [ref=f1e115]: A photo alone cannot reliably determine texture, pH, nutrients, drainage, organic matter or chemistry. This design is not connected to an AI model or upload service; all assessment and recovery states are illustrative.
+  - contentinfo [ref=f1e116]:
+    - generic [ref=f1e117]:
+      - link "tanimtech." [ref=f1e118] [cursor=pointer]:
+        - /url: index.html
+      - paragraph [ref=f1e119]: Thoughtful planting starts with understanding your land.
+      - navigation [ref=f1e120]:
+        - link "Methodology" [ref=f1e121] [cursor=pointer]:
+          - /url: index.html#methodology
+        - link "Data & limitations" [ref=f1e122] [cursor=pointer]:
+          - /url: index.html#methodology
+        - link "Help" [ref=f1e123] [cursor=pointer]:
+          - /url: index.html#how-it-works
+    - generic [ref=f1e124]:
+      - paragraph [ref=f1e125]: © 2026 TanimTech · Philippine crop planning concept
+      - paragraph [ref=f1e126]: Demo data only. Not a forecast, diagnosis, or yield guarantee.

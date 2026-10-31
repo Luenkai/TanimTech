@@ -1,0 +1,157 @@
+- generic [active] [ref=f4e1]:
+  - banner [ref=f4e2]:
+    - generic [ref=f4e3]:
+      - link "♧ tanimtech." [ref=f4e4] [cursor=pointer]:
+        - /url: index.html
+        - generic [ref=f4e5]: ♧
+        - text: tanimtech.
+      - navigation [ref=f4e6]:
+        - link "Explore crops" [ref=f4e7] [cursor=pointer]:
+          - /url: index.html#crops
+        - link "Planting calendar" [ref=f4e8] [cursor=pointer]:
+          - /url: index.html#calendar
+        - link "Methodology" [ref=f4e9] [cursor=pointer]:
+          - /url: index.html#methodology
+      - generic [ref=f4e10]: MR
+  - navigation [ref=f4e13]:
+    - link "Overview" [ref=f4e14] [cursor=pointer]:
+      - /url: index.html
+    - link "Get recommendations" [ref=f4e15] [cursor=pointer]:
+      - /url: conditions.html
+    - link "My farm profiles" [ref=f4e16] [cursor=pointer]:
+      - /url: conditions.html
+    - link "Compare crops" [ref=f4e17] [cursor=pointer]:
+      - /url: recommendations.html
+  - main [ref=f4e18]:
+    - link "← Back to your conditions" [ref=f4e19] [cursor=pointer]:
+      - /url: conditions.html
+    - paragraph [ref=f4e20]: CROP PLANNING / OPTIONAL SOIL PHOTO
+    - heading "A closer look at your soil." [level=1] [ref=f4e21]
+    - paragraph [ref=f4e22]: Take or upload a photo for a tentative soil-type suggestion. This optional add-on is not a reliable soil test.
+    - generic [ref=f4e23]:
+      - generic [ref=f4e24]:
+        - generic [ref=f4e25]: "1"
+        - text: Capture or upload
+      - generic [ref=f4e26]:
+        - generic [ref=f4e27]: "2"
+        - text: Review photo
+      - generic [ref=f4e28]:
+        - generic [ref=f4e29]: "3"
+        - text: Confirm soil context
+      - generic [ref=f4e30]: OPTIONAL · ADD-ON
+    - generic [ref=f4e32]:
+      - generic [ref=f4e33]:
+        - generic [ref=f4e34]:
+          - generic [ref=f4e35]:
+            - paragraph [ref=f4e36]: 01 / CHOOSE A PHOTO SOURCE
+            - heading "Start with one clear soil close-up" [level=2] [ref=f4e37]
+          - generic [ref=f4e38]: DEMO DESIGN
+        - generic [ref=f4e39]:
+          - generic [ref=f4e40]:
+            - heading "◎ Take a photo" [level=3] [ref=f4e41]
+            - paragraph [ref=f4e42]: Use your device camera. The photo stays in this browser.
+            - button "Open camera ↗" [ref=f4e43] [cursor=pointer]:
+              - text: Open camera
+              - generic [ref=f4e44]: ↗
+          - generic [ref=f4e45]:
+            - heading "⇧ Upload a photo" [level=3] [ref=f4e46]
+            - paragraph [ref=f4e47]: Choose one soil close-up from your device. JPG or PNG · maximum 10 MB.
+            - button "Choose file ↗" [ref=f4e48] [cursor=pointer]:
+              - text: Choose file
+              - generic [ref=f4e49]: ↗
+        - generic [ref=f4e50]:
+          - strong [ref=f4e51]: Selected photo preview
+          - generic [ref=f4e52]: NO PHOTO SELECTED
+        - generic [ref=f4e53]:
+          - generic [ref=f4e54]: ▧
+          - strong [ref=f4e55]: Soil close-up goes here
+          - generic [ref=f4e56]: Choose a photo or take one with your camera
+        - generic [ref=f4e57]:
+          - strong [ref=f4e58]: No photo selected
+          - generic [ref=f4e59]: JPG or PNG · Maximum 10 MB · stays on this device
+          - generic [ref=f4e60]:
+            - button "Replace" [ref=f4e61] [cursor=pointer]
+            - button "Remove" [ref=f4e62] [cursor=pointer]
+        - generic [ref=f4e63]:
+          - generic [ref=f4e64]:
+            - checkbox "I agree to use this photo for an optional, tentative review in this browser." [ref=f4e65]
+            - generic [ref=f4e66]: I agree to use this photo for an optional, tentative review in this browser.
+          - paragraph [ref=f4e67]: Your photo is stored only in this browser on this device. It is not uploaded or analyzed. Avoid faces, IDs and location-identifying details.
+        - generic [ref=f4e68]:
+          - paragraph [ref=f4e69]: No photo is sent to a server. Analysis is not available.
+          - link "Review photo ↗" [ref=f4e70] [cursor=pointer]:
+            - /url: photo-review.html
+            - text: Review photo
+            - generic [ref=f4e71]: ↗
+        - paragraph [ref=f4e73]: OR / CONTINUE WITHOUT A PHOTO
+        - heading "Know your soil? Choose it manually." [level=2] [ref=f4e74]
+        - generic [ref=f4e75]:
+          - generic [ref=f4e76]:
+            - radio "Clay" [ref=f4e77]
+            - text: Clay
+          - generic [ref=f4e78]:
+            - radio "Loam" [checked] [ref=f4e79]
+            - text: Loam
+          - generic [ref=f4e80]:
+            - radio "Sandy" [ref=f4e81]
+            - text: Sandy
+          - generic [ref=f4e82]:
+            - radio "Unknown" [ref=f4e83]
+            - text: Unknown
+        - generic [ref=f4e84]:
+          - link "Use manual selection → Inputs" [ref=f4e85] [cursor=pointer]:
+            - /url: conditions.html
+          - link "Skip photo & return to inputs →" [ref=f4e86] [cursor=pointer]:
+            - /url: conditions.html
+        - paragraph [ref=f4e87]: Unknown is okay. Soil type is an optional Add-on and never blocks the Core recommendation flow.
+      - complementary [ref=f4e88]:
+        - generic [ref=f4e89]:
+          - paragraph [ref=f4e90]: A BETTER FIELD PHOTO
+          - heading "Keep the soil in focus" [level=2] [ref=f4e91]
+          - generic [ref=f4e92]:
+            - generic [ref=f4e93]:
+              - generic [ref=f4e94]: 01Use natural daylight
+              - generic [ref=f4e95]: Avoid harsh shadows, flash and color filters.
+            - generic [ref=f4e96]:
+              - generic [ref=f4e97]: 02Fill the frame with soil
+              - generic [ref=f4e98]: Use a small representative sample on a plain surface; remove large leaves and debris.
+            - generic [ref=f4e99]:
+              - generic [ref=f4e100]: 03Hold steady, shoot close
+              - generic [ref=f4e101]: Keep the camera parallel to the sample and tap to focus. Avoid blurry detail.
+          - paragraph [ref=f4e102]: A clearer image improves visibility, not the reliability of a soil test.
+        - generic [ref=f4e103]:
+          - heading "⚠ A photo has limits" [level=3] [ref=f4e104]
+          - paragraph [ref=f4e105]: Photos alone cannot reliably determine soil texture, pH, nutrients, drainage, organic matter or chemistry. Keep pH as a separate measured Core input.
+        - generic [ref=f4e106]:
+          - paragraph [ref=f4e107]: MALINAO DEMO FARM
+          - heading "Your field snapshot" [level=2] [ref=f4e108]
+          - generic [ref=f4e109]: 4 / 4 CORE VALUES ENTERED
+          - generic [ref=f4e110]:
+            - generic [ref=f4e111]:
+              - generic [ref=f4e112]: Location
+              - generic [ref=f4e113]: Bay, Laguna
+            - generic [ref=f4e114]:
+              - generic [ref=f4e115]: Planning window
+              - generic [ref=f4e116]: November · wet season
+            - generic [ref=f4e117]:
+              - generic [ref=f4e118]: Soil pH
+              - generic [ref=f4e119]: 6.4 · manual demo value
+          - paragraph [ref=f4e120]: Demo values are not verified measurements. A photo never replaces a measured Core input.
+    - generic [ref=f4e121]:
+      - strong [ref=f4e122]: ⓘ Optional by design. Your photo stays on this device.
+      - paragraph [ref=f4e123]: Camera capture and photo preview work in your browser. The photo is saved locally, never uploaded, and is not analyzed by AI. You can always return to your conditions and continue manually.
+  - contentinfo [ref=f4e124]:
+    - generic [ref=f4e125]:
+      - link "tanimtech." [ref=f4e126] [cursor=pointer]:
+        - /url: index.html
+      - paragraph [ref=f4e127]: Thoughtful planting starts with understanding your land.
+      - navigation [ref=f4e128]:
+        - link "Methodology" [ref=f4e129] [cursor=pointer]:
+          - /url: index.html#methodology
+        - link "Data & limitations" [ref=f4e130] [cursor=pointer]:
+          - /url: index.html#methodology
+        - link "Help" [ref=f4e131] [cursor=pointer]:
+          - /url: index.html#how-it-works
+    - generic [ref=f4e132]:
+      - paragraph [ref=f4e133]: © 2026 TanimTech · Philippine crop planning concept
+      - paragraph [ref=f4e134]: Demo data only. Not a forecast, diagnosis, or yield guarantee.

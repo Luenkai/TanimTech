@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>A suggestion, ready for your judgment — TanimTech</title>
+  <script src="https://cdn.tailwindcss.com"></script><script>tailwind.config={theme:{extend:{colors:{paper:'#f6f5ee',forest:'#174b3a',ink:'#274c3e',muted:'#788073',line:'#dce0d4',leaf:'#e9efdc',lime:'#d9e99b'}}}}</script>
+  <link rel="stylesheet" href="css/site.css?v=4">
+</head>
+<body>
+  <header class="site-header"><div class="header-inner"><a class="brand" href="index.html"><span class="brand-mark">♧</span>tanimtech.</a><nav class="main-nav"><a href="index.html#crops">Explore crops</a><a href="index.html#calendar">Planting calendar</a><a href="index.html#methodology">Methodology</a></nav><div class="header-actions"><span class="workspace-pill">DEMO WORKSPACE</span><span class="avatar">MR</span></div></div></header>
+  <div class="subnav"><nav class="subnav-links"><a href="index.html">Overview</a><a class="active" href="conditions.html">Get recommendations</a><a href="conditions.html" data-dev-feature="Farm profiles">My farm profiles</a><a href="recommendations.html">Compare crops</a></nav><span>Malinao demo farm &nbsp;/&nbsp; Laguna</span></div>
+  <main class="page-shell py-10">
+    <a class="text-xs font-bold text-forest" href="soil-photo.html">← Back to your conditions</a>
+    <p class="eyebrow mt-6">CROP PLANNING / OPTIONAL SOIL PHOTO</p><h1 class="section-heading mt-3">A suggestion, ready for your judgment.</h1><p class="muted mt-3">Review the demo assessment, then confirm or choose a soil type yourself. Unknown is always a valid optional answer.</p>
+    <div class="stepper mt-7"><span><b>1</b>Capture or upload</span><span><b>2</b>Review photo</span><span class="current"><b>3</b>Confirm soil context</span><span class="justify-end"><span class="badge">OPTIONAL · ADD-ON</span></span></div>
+    <div class="warning mt-6"><strong class="text-xs">⚠ &nbsp;Demo assessment only · not a reliable soil classification</strong><p class="muted mt-2 text-xs">No photo has been analyzed. Photos alone cannot reliably determine texture, pH, nutrients, drainage, organic matter or chemistry. A loam suggestion below is illustrative, not a measured or validated result.</p></div>
+    <div class="mt-7 grid items-start gap-7 lg:grid-cols-[2.1fr_1fr]">
+      <div class="space-y-6">
+        <section class="card p-7">
+          <div class="flex flex-wrap items-start justify-between gap-4"><div><p class="eyebrow">03 / TENTATIVE PHOTO SUGGESTION</p><h2 class="serif mt-3 text-3xl">Loam</h2></div><span class="badge">ILLUSTRATIVE RESULT</span></div>
+          <div class="mt-5 grid items-center gap-6 sm:grid-cols-[.65fr_1.35fr]">
+            <div class="photo-placeholder h-44"><span class="text-2xl">▧</span><strong class="mt-2 text-xs">Soil close-up goes here</strong><span class="muted mt-1 text-xs">Intentional placeholder · no photo analyzed</span></div>
+            <div><span class="badge" style="background:var(--sand)">UNCERTAIN · NOT VERIFIED</span><h3 class="serif mt-3 text-2xl">A demo suggestion, not a conclusion about your soil.</h3><p class="muted mt-3 text-xs">Texture cannot be reliably established from appearance alone. Lighting, moisture and sample preparation can change how the same soil looks.</p><p class="muted mt-3 text-xs">No confidence percentage is shown: this design has no validated classifier or calibrated uncertainty estimate.</p><p class="muted mt-3 text-xs">soil-closeup.jpg · example only<br>No actual visual evidence assessed.</p></div>
+          </div>
+          <div class="divider my-6"></div><h3 class="serif text-2xl">What a visual review could describe</h3><p class="muted mt-3 text-xs">Example descriptions might include brown color, visible small clumps and mixed-looking particles. These are hypothetical visual traits, not findings from this placeholder or proof of a loam texture.</p><p class="muted mt-3 text-xs">Color is not an organic-matter test. Clumps do not establish drainage, fertility or a clay/silt/sand ratio. Ask an agriculture adviser about representative sampling and soil testing.</p>
+        </section>
+        <section class="card p-7">
+          <p class="eyebrow">YOUR CHOICE / OPTIONAL SOIL CONTEXT</p><h2 class="serif mt-3 text-3xl">Confirm the suggestion or override it</h2><p class="muted mt-3">Loam is selected for this demo. Choose clay, loam, sandy or unknown; a manual choice takes precedence over any tentative photo suggestion.</p>
+          <div class="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4"><label class="choice"><input type="radio" name="soilType" value="Clay" data-soil-choice>Clay</label><label class="choice selected"><input type="radio" name="soilType" value="Loam" data-soil-choice>Loam</label><label class="choice"><input type="radio" name="soilType" value="Sandy" data-soil-choice>Sandy</label><label class="choice"><input type="radio" name="soilType" value="Unknown" data-soil-choice>Unknown</label></div>
+          <div class="mt-5 flex flex-wrap items-center justify-between gap-4"><a class="button button-primary" href="conditions.html">Confirm &amp; return to inputs</a><a class="text-xs font-bold text-forest" href="conditions.html">Use Unknown &amp; skip photo →</a></div>
+          <p class="field-note mt-4">Proposed result handling: record the selected value and its source as user-confirmed or manual, never as a verified lab result.</p>
+        </section>
+        <section class="card p-6"><div class="flex flex-wrap items-center justify-between gap-4"><span class="badge" style="background:var(--sand)">ALTERNATE RESULT · DEMO STATE</span><a class="button" href="soil-photo.html">Retake / replace photo ↗</a></div><h2 class="serif mt-4 text-2xl">Unable to determine from this photo</h2><p class="muted mt-3 text-xs">There is insufficient visible evidence for even a tentative suggestion. No soil type is assigned. Retake or replace the photo, choose manually, or leave soil type Unknown.</p><p class="muted mt-3 text-xs">This is a separate example outcome, not a second verdict about the demo loam suggestion above. No score or classification should be forced when evidence is insufficient.</p><a class="mt-4 inline-block text-xs font-bold text-forest" href="conditions.html">Choose manually or use Unknown →</a></section>
+        <section class="flex flex-wrap items-center justify-between gap-5 border-t border-line pt-6"><div><h3 class="font-bold">Next: review your Core conditions, then your crop shortlist.</h3><p class="muted mt-2 text-xs">Confirmation returns to Inputs. Continue to recommendations after the four Core values are valid; the photo remains optional. All loaded values and results here are demo data only.</p></div><a class="button button-primary" href="recommendations.html?demo-results=1" data-dev-preview="Personalized crop scoring">Continue to recommendations <span>↗</span></a></section>
+      </div>
+      <aside class="space-y-5">
+        <section class="notice"><p class="eyebrow">Core</p><h2 class="serif mt-3 text-3xl">Your pH stays separate</h2><p class="serif mt-3 text-4xl">6.4</p><p class="muted mt-2 text-xs">Manual demo value · not verified<br>Not inferred or changed by a photo.</p><p class="muted mt-3 text-xs">For real use, enter a measured pH from a representative test in your Core conditions.</p><a class="mt-4 inline-block text-xs font-bold" href="conditions.html">Review Core conditions ↗</a></section>
+        <section class="card p-7"><p class="eyebrow">MALINAO DEMO FARM</p><h2 class="serif mt-3 text-3xl">Your field snapshot</h2><span class="badge mt-3">4 / 4 CORE VALUES ENTERED</span><div class="mt-4"><div class="mini-row"><span class="muted">Location</span><b>Bay, Laguna</b></div><div class="mini-row"><span class="muted">Planning window</span><b>November · wet season</b></div><div class="mini-row"><span class="muted">Soil pH</span><b>6.4 · manual demo value</b></div></div><p class="muted mt-4 text-xs">Demo values are not verified measurements. A photo never replaces a measured Core input.</p></section>
+        <section class="notice"><strong class="text-xs">ⓘ &nbsp;Still unsure?</strong><p class="muted mt-2 text-xs">Choose Unknown and continue manually. Soil photos add optional context; they do not unlock or block crop recommendations.</p></section>
+      </aside>
+    </div>
+  </main>
+  <footer class="site-footer"><div class="footer-inner"><a class="footer-brand" href="index.html">tanimtech.</a><p>Thoughtful planting starts with understanding your land.</p><nav class="footer-links"><a href="index.html#methodology">Methodology</a><a href="index.html#methodology">Data &amp; limitations</a><a href="index.html#how-it-works">Help</a></nav></div><div class="footer-bottom"><p>© 2026 TanimTech · Philippine crop planning concept</p><p>Demo data only. Not a forecast, diagnosis, or yield guarantee.</p></div></footer>
+  <script src="js/site.js?v=7"></script>
+</body>
+</html>
