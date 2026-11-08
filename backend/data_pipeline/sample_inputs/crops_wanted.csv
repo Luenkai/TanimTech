@@ -1,0 +1,8 @@
+slug,name,scientific,category,life_form,summary,kaggle_label,humidity_min,humidity_max,best_months,possible_months,flood_note,typhoon_note
+pechay,Pechay,Brassica rapa,Leafy and fruit vegetables,Herb,A short-cycle leafy option for a closer look.,,65,85,"11,12,1,2","3,4,5,9,10",Use caution · demo note. Do not interpret as safe under inundation.,Not established. No crop-level storm resilience guarantee.
+kangkong,Kangkong,Ipomoea aquatica,Leafy and fruit vegetables,Vine,Familiar greens with water conditions to check.,,70,90,"4,5,6,7,8,9,10","3,11,12",Tolerates wet conditions · demo note. Water quality still matters.,Not established.
+mongo,Mongo,Vigna radiata,Legumes,Herb,A different growing rhythm for your shortlist.,mungbean,,,"11,12,1","2,3,10",Sensitive to waterlogging · demo note.,Not established. Wet weather near maturity deserves caution.
+sitaw,Sitaw,Vigna unguiculata,Legumes,Vine,A climbing legume that needs a trellis.,,65,85,"10,11,12,1,2","3,4,9",,
+talong,Talong,Solanum melongena,Leafy and fruit vegetables,Herb,A fruiting vegetable with a longer cycle.,,60,85,"10,11,12,1","2,3,4,9",,
+kamote,Kamote,Ipomoea batatas,Root crops,Vine,A hardy root crop with a long cycle.,,60,80,"5,6,7,8,9,10","4,11,12",,
+mais,Mais,Zea mays,Grains,Herb,A staple grain planned around the rains.,maize,,,"5,6,10,11","4,7,12",,
