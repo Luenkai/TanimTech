@@ -2,6 +2,7 @@
 (pH 30, temperature 30, rainfall 25, humidity 15 = 100).
 Add-on context (soil type, season, risk...) NEVER adds points; it only produces guidance notes."""
 from .util import round_half_up
+from .kaggle_data import evidence_for
 
 FACTORS = [
     {"key": "soilPh",      "label": "Soil pH",     "weight": 30, "min": "ph_min",       "max": "ph_max"},
@@ -87,6 +88,7 @@ def recommend(crops, data, ctx=None):
             "fit": s["fit"], "breakdown": s["breakdown"], **explain(crop, s["breakdown"]),
             "notes": context_notes(ctx),
             "disclaimer": "Demo fit / 100 · not a probability of success.",
+            "dataEvidence": evidence_for(crop["slug"]),
         })
     results.sort(key=lambda r: -r["fit"])  # stable sort keeps list order for ties
     for i, r in enumerate(results):

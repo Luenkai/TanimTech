@@ -39,7 +39,7 @@ def create_app():
     @app.get("/<path:filename>")
     def website(filename):
         parts = filename.split("/")
-        allowed = (len(parts) == 1 and filename.endswith(".html")) or (len(parts) > 1 and parts[0] in PUBLIC_DIRS)
+        allowed = filename == "manus-routes.json" or (len(parts) == 1 and filename.endswith(".html")) or (len(parts) > 1 and parts[0] in PUBLIC_DIRS)
         if not allowed or ".." in parts:
             return jsonify({"error": "Not found."}), 404
         return send_from_directory(PROJECT_ROOT, filename)

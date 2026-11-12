@@ -19,6 +19,9 @@ class BackendTests(unittest.TestCase):
         self.assertEqual(self.c.get("/api/health").json, {"status": "ok"})
         m = self.c.get("/api/methodology").json
         self.assertEqual(sum(w["maxPoints"] for w in m["weights"]), 100)
+        status = self.c.get("/api/recommendations/data-status")
+        self.assertEqual(status.status_code, 200)
+        self.assertTrue(status.json["available"])
 
     def test_explorer_filters(self):
         self.assertEqual(self.c.get("/api/crops").json["count"], 7)
@@ -36,6 +39,7 @@ class BackendTests(unittest.TestCase):
         self.assertEqual(res[0]["slug"], "pechay")
         self.assertTrue(all(0 <= x["fit"] <= 100 for x in res))
         self.assertEqual(sum(b["maxPoints"] for b in res[0]["breakdown"]), 100)
+        self.assertIn("dataEvidence", res[0])
 
     def test_recommendation_validation(self):
         r = self.c.post("/api/recommendations", json={"soilPh": 20, "temperature": 27, "humidity": 78})

@@ -25,9 +25,9 @@ python -m data_pipeline.clean_kaggle
 It writes normalized observations and crop-level profiles to `data_pipeline/clean/`:
 `kaggle_soil_samples`, `kaggle_soil_crop_profiles`, `kaggle_yield_observations`,
 `kaggle_yield_crop_profiles`, `kaggle_state_soil`, `kaggle_state_weather`, and
-`kaggle_clean_report.json`. This stage is not connected to the website or Flask recommendation endpoint yet.
+`kaggle_clean_report.json`. The Flask recommendation endpoint reads the committed crop-profile CSVs and returns matching evidence metadata.
 
-The first dataset has 8,000 observations and does not contain pH, despite pH being discussed in its narrative description. The cleaner therefore does not invent pH values. The second dataset has 19,689 crop-yield observations and state-level soil and annual weather tables for India from 1997–2020. Soil and weather are joined by state and year, but they are not farm-level measurements and should not be treated as Philippine conditions.
+The first dataset has 8,000 observations and does not contain pH, despite pH being discussed in its narrative description. The cleaner therefore does not invent pH values. The second dataset has 19,689 crop-yield observations and state-level soil and annual weather tables for India from 1997–2020. Soil and weather are joined by state and year, but they are not farm-level measurements and should not be treated as Philippine conditions. The API exposes these cleaned crop profiles as evidence context; it does not silently turn them into Philippine recommendation bands.
 
 Yield values are preserved as published and are also compared with `production / area`. Rows are flagged when the two differ by more than 10%; they are not silently deleted because the source units and definitions need verification. The crop profiles use p05/median/p95 summaries and should be reviewed before being used as recommendation bands.
 
