@@ -1,0 +1,152 @@
+{
+  "source": "Kaggle public datasets; see data_pipeline/README.md for URLs and limitations.",
+  "crop_soil": {
+    "rows_before": 8000,
+    "rows_after": 8000,
+    "duplicates_removed": 0,
+    "invalid_rows_removed": 0,
+    "pH_available": false,
+    "regions_available": false,
+    "dates_available": false
+  },
+  "yield": {
+    "rows_before": 19689,
+    "rows_after": 19689,
+    "duplicates_removed": 0,
+    "invalid_rows_removed": 0,
+    "zero_reported_yield": 112,
+    "differs_over_10pct": 6254
+  },
+  "state_soil": {
+    "rows_before": 30,
+    "rows_after": 30,
+    "duplicates_removed": 0,
+    "invalid_rows_removed": 0
+  },
+  "state_weather": {
+    "rows_before": 720,
+    "rows_after": 720,
+    "duplicates_removed": 0,
+    "invalid_rows_removed": 0
+  },
+  "yield_condition_join": {
+    "rows": 19689,
+    "rows_with_complete_conditions": 19689,
+    "rows_missing_conditions": 0
+  },
+  "outputs": {
+    "kaggle_soil_samples": {
+      "rows": 8000,
+      "columns": [
+        "sample_id",
+        "source_row",
+        "temperature_c",
+        "humidity_pct",
+        "moisture_pct",
+        "soil_type",
+        "crop",
+        "nitrogen",
+        "potassium",
+        "phosphorus",
+        "fertilizer"
+      ]
+    },
+    "kaggle_soil_crop_profiles": {
+      "rows": 11,
+      "columns": [
+        "crop",
+        "observations",
+        "dominant_soil_type",
+        "dominant_fertilizer",
+        "temperature_c_p05",
+        "temperature_c_median",
+        "temperature_c_p95",
+        "humidity_pct_p05",
+        "humidity_pct_median",
+        "humidity_pct_p95",
+        "moisture_pct_p05",
+        "moisture_pct_median",
+        "moisture_pct_p95",
+        "nitrogen_p05",
+        "nitrogen_median",
+        "nitrogen_p95",
+        "potassium_p05",
+        "potassium_median",
+        "potassium_p95",
+        "phosphorus_p05",
+        "phosphorus_median",
+        "phosphorus_p95"
+      ]
+    },
+    "kaggle_yield_observations": {
+      "rows": 19689,
+      "columns": [
+        "crop",
+        "year",
+        "season",
+        "state",
+        "area",
+        "production",
+        "fertilizer",
+        "pesticide",
+        "yield_value",
+        "calculated_yield",
+        "yield_relative_error",
+        "yield_reconciliation",
+        "soil_n",
+        "soil_p",
+        "soil_k",
+        "soil_ph",
+        "temperature_c",
+        "rainfall_mm",
+        "humidity_pct",
+        "conditions_complete"
+      ]
+    },
+    "kaggle_yield_crop_profiles": {
+      "rows": 55,
+      "columns": [
+        "crop",
+        "observations",
+        "states",
+        "years",
+        "within_10pct_yield_share",
+        "soil_ph_p05",
+        "soil_ph_median",
+        "soil_ph_p95",
+        "temperature_c_p05",
+        "temperature_c_median",
+        "temperature_c_p95",
+        "rainfall_mm_p05",
+        "rainfall_mm_median",
+        "rainfall_mm_p95",
+        "humidity_pct_p05",
+        "humidity_pct_median",
+        "humidity_pct_p95",
+        "yield_value_p05",
+        "yield_value_median",
+        "yield_value_p95"
+      ]
+    },
+    "kaggle_state_soil": {
+      "rows": 30,
+      "columns": [
+        "state",
+        "soil_n",
+        "soil_p",
+        "soil_k",
+        "soil_ph"
+      ]
+    },
+    "kaggle_state_weather": {
+      "rows": 720,
+      "columns": [
+        "state",
+        "year",
+        "temperature_c",
+        "rainfall_mm",
+        "humidity_pct"
+      ]
+    }
+  }
+}

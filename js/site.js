@@ -446,6 +446,46 @@
     });
   });
 
+  const recommendationPage = document.querySelector("[data-recommendations-page]");
+  if (recommendationPage) {
+    const escapeHtml = (value) => String(value ?? "").replace(/[&<>\"']/g, (character) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+    }[character]));
+    const inputValue = (key, fallback) => {
+      const value = Number(state[key]);
+      return Number.isFinite(value) ? value : fallback;
+    };
+    const conditions = {
+      soilPh: inputValue("soilPh", 6.4), temperature: inputValue("temperature", 27),
+      humidity: inputValue("humidity", 78), rainfall: inputValue("rainfall", 101),
+      soilType: state.soilType || "Loam", season: state.season || "Wet season",
+      region: state.region || "Bay, Laguna", planningMonth: state.planningMonth || "November 2026",
+      plantCategory: state.plantCategory || "All categories", lifeForm: state.lifeForm || "No preference",
+    };
+    const cropImage = { pechay: "pechay.jpg", kangkong: "kangkong.jpg", mongo: "mongo.jpg" };
+    const formatBand = (band) => Array.isArray(band) ? `${band[0]}–${band[1]}` : "not available";
+    const renderRecommendations = (payload) => {
+      const results = Array.isArray(payload.results) ? payload.results : [];
+      if (!results.length) {
+        recommendationPage.innerHTML = '<section class="warning mt-8"><strong>No crops matched the selected filters.</strong><p class="muted mt-2 text-xs">Return to your conditions and broaden the category or life-form filters.</p></section>';
+        return;
+      }
+      const first = results[0];
+      const card = (result, index) => {
+        const evidence = result.dataEvidence?.available ? "CLEANED KAGGLE PROFILE" : "CURATED REFERENCE FALLBACK";
+        const image = cropImage[result.slug] || "hero-farm.jpg";
+        return `<article class="card overflow-hidden"><img class="h-52 w-full object-cover" src="images/${escapeHtml(image)}" alt="${escapeHtml(result.name)}"><div class="p-6"><div class="flex items-center justify-between"><span class="badge" ${index ? 'style="background:#edf0e9"' : ""}>${index ? "ALTERNATIVE" : "CLOSEST FIT"}</span><small class="muted">${result.growingDays[0]}–${result.growingDays[1]} days</small></div><div class="mt-3 flex items-center justify-between"><h2 class="serif text-3xl">${escapeHtml(result.name)}</h2><span class="serif text-3xl">${result.fit}</span></div><p class="muted text-xs">Fit / 100 · not a probability of success</p><div class="score-line my-4"><span style="width:${result.fit}%"></span></div><p class="eyebrow">WHY IT APPEARS</p><p class="mt-2 text-xs">${escapeHtml(result.whyItAppears)}</p><p class="eyebrow mt-4">WHAT TO CHECK</p><p class="mt-2 text-xs">${escapeHtml(result.whatToCheck)}</p><span class="badge mt-4">${evidence}</span></div></article>`;
+      };
+      const breakdown = first.breakdown.map((item) => `<div class="mini-row"><b>${escapeHtml(item.label)}<br><small class="muted font-normal">${item.value}</small></b><span>${formatBand(item.band)}<br><small class="muted">Reference band</small></span><span class="badge">${item.points} / ${item.maxPoints}</span></div>`).join("");
+      const evidenceCount = results.filter((result) => result.dataEvidence?.available).length;
+      recommendationPage.innerHTML = `<p class="eyebrow">CROP PLANNING / API SHORTLIST</p><div class="flex flex-wrap items-end justify-between gap-5"><div><h1 class="section-heading mt-3">Crops worth a closer look.</h1><p class="muted mt-3">Live fit scores from the recommendation API for your current field inputs.</p></div><a class="button button-primary" href="conditions.html">Edit conditions ↗</a></div><div class="notice mt-6 grid grid-cols-2 gap-3 text-xs sm:grid-cols-5"><span>pH ${conditions.soilPh}</span><span>${conditions.temperature} °C mean</span><span>${conditions.humidity}% RH</span><span>${conditions.rainfall} mm / month</span><span>${escapeHtml(conditions.planningMonth)} <span class="badge ml-2">API RESULTS</span></span></div><div class="mt-6 flex flex-wrap items-center justify-between gap-4"><p class="muted text-xs">${results.length} matches · ${evidenceCount} backed by cleaned Kaggle profiles · ${escapeHtml(conditions.region)}</p><span class="badge">API CONNECTED</span></div><div class="mt-6 grid gap-5 lg:grid-cols-3">${results.slice(0, 3).map(card).join("")}</div><p class="muted mt-4 text-xs">${escapeHtml(payload.note || "Illustrative scoring only.")} Cleaned Kaggle profiles are evidence context; they do not turn the fit into a forecast.</p><div id="compare" class="mt-10 grid items-start gap-6 lg:grid-cols-[2fr_1fr]"><section class="card p-7"><p class="eyebrow">EXPLAIN THE FIT / ${first.fit} OF 100</p><h2 class="serif mt-3">Why ${escapeHtml(first.name)} ranks first</h2><p class="muted mt-3">The API keeps the four weighted core factors visible. Add-on context provides guidance and never adds score points.</p><div class="mt-5">${breakdown}</div><p class="muted mt-4 text-xs">${escapeHtml(first.dataEvidence?.source || "Curated reference bands")}</p></section><aside class="card p-7"><p class="eyebrow">FIT ≠ CERTAINTY</p><h2 class="serif mt-3 text-3xl">What the score can’t tell you</h2><div class="mt-4"><div class="mini-row"><span class="muted">Input completeness</span><b>4 / 4 core values<br><small class="muted font-normal">Entered, not independently verified</small></b></div><div class="mini-row"><span class="muted">Field blind spots</span><b>Drainage · pests · seed quality<br><small class="muted font-normal">Not included in the score</small></b></div></div><div class="warning mt-5"><strong class="text-xs">⚠ Seasonal risk stays visible</strong><p class="muted mt-2 text-xs">A high fit score must not override current local advisories.</p></div></aside></div>`;
+    };
+    fetch("/api/recommendations", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(conditions) })
+      .then((response) => response.ok ? response.json() : Promise.reject(new Error("Recommendation API unavailable")))
+      .then(renderRecommendations)
+      .catch(() => showToast("Showing the saved preview. Start the Flask API to load live recommendations."));
+  }
+
   if (new URLSearchParams(window.location.search).has("demo-results")) {
     showToast("Personalized crop scoring is under development. These are illustrative demo results.");
   }

@@ -34,8 +34,19 @@ Example `POST /api/recommendations`:
 Only `tanimtech/store.py` touches storage. Re-write its `Crops`, `Profiles` and `Shortlists`
 methods with SQL (same method names and return shapes). Nothing else changes.
 
-## Data warning
-Only pechay's ranges come from your page. Every other crop in `tanimtech/data/crops.py` is a placeholder: replace them.
+## Cleaned Kaggle data integration
+The `kaggle-data-cleaning` branch is merged into this integration branch. Its committed cleaned
+outputs live in `data_pipeline/clean/`, including the crop-soil and yield-condition profile CSVs.
+Run `python -m data_pipeline.clean_kaggle` after replacing the raw inputs to regenerate them.
+
+`POST /api/recommendations` includes `dataEvidence` for every crop and identifies the matching
+cleaned Kaggle profile. `GET /api/recommendations/data-status` reports which profile artifacts are
+available. The four-factor fit score remains transparent and the cleaned data is shown as evidence,
+not converted into a false confidence estimate.
+
+The frontend recommendations page posts the saved condition inputs to the API and displays the live
+fit breakdown plus a cleaned-data badge. If the API is unavailable, the original static preview
+remains visible.
 
 ## JSON in this project
 - Storage: `storage/store.json` (profiles + shortlists), created on first save.

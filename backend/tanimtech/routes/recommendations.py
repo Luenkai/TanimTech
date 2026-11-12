@@ -3,8 +3,15 @@ from flask import Blueprint, jsonify, request
 from .. import store
 from ..scoring import recommend
 from ..validate import validate_conditions
+from ..kaggle_data import status as kaggle_status
 
 bp = Blueprint("recommendations", __name__)
+
+
+@bp.get("/data-status")
+def data_status():
+    """Report whether the cleaned Kaggle profile artifacts are installed."""
+    return jsonify(kaggle_status())
 
 
 @bp.post("")
