@@ -5,7 +5,7 @@ import unittest
 import numpy as np
 import pandas as pd
 
-from data_pipeline import build_crops, clean_psa, clean_ibtracs, fetch_nasa_power
+from data_pipeline import build_crops, clean_psa, clean_ibtracs, fetch_nasa_power, clean_kaggle
 from data_pipeline.common import to_number, read_csv_smart, haversine_km
 
 
@@ -125,6 +125,40 @@ class TyphoonTests(unittest.TestCase):
         self.assertEqual(nov["storms_per_year"], 1.5)       # A, B (2010) + E (2011) = 3 storms over 2 years; C is too far
         self.assertEqual(nov["risk_label"], "High")
         self.assertEqual(out[out["month"] == 7].iloc[0]["risk_label"], "Low")   # wind 20 kt is below tropical-storm strength
+
+
+class KaggleTests(unittest.TestCase):
+    def test_crop_soil_normalization_and_invalid_rows(self):
+        raw = pd.DataFrame({
+            "Temparature": [26, 29, 99], "Humidity": [52, 65, 50], "Moisture": [38, 45, 40],
+            "Soil Type": ["Sandy", " Loamy ", "Black"], "Crop Type": ["Maize", "Sugarcane", "Cotton"],
+            "Nitrogen": [37, 12, -1], "Potassium": [0, 0, 9], "Phosphorous": [0, 36, 30],
+            "Fertilizer Name": ["Urea", "DAP", "14-35-14"],
+        })
+        out, report = clean_kaggle.clean_crop_soil(raw)
+        self.assertEqual(len(out), 2)
+        self.assertEqual(out.iloc[1]["soil_type"], "Loamy")
+        self.assertFalse(report["pH_available"])
+        self.assertEqual(report["invalid_rows_removed"], 1)
+
+    def test_yield_condition_join_and_reconciliation_flag(self):
+        yields = pd.DataFrame({
+            "crop": ["Rice", "Rice"], "year": [2020, 2020], "season": ["Kharif     ", "Rabi"],
+            "state": ["State A", "State A"], "area": [100, 100], "production": [100, 100],
+            "fertilizer": [10, 10], "pesticide": [1, 1], "yield": [1.0, 2.0],
+        })
+        soil = pd.DataFrame({"state": ["State A"], "N": [50], "P": [20], "K": [30], "pH": [6.5]})
+        weather = pd.DataFrame({"state": ["State A"], "year": [2020], "avg_temp_c": [27], "total_rainfall_mm": [1200], "avg_humidity_percent": [75]})
+        y, _ = clean_kaggle.clean_yield(yields)
+        s, _ = clean_kaggle.clean_state_soil(soil)
+        w, _ = clean_kaggle.clean_state_weather(weather)
+        merged, report = clean_kaggle.merge_yield_conditions(y, s, w)
+        self.assertEqual(report["rows_missing_conditions"], 0)
+        self.assertTrue(merged["conditions_complete"].all())
+        self.assertIn("differs_over_10pct", set(merged["yield_reconciliation"]))
+        profile = clean_kaggle.profile_yield_conditions(merged)
+        self.assertEqual(profile.iloc[0]["crop"], "Rice")
+        self.assertEqual(profile.iloc[0]["observations"], 2)
 
 
 if __name__ == "__main__":
