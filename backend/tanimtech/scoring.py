@@ -1,14 +1,15 @@
-"""Fit scoring: 4 weighted core factors, same weights shown on recommendations.html
-(pH 30, temperature 30, rainfall 25, humidity 15 = 100).
-Add-on context (soil type, season, risk...) NEVER adds points; it only produces guidance notes."""
+"""Fit scoring from committed FAO ECOCROP crop requirement profiles.
+Soil pH, temperature, and annual rainfall are scored. Relative humidity is collected
+from NASA POWER as context because ECOCROP does not publish a comparable humidity
+requirement for these profiles. Add-on context never adds points."""
 from .util import round_half_up
 from .kaggle_data import evidence_for
 
 FACTORS = [
-    {"key": "soilPh",      "label": "Soil pH",     "weight": 30, "min": "ph_min",       "max": "ph_max"},
-    {"key": "temperature", "label": "Temperature", "weight": 30, "min": "temp_min",     "max": "temp_max"},
-    {"key": "rainfall",    "label": "Rainfall",    "weight": 25, "min": "rain_min",     "max": "rain_max"},
-    {"key": "humidity",    "label": "Humidity",    "weight": 15, "min": "humidity_min", "max": "humidity_max"},
+    {"key": "soilPh",      "label": "Soil pH",     "weight": 35, "min": "ph_min",       "max": "ph_max"},
+    {"key": "temperature", "label": "Temperature", "weight": 35, "min": "temp_min",     "max": "temp_max"},
+    {"key": "rainfall",    "label": "Annual rainfall", "weight": 30, "min": "rain_min",     "max": "rain_max"},
+    {"key": "humidity",    "label": "Humidity context", "weight": 0, "min": "humidity_min", "max": "humidity_max"},
 ]
 
 
@@ -47,15 +48,15 @@ def explain(crop, breakdown):
     off = [b for b in breakdown if b["status"] != "within"]
     if within:
         text = ", ".join(within)
-        why = f"{text[0].upper() + text[1:]} sit within the example reference bands for {crop['name']}."
+        why = f"{text[0].upper() + text[1:]} sit within the FAO ECOCROP requirement bands for {crop['name']}."
     else:
         why = f"None of the four core values sit inside the example bands for {crop['name']}."
     if off:
         check = " ".join(
-            f"{b['label']} ({_num(b['value'])}) is {b['status']} the demo band {_num(b['band'][0])}–{_num(b['band'][1])}."
+            f"{b['label']} ({_num(b['value'])}) is {b['status']} the ECOCROP band {_num(b['band'][0])}–{_num(b['band'][1])}."
             for b in off)
     else:
-        check = "All four core values are within band; drainage, pests and seed quality are still unassessed."
+        check = "The scored requirements are within band; humidity is context only, and drainage, pests and seed quality remain unassessed."
     return {"whyItAppears": why, "whatToCheck": check}
 
 
@@ -87,7 +88,7 @@ def recommend(crops, data, ctx=None):
             "lifeForm": crop["life_form"], "growingDays": [crop["days_min"], crop["days_max"]],
             "fit": s["fit"], "breakdown": s["breakdown"], **explain(crop, s["breakdown"]),
             "notes": context_notes(ctx),
-            "disclaimer": "Demo fit / 100 · not a probability of success.",
+            "disclaimer": "Fit / 100 · not a probability of success. Requirement bands are from FAO ECOCROP.",
             "dataEvidence": evidence_for(crop["slug"]),
         })
     results.sort(key=lambda r: -r["fit"])  # stable sort keeps list order for ties

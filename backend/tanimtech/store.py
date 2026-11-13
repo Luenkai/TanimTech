@@ -11,9 +11,9 @@ import os
 import threading
 from datetime import datetime, timezone
 
-from .data.crops import CROPS as DEMO_CROPS
+from .data.crops import CROPS as FALLBACK_CROPS
 
-# If the data pipeline has produced clean/crops_clean.json, use it instead of the demo placeholders.
+# Use the committed FAO ECOCROP-derived crop profiles when available.
 CROPS_JSON = os.environ.get("TANIM_CROPS_FILE") or os.path.join(
     os.path.dirname(__file__), "..", "data_pipeline", "clean", "crops_clean.json")
 
@@ -30,7 +30,7 @@ def _load_crops():
         with open(CROPS_JSON, encoding="utf-8") as fh:
             rows = json.load(fh)
     except (OSError, ValueError):
-        return DEMO_CROPS
+        return FALLBACK_CROPS
     crops = []
     for r in rows:
         r = {k: ("" if v is None else v) for k, v in r.items()}
@@ -39,7 +39,7 @@ def _load_crops():
                 r[k] = fallback  # no humidity source (needs_review = 1): do not let it penalise the crop
         r["best_months"], r["possible_months"] = _months(r.get("best_months")), _months(r.get("possible_months"))
         crops.append(r)
-    return crops or DEMO_CROPS
+    return crops or FALLBACK_CROPS
 
 
 CROPS = _load_crops()

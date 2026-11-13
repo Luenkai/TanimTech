@@ -7,7 +7,7 @@ os.environ["TANIM_STORE_FILE"] = os.path.join(tempfile.mkdtemp(), "store.json")
 
 from tanimtech import create_app  # noqa: E402
 
-DEMO = {"soilPh": 6.4, "temperature": 27, "humidity": 78, "rainfall": 101}
+SAMPLE = {"soilPh": 6.4, "temperature": 27, "humidity": 78, "rainfall": 1500}
 
 
 class BackendTests(unittest.TestCase):
@@ -29,14 +29,14 @@ class BackendTests(unittest.TestCase):
         vines = self.c.get("/api/crops?lifeForm=Vine").json["crops"]
         self.assertTrue(vines and all(x["lifeForm"] == "Vine" for x in vines))
         self.assertTrue(all(x["growingDays"][1] <= 45 for x in self.c.get("/api/crops?maxDays=45").json["crops"]))
-        self.assertEqual(self.c.get("/api/crops/pechay").json["bands"]["soilPh"], [6.0, 7.0])
+        self.assertEqual(self.c.get("/api/crops/pechay").json["bands"]["soilPh"], [6, 7.5])
         self.assertEqual(self.c.get("/api/crops/nope").status_code, 404)
 
     def test_recommendations(self):
-        r = self.c.post("/api/recommendations", json={**DEMO, "season": "Wet season"})
+        r = self.c.post("/api/recommendations", json={**SAMPLE, "season": "Wet season"})
         self.assertEqual(r.status_code, 200)
         res = r.json["results"]
-        self.assertEqual(res[0]["slug"], "pechay")
+        self.assertEqual(res[0]["slug"], "talong")
         self.assertTrue(all(0 <= x["fit"] <= 100 for x in res))
         self.assertEqual(sum(b["maxPoints"] for b in res[0]["breakdown"]), 100)
         self.assertIn("dataEvidence", res[0])
@@ -48,7 +48,7 @@ class BackendTests(unittest.TestCase):
         self.assertEqual(self.c.post("/api/recommendations", data="not json").status_code, 400)
 
     def test_compare(self):
-        ok = self.c.post("/api/compare", json={"slugs": ["pechay", "kangkong", "mongo"], **DEMO})
+        ok = self.c.post("/api/compare", json={"slugs": ["pechay", "kangkong", "mongo"], **SAMPLE})
         self.assertEqual(len(ok.json["crops"]), 3)
         self.assertIsNotNone(ok.json["crops"][0]["fit"])
         self.assertEqual(self.c.post("/api/compare", json={"slugs": ["pechay"]}).status_code, 400)
@@ -58,21 +58,21 @@ class BackendTests(unittest.TestCase):
         g = self.c.get("/api/calendar?crops=pechay,mais").json
         self.assertEqual([r["slug"] for r in g["rows"]], ["pechay", "mais"])
         self.assertEqual(len(g["rows"][0]["months"]), 12)
-        climate = [{"temperature": 27, "humidity": 78, "rainfall": 101}] * 12
+        climate = [{"temperature": 20, "humidity": 78, "rainfall": 1200}] * 12
         p = self.c.post("/api/calendar", json={"soilPh": 6.4, "monthlyClimate": climate, "crops": ["pechay"]})
         self.assertEqual(p.json["rows"][0]["months"][0]["status"], "best")
         self.assertEqual(self.c.post("/api/calendar", json={"soilPh": 6.4, "monthlyClimate": []}).status_code, 400)
 
     def test_profile_lifecycle(self):
-        r = self.c.post("/api/profiles", json={**DEMO, "name": "Malinao demo farm", "soilType": "Loam"})
+        r = self.c.post("/api/profiles", json={**SAMPLE, "name": "Field profile", "soilType": "Loam"})
         self.assertEqual(r.status_code, 201)
         pid = r.json["id"]
         self.assertEqual(r.json["soilTypeSource"], "manual")
-        self.assertEqual(self.c.post("/api/profiles", json=DEMO).status_code, 400)  # no name
+        self.assertEqual(self.c.post("/api/profiles", json=SAMPLE).status_code, 400)  # no name
 
-        upd = self.c.put(f"/api/profiles/{pid}", json={**DEMO, "name": "Renamed", "soilPh": 6.8})
+        upd = self.c.put(f"/api/profiles/{pid}", json={**SAMPLE, "name": "Renamed", "soilPh": 6.8})
         self.assertEqual(upd.json["soilPh"], 6.8)
-        self.assertEqual(self.c.get(f"/api/profiles/{pid}/recommendations").json["results"][0]["slug"], "pechay")
+        self.assertEqual(self.c.get(f"/api/profiles/{pid}/recommendations").json["results"][0]["slug"], "talong")
         self.assertEqual(len(self.c.get(f"/api/profiles/{pid}/calendar").json["rows"]), 7)
         self.assertEqual(self.c.post(f"/api/profiles/{pid}/shortlists", json={"label": "Nov"}).status_code, 201)
         ov = self.c.get(f"/api/profiles/{pid}/overview").json

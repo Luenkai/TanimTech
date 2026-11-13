@@ -1,7 +1,7 @@
 """Saved farm profiles (screen 12) + farm overview (screen 2) + "Save this shortlist"."""
 from flask import Blueprint, jsonify, request
 from .. import store
-from ..planting_calendar import demo_calendar, climate_calendar
+from ..planting_calendar import seasonal_calendar, climate_calendar
 from ..scoring import recommend
 from ..validate import validate_conditions, validate_monthly_climate
 
@@ -38,7 +38,7 @@ def _calendar_for(p):
     crops = store.crops.all()
     if p.get("monthlyClimate"):
         return climate_calendar(crops, p["monthlyClimate"], p["soilPh"])
-    return demo_calendar(crops)
+    return seasonal_calendar(crops)
 
 
 @bp.get("")

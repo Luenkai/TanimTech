@@ -1,5 +1,5 @@
 (() => {
-  const storageKey = "tanimtech-demo-inputs";
+  const storageKey = "tanimtech-field-inputs";
   const toastRegion = document.createElement("div");
   toastRegion.className = "toast-region";
   toastRegion.setAttribute("aria-live", "polite");
@@ -356,11 +356,13 @@
     if (!Object.hasOwn(state, key) && key === "soilType") state.soilType = input.value;
     input.addEventListener("input", () => {
       state[key] = input.value;
+      if (["temperature", "humidity", "rainfall"].includes(key)) state.climateSource = "";
       saveState();
       updateSnapshot();
     });
     input.addEventListener("change", () => {
       state[key] = input.value;
+      if (["temperature", "humidity", "rainfall"].includes(key)) state.climateSource = "";
       saveState();
       updateSnapshot();
     });
@@ -380,19 +382,15 @@
     });
     document.querySelectorAll("[data-source-status]").forEach((element) => {
       element.textContent = entered === 0
-        ? "Not entered"
+        ? "Waiting for measurements"
         : completed < coreInputs.length
-          ? "Incomplete / not verified"
-          : coreInputs.every((input) => input.value === defaultValues[input.dataset.inputKey])
-            ? "Demo / not verified"
-            : "Your entries / not verified";
+          ? "Incomplete"
+          : state.climateSource || "User-entered · verify source";
     });
     document.querySelectorAll("[data-input-source]").forEach((element) => {
       element.textContent = entered === 0
-        ? "No values entered"
-        : coreInputs.every((input) => input.value === defaultValues[input.dataset.inputKey])
-          ? "prefilled demonstration dataset"
-          : "your values · saved on this device";
+        ? "Waiting for measurements"
+        : state.climateSource || "User-entered values · verify source";
     });
     document.querySelectorAll("[data-context-value]").forEach((element) => {
       const input = document.querySelector(`[data-input-key="${element.dataset.contextValue}"]`);
@@ -414,7 +412,7 @@
     });
   });
 
-  const clearButton = document.querySelector("[data-clear-demo]");
+  const clearButton = document.querySelector("[data-clear-inputs]");
   if (clearButton) {
     clearButton.addEventListener("click", () => {
       state = { cleared: true };
@@ -427,7 +425,62 @@
       });
       saveState();
       updateSnapshot();
-      showToast("Demo values cleared. Enter your field measurements to continue.");
+      showToast("Entries cleared. Add measured field values to continue.");
+    });
+  }
+
+  const climateButton = document.querySelector("[data-load-climate]");
+  if (climateButton) {
+    const climateStatus = document.querySelector("[data-climate-status]");
+    const monthInput = document.querySelector('[data-input-key="planningMonth"]');
+    const latitudeInput = document.querySelector('[data-input-key="latitude"]');
+    const longitudeInput = document.querySelector('[data-input-key="longitude"]');
+    const setCoreValue = (key, value) => {
+      const input = document.querySelector(`[data-input-key="${key}"]`);
+      if (!input) return;
+      input.value = String(value);
+      state[key] = String(value);
+    };
+    climateButton.addEventListener("click", async () => {
+      const latitude = Number(latitudeInput?.value);
+      const longitude = Number(longitudeInput?.value);
+      if (!Number.isFinite(latitude) || !Number.isFinite(longitude) || latitude < -90 || latitude > 90 || longitude < -180 || longitude > 180) {
+        showToast("Enter a valid latitude and longitude first.");
+        latitudeInput?.focus();
+        return;
+      }
+      climateButton.disabled = true;
+      climateStatus.textContent = "Loading NASA POWER climatology…";
+      try {
+        const url = new URL("https://power.larc.nasa.gov/api/temporal/climatology/point");
+        url.search = new URLSearchParams({ parameters: "T2M,RH2M,PRECTOTCORR", community: "AG", latitude, longitude, format: "JSON" });
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("NASA POWER did not return climate data.");
+        const payload = await response.json();
+        const parameters = payload.properties?.parameter || {};
+        const month = (monthInput?.value || "ANN").slice(0, 3).toUpperCase();
+        const days = { JAN:31, FEB:28.25, MAR:31, APR:30, MAY:31, JUN:30, JUL:31, AUG:31, SEP:30, OCT:31, NOV:30, DEC:31 }[month] || 365;
+        const temperature = Number(parameters.T2M?.[month] ?? parameters.T2M?.ANN);
+        const humidity = Number(parameters.RH2M?.[month] ?? parameters.RH2M?.ANN);
+        const precipitationDaily = Number(parameters.PRECTOTCORR?.[month] ?? parameters.PRECTOTCORR?.ANN);
+        const annualRainfall = Number(parameters.PRECTOTCORR?.ANN) * 365;
+        const rainfall = annualRainfall;
+        if (![temperature, humidity, rainfall].every(Number.isFinite)) throw new Error("The climate response did not include usable values.");
+        setCoreValue("temperature", temperature.toFixed(1));
+        setCoreValue("humidity", humidity.toFixed(1));
+        setCoreValue("rainfall", rainfall.toFixed(0));
+        state.climateSource = "NASA POWER climatology · Jan 2001–Dec 2025";
+        state.climateCoordinates = { latitude, longitude };
+        saveState();
+        updateSnapshot();
+        climateStatus.textContent = `Loaded ${monthInput?.value || "annual"} values from NASA POWER at ${latitude.toFixed(4)}, ${longitude.toFixed(4)}. Annual rainfall is converted from NASA POWER mm/day to mm/year; temperature and humidity use the selected month.`;
+        showToast("NASA POWER climate values loaded.");
+      } catch (error) {
+        climateStatus.textContent = error.message;
+        showToast(error.message);
+      } finally {
+        climateButton.disabled = false;
+      }
     });
   }
 
@@ -438,11 +491,11 @@
         event.preventDefault();
         firstInvalid.focus();
         firstInvalid.reportValidity();
-        showToast("Enter all four valid core values before reviewing the demo shortlist.");
+        showToast("Enter all four valid field values before reviewing recommendations.");
         return;
       }
       event.preventDefault();
-      window.location.href = `${link.href}?demo-results=1`;
+      window.location.href = `${link.href}?results=1`;
     });
   });
 
@@ -451,17 +504,21 @@
     const escapeHtml = (value) => String(value ?? "").replace(/[&<>\"']/g, (character) => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
     }[character]));
-    const inputValue = (key, fallback) => {
+    const inputValue = (key) => {
       const value = Number(state[key]);
-      return Number.isFinite(value) ? value : fallback;
+      return Number.isFinite(value) ? value : null;
     };
     const conditions = {
-      soilPh: inputValue("soilPh", 6.4), temperature: inputValue("temperature", 27),
-      humidity: inputValue("humidity", 78), rainfall: inputValue("rainfall", 101),
-      soilType: state.soilType || "Loam", season: state.season || "Wet season",
-      region: state.region || "Bay, Laguna", planningMonth: state.planningMonth || "November 2026",
+      soilPh: inputValue("soilPh"), temperature: inputValue("temperature"),
+      humidity: inputValue("humidity"), rainfall: inputValue("rainfall"),
+      soilType: state.soilType || "", season: state.season || "",
+      region: state.region || "", planningMonth: state.planningMonth || "",
       plantCategory: state.plantCategory || "All categories", lifeForm: state.lifeForm || "No preference",
     };
+    if ([conditions.soilPh, conditions.temperature, conditions.humidity, conditions.rainfall].some((value) => value === null)) {
+      recommendationPage.innerHTML = '<p class="eyebrow">CROP PLANNING / RECOMMENDATIONS</p><h1 class="section-heading mt-3">Enter your field conditions first.</h1><p class="muted mt-3">Recommendations are not generated from placeholder values. Add your measured pH, temperature, humidity, and annual rainfall to continue.</p><div class="notice mt-8"><a class="button button-primary" href="conditions.html">Enter field conditions ↗</a></div>';
+      return;
+    }
     const cropImage = { pechay: "pechay.jpg", kangkong: "kangkong.jpg", mongo: "mongo.jpg", sitaw: "hero-farm.jpg", talong: "hero-farm.jpg", kamote: "hero-farm.jpg", mais: "hero-farm.jpg" };
     const cropGuides = {
       pechay: { title: "Pechay field guide", body: "A short-cycle leafy option. Check drainage carefully during wet months, and confirm pest pressure before scaling beyond a trial bed." },
@@ -473,13 +530,13 @@
       mais: { title: "Mais field guide", body: "A staple grain planned around the rains. The cleaned Kaggle evidence is useful context, not a Philippine field guarantee." },
     };
     const cropDefinitions = [
-      { slug: "pechay", name: "Pechay", category: "Leafy and fruit vegetables", lifeForm: "Herb", days: [30, 45], bands: [[6, 7], [18, 30], [60, 150], [65, 85]], summary: "A short-cycle leafy option for a closer look." },
-      { slug: "kangkong", name: "Kangkong", category: "Leafy and fruit vegetables", lifeForm: "Vine", days: [25, 35], bands: [[5.5, 7], [25, 35], [100, 250], [70, 90]], summary: "Familiar greens, with water conditions to check." },
-      { slug: "mongo", name: "Mongo", category: "Legumes", lifeForm: "Herb", days: [60, 90], bands: [[6, 7.5], [24, 32], [50, 100], [60, 80]], summary: "A different growing rhythm for your shortlist." },
-      { slug: "sitaw", name: "Sitaw", category: "Legumes", lifeForm: "Vine", days: [50, 70], bands: [[5.5, 7], [20, 32], [80, 200], [65, 85]], summary: "A climbing legume that needs a trellis." },
-      { slug: "talong", name: "Talong", category: "Leafy and fruit vegetables", lifeForm: "Herb", days: [70, 100], bands: [[5.5, 6.8], [22, 32], [80, 200], [60, 85]], summary: "A fruiting vegetable with a longer cycle." },
-      { slug: "kamote", name: "Kamote", category: "Root crops", lifeForm: "Vine", days: [90, 120], bands: [[5.5, 6.5], [21, 30], [80, 200], [60, 80]], summary: "A hardy root crop with a long cycle." },
-      { slug: "mais", name: "Mais", category: "Grains", lifeForm: "Herb", days: [80, 110], bands: [[5.8, 7], [21, 30], [80, 200], [55, 80]], summary: "A staple grain planned around the rains." },
+      { slug: "pechay", name: "Pechay", category: "Leafy and fruit vegetables", lifeForm: "Herb", days: [40, 90], bands: [[6, 7.5], [12, 22], [800, 1600], [0, 100]], summary: "FAO ECOCROP requirement profile for Chinese cabbage / pechay." },
+      { slug: "kangkong", name: "Kangkong", category: "Leafy and fruit vegetables", lifeForm: "Vine", days: [30, 70], bands: [[5, 7], [15, 35], [2000, 2500], [0, 100]], summary: "FAO ECOCROP requirement profile for water spinach." },
+      { slug: "mongo", name: "Mongo", category: "Legumes", lifeForm: "Herb", days: [50, 120], bands: [[5.5, 6.2], [21, 36], [650, 900], [0, 100]], summary: "FAO ECOCROP requirement profile for green gram / mung bean." },
+      { slug: "sitaw", name: "Sitaw", category: "Legumes", lifeForm: "Vine", days: [50, 150], bands: [[5.5, 7], [20, 35], [1500, 2000], [0, 100]], summary: "FAO ECOCROP requirement profile for yard-long bean." },
+      { slug: "talong", name: "Talong", category: "Leafy and fruit vegetables", lifeForm: "Herb", days: [70, 120], bands: [[5.5, 6.8], [20, 35], [1200, 1600], [0, 100]], summary: "FAO ECOCROP requirement profile for eggplant." },
+      { slug: "kamote", name: "Kamote", category: "Root crops", lifeForm: "Vine", days: [80, 170], bands: [[5, 7], [18, 28], [750, 2000], [0, 100]], summary: "FAO ECOCROP requirement profile for sweet potato." },
+      { slug: "mais", name: "Mais", category: "Grains", lifeForm: "Herb", days: [65, 365], bands: [[5, 7], [18, 33], [600, 1200], [0, 100]], summary: "FAO ECOCROP requirement profile for maize." },
     ];
     const evidenceByCrop = {
       mongo: { available: true, source: "Cleaned Kaggle crop-soil and yield-condition profiles", soilProfile: "Moong (Green Gram) · 740 soil observations", yieldProfile: "Moong (Green Gram) · 740 yield observations across 26 states" },
@@ -495,19 +552,19 @@
       return Math.max(0, Math.round(weight * 0.5 * (1 - distance / width)));
     };
     const localRecommend = () => {
-      const factors = [["soilPh", "Soil pH", 30], ["temperature", "Temperature", 30], ["rainfall", "Rainfall", 25], ["humidity", "Humidity", 15]];
+      const factors = [["soilPh", "Soil pH", 35], ["temperature", "Temperature", 35], ["rainfall", "Annual rainfall", 30], ["humidity", "Humidity context", 0]];
       let pool = cropDefinitions.filter((crop) => (!conditions.plantCategory || conditions.plantCategory === "All categories" || crop.category === conditions.plantCategory) && (!conditions.lifeForm || conditions.lifeForm === "No preference" || crop.lifeForm === conditions.lifeForm));
       return pool.map((crop) => {
         const breakdown = factors.map(([key, label, weight], index) => { const value = conditions[key]; const band = crop.bands[index]; return { factor: key, label, value, band, points: scoreFactor(value, band, weight), maxPoints: weight, status: value < band[0] ? "below" : value > band[1] ? "above" : "within" }; });
-        const within = breakdown.filter((item) => item.status === "within").map((item) => item.label.toLowerCase());
+        const within = breakdown.filter((item) => item.status === "within" && item.maxPoints > 0).map((item) => item.label.toLowerCase());
         const off = breakdown.filter((item) => item.status !== "within");
-        return { ...crop, fit: breakdown.reduce((sum, item) => sum + item.points, 0), breakdown, whyItAppears: within.length ? `${within[0][0].toUpperCase() + within[0].slice(1)} and other core values sit within the example reference bands.` : "The current core values sit outside the strongest example bands.", whatToCheck: off.length ? off.map((item) => `${item.label} (${item.value}) is ${item.status} the ${item.band[0]}–${item.band[1]} reference band.`).join(" ") : "All four core values are within band; drainage, pests, and seed quality are still unassessed.", dataEvidence: evidenceByCrop[crop.slug] || { available: false, source: "No cleaned Kaggle profile found; curated reference bands used." } };
+        return { ...crop, fit: breakdown.reduce((sum, item) => sum + item.points, 0), breakdown, whyItAppears: within.length ? `${within[0][0].toUpperCase() + within[0].slice(1)} and other scored values sit within the FAO ECOCROP requirement bands.` : "The scored values sit outside the strongest ECOCROP requirement bands.", whatToCheck: off.length ? off.map((item) => `${item.label} (${item.value}) is ${item.status} the ${item.band[0]}–${item.band[1]} requirement band.`).join(" ") : "The scored requirements are within band; drainage, pests, and seed quality are still unassessed.", dataEvidence: evidenceByCrop[crop.slug] || { available: false, source: "No matching cleaned evidence profile; crop requirement bands are from FAO ECOCROP." } };
       }).sort((a, b) => b.fit - a.fit).map((result, index) => ({ ...result, label: index === 0 ? "CLOSEST FIT" : "ALTERNATIVE" }));
     };
     let sortMode = "fit";
     let currentResults = [];
     const formatBand = (band) => Array.isArray(band) ? `${band[0]}–${band[1]}` : "not available";
-    const evidenceMarkup = (result) => result.dataEvidence?.available ? `<details class="mt-4"><summary class="text-xs font-bold" style="cursor:pointer">View cleaned profile evidence ↗</summary><div class="notice mt-3 text-xs"><p><b>Source</b><br>${escapeHtml(result.dataEvidence.source)}</p><p class="mt-2"><b>Soil profile</b><br>${escapeHtml(result.dataEvidence.soilProfile || "Available")}</p><p class="mt-2"><b>Yield profile</b><br>${escapeHtml(result.dataEvidence.yieldProfile || "Available")}</p></div></details>` : `<details class="mt-4"><summary class="text-xs font-bold" style="cursor:pointer">View fallback explanation ↗</summary><div class="warning mt-3 text-xs">${escapeHtml(result.dataEvidence?.source || "No profile matched this crop.")} The fit remains based on the curated reference bands.</div></details>`;
+    const evidenceMarkup = (result) => result.dataEvidence?.available ? `<details class="mt-4"><summary class="text-xs font-bold" style="cursor:pointer">View cleaned profile evidence ↗</summary><div class="notice mt-3 text-xs"><p><b>Source</b><br>${escapeHtml(result.dataEvidence.source)}</p><p class="mt-2"><b>Soil profile</b><br>${escapeHtml(result.dataEvidence.soilProfile || "Available")}</p><p class="mt-2"><b>Yield profile</b><br>${escapeHtml(result.dataEvidence.yieldProfile || "Available")}</p></div></details>` : `<details class="mt-4"><summary class="text-xs font-bold" style="cursor:pointer">View data coverage note ↗</summary><div class="warning mt-3 text-xs">${escapeHtml(result.dataEvidence?.source || "No profile matched this crop.")} The fit uses the committed FAO ECOCROP requirement bands.</div></details>`;
     const guideMarkup = (result) => `<button class="button mt-4" type="button" data-crop-guide="${escapeHtml(result.slug)}">Open crop guide ↗</button>`;
     const renderGuideDialog = (slug) => { const guide = cropGuides[slug] || cropGuides.pechay; const existing = document.querySelector("[data-guide-dialog]"); existing?.remove(); const dialog = document.createElement("div"); dialog.setAttribute("data-guide-dialog", "true"); dialog.innerHTML = `<div style="position:fixed;inset:0;background:rgb(23 75 58 / 30%);z-index:100;display:grid;place-items:center;padding:20px"><section class="card" style="max-width:520px;padding:28px;box-shadow:0 18px 50px rgb(23 75 58 / 20%)" role="dialog" aria-modal="true"><p class="eyebrow">FIELD GUIDE / ${escapeHtml(slug)}</p><h2 class="serif mt-3 text-3xl">${escapeHtml(guide.title)}</h2><p class="muted mt-4 text-sm">${escapeHtml(guide.body)}</p><div class="notice mt-5 text-xs">Use the guide to frame the next field check. It does not replace local advice, soil testing, or a validated yield forecast.</div><button class="button button-primary mt-6" type="button" data-close-guide>Close guide</button></section></div>`; document.body.append(dialog); dialog.querySelector("[data-close-guide]").addEventListener("click", () => dialog.remove()); dialog.firstElementChild.addEventListener("click", (event) => { if (event.target === dialog.firstElementChild) dialog.remove(); }); };
     const renderRecommendations = (payload, mode = "API CONNECTED") => {
@@ -516,10 +573,10 @@
       if (!currentResults.length) { recommendationPage.innerHTML = '<section class="warning mt-8"><strong>No crops matched the selected filters.</strong><p class="muted mt-2 text-xs">Return to your conditions and broaden the category or life-form filters.</p></section>'; return; }
       const first = currentResults[0];
       const evidenceCount = currentResults.filter((result) => result.dataEvidence?.available).length;
-      const cards = currentResults.slice(0, 3).map((result, index) => `<article class="card overflow-hidden"><img class="h-52 w-full object-cover" src="images/${escapeHtml(cropImage[result.slug] || "hero-farm.jpg")}" alt="${escapeHtml(result.name)}"><div class="p-6"><div class="flex items-center justify-between"><span class="badge" ${index ? 'style="background:#edf0e9"' : ""}>${index ? "ALTERNATIVE" : "CLOSEST FIT"}</span><small class="muted">${result.growingDays ? result.growingDays[0] : result.days[0]}–${result.growingDays ? result.growingDays[1] : result.days[1]} days</small></div><div class="mt-3 flex items-center justify-between"><h2 class="serif text-3xl">${escapeHtml(result.name)}</h2><span class="serif text-3xl">${result.fit}</span></div><p class="muted text-xs">Fit / 100 · not a probability of success</p><div class="score-line my-4"><span style="width:${result.fit}%"></span></div><p class="eyebrow">WHY IT APPEARS</p><p class="mt-2 text-xs">${escapeHtml(result.whyItAppears)}</p><p class="eyebrow mt-4">WHAT TO CHECK</p><p class="mt-2 text-xs">${escapeHtml(result.whatToCheck)}</p><span class="badge mt-4">${result.dataEvidence?.available ? "CLEANED KAGGLE PROFILE" : "CURATED REFERENCE FALLBACK"}</span>${evidenceMarkup(result)}${guideMarkup(result)}</div></article>`).join("");
+      const cards = currentResults.slice(0, 3).map((result, index) => `<article class="card overflow-hidden"><img class="h-52 w-full object-cover" src="images/${escapeHtml(cropImage[result.slug] || "hero-farm.jpg")}" alt="${escapeHtml(result.name)}"><div class="p-6"><div class="flex items-center justify-between"><span class="badge" ${index ? 'style="background:#edf0e9"' : ""}>${index ? "ALTERNATIVE" : "CLOSEST FIT"}</span><small class="muted">${result.growingDays ? result.growingDays[0] : result.days[0]}–${result.growingDays ? result.growingDays[1] : result.days[1]} days</small></div><div class="mt-3 flex items-center justify-between"><h2 class="serif text-3xl">${escapeHtml(result.name)}</h2><span class="serif text-3xl">${result.fit}</span></div><p class="muted text-xs">Fit / 100 · not a probability of success</p><div class="score-line my-4"><span style="width:${result.fit}%"></span></div><p class="eyebrow">WHY IT APPEARS</p><p class="mt-2 text-xs">${escapeHtml(result.whyItAppears)}</p><p class="eyebrow mt-4">WHAT TO CHECK</p><p class="mt-2 text-xs">${escapeHtml(result.whatToCheck)}</p><span class="badge mt-4">${result.dataEvidence?.available ? "CLEANED KAGGLE PROFILE" : "ECOCROP REQUIREMENTS"}</span>${evidenceMarkup(result)}${guideMarkup(result)}</div></article>`).join("");
       const breakdown = (first.breakdown || []).map((item) => `<div class="mini-row"><b>${escapeHtml(item.label)}<br><small class="muted font-normal">${item.value}</small></b><span>${formatBand(item.band)}<br><small class="muted">Reference band</small></span><span class="badge">${item.points} / ${item.maxPoints}</span></div>`).join("");
       const saved = localStorage.getItem("tanimtech-saved-shortlist") === "true";
-      recommendationPage.innerHTML = `<p class="eyebrow">CROP PLANNING / ${mode === "API CONNECTED" ? "API SHORTLIST" : "BROWSER DEMO ENGINE"}</p><div class="flex flex-wrap items-end justify-between gap-5"><div><h1 class="section-heading mt-3">Crops worth a closer look.</h1><p class="muted mt-3">${mode === "API CONNECTED" ? "Live fit scores from the recommendation API." : "Interactive fit scores calculated in your browser while the API is unavailable."}</p></div><a class="button button-primary" href="conditions.html">Edit conditions ↗</a></div><div class="notice mt-6 grid grid-cols-2 gap-3 text-xs sm:grid-cols-5"><span>pH ${conditions.soilPh}</span><span>${conditions.temperature} °C mean</span><span>${conditions.humidity}% RH</span><span>${conditions.rainfall} mm / month</span><span>${escapeHtml(conditions.planningMonth)} <span class="badge ml-2">${mode === "API CONNECTED" ? "API RESULTS" : "LOCAL RESULTS"}</span></span></div><div class="mt-6 flex flex-wrap items-center justify-between gap-4"><p class="muted text-xs">${currentResults.length} matches · ${evidenceCount} backed by cleaned Kaggle profiles · ${escapeHtml(conditions.region)}</p><div class="flex flex-wrap gap-3"><button class="field-control min-h-10 text-xs" type="button" data-sort-results>Sort: ${sortMode === "fit" ? "highest fit" : "crop name"} ↕</button><button class="button button-primary" type="button" data-scroll-compare>Compare top 3 ↗</button></div></div><div class="mt-6 grid gap-5 lg:grid-cols-3">${cards}</div><p class="muted mt-4 text-xs">${escapeHtml(payload.note || "Illustrative scoring only.")} Cleaned Kaggle profiles are evidence context; they do not turn fit into a forecast.</p><div id="compare" class="mt-10 grid items-start gap-6 lg:grid-cols-[2fr_1fr]"><section class="card p-7"><p class="eyebrow">EXPLAIN THE FIT / ${first.fit} OF 100</p><h2 class="serif mt-3">Why ${escapeHtml(first.name)} ranks first</h2><p class="muted mt-3">The recommendation engine keeps the four weighted core factors visible. Add-on context provides guidance and never adds score points.</p><div class="mt-5">${breakdown}</div><p class="muted mt-4 text-xs">${escapeHtml(first.dataEvidence?.source || "Curated reference bands")}</p></section><aside class="card p-7"><p class="eyebrow">FIT ≠ CERTAINTY</p><h2 class="serif mt-3 text-3xl">What the score can’t tell you</h2><div class="mt-4"><div class="mini-row"><span class="muted">Input completeness</span><b>4 / 4 core values<br><small class="muted font-normal">Entered, not independently verified</small></b></div><div class="mini-row"><span class="muted">Field blind spots</span><b>Drainage · pests · seed quality<br><small class="muted font-normal">Not included in the score</small></b></div></div><div class="warning mt-5"><strong class="text-xs">⚠ Seasonal risk stays visible</strong><p class="muted mt-2 text-xs">A high fit score must not override current local advisories.</p></div></aside></div><section class="mt-8 flex flex-wrap items-center justify-between gap-6 rounded bg-forest px-8 py-7 text-white"><div><h2 class="serif text-2xl">Take the shortlist back to the field.</h2><p class="mt-2 text-sm text-white/75">Save this shortlist on your device, then verify drainage and local conditions before planting at scale.</p></div><button class="button" type="button" data-save-shortlist>${saved ? "Saved on this device ✓" : "Save this shortlist ↗"}</button></section>`;
+      recommendationPage.innerHTML = `<p class="eyebrow">CROP PLANNING / ${mode === "API CONNECTED" ? "API SHORTLIST" : "LOCAL CALCULATION"}</p><div class="flex flex-wrap items-end justify-between gap-5"><div><h1 class="section-heading mt-3">Crops worth a closer look.</h1><p class="muted mt-3">${mode === "API CONNECTED" ? "Live fit scores from the recommendation API." : "Fit scores calculated from your entries while the API is unavailable."}</p></div><a class="button button-primary" href="conditions.html">Edit conditions ↗</a></div><div class="notice mt-6 grid grid-cols-2 gap-3 text-xs sm:grid-cols-5"><span>pH ${conditions.soilPh}</span><span>${conditions.temperature} °C mean</span><span>${conditions.humidity}% RH</span><span>${conditions.rainfall} mm / year</span><span>${escapeHtml(conditions.planningMonth)} <span class="badge ml-2">${mode === "API CONNECTED" ? "API RESULTS" : "LOCAL RESULTS"}</span></span></div><div class="mt-6 flex flex-wrap items-center justify-between gap-4"><p class="muted text-xs">${currentResults.length} matches · ${evidenceCount} backed by cleaned Kaggle profiles · ${escapeHtml(conditions.region)}</p><div class="flex flex-wrap gap-3"><button class="field-control min-h-10 text-xs" type="button" data-sort-results>Sort: ${sortMode === "fit" ? "highest fit" : "crop name"} ↕</button><button class="button button-primary" type="button" data-scroll-compare>Compare top 3 ↗</button></div></div><div class="mt-6 grid gap-5 lg:grid-cols-3">${cards}</div><p class="muted mt-4 text-xs">${escapeHtml(payload.note || "Fit is a transparent screening score, not a yield prediction.")} Cleaned Kaggle profiles are evidence context; they do not turn fit into a forecast.</p><div id="compare" class="mt-10 grid items-start gap-6 lg:grid-cols-[2fr_1fr]"><section class="card p-7"><p class="eyebrow">EXPLAIN THE FIT / ${first.fit} OF 100</p><h2 class="serif mt-3">Why ${escapeHtml(first.name)} ranks first</h2><p class="muted mt-3">The recommendation engine keeps the four weighted core factors visible. Add-on context provides guidance and never adds score points.</p><div class="mt-5">${breakdown}</div><p class="muted mt-4 text-xs">${escapeHtml(first.dataEvidence?.source || "FAO ECOCROP requirement bands")}</p></section><aside class="card p-7"><p class="eyebrow">FIT ≠ CERTAINTY</p><h2 class="serif mt-3 text-3xl">What the score can’t tell you</h2><div class="mt-4"><div class="mini-row"><span class="muted">Input completeness</span><b>4 / 4 core values<br><small class="muted font-normal">Entered, not independently verified</small></b></div><div class="mini-row"><span class="muted">Field blind spots</span><b>Drainage · pests · seed quality<br><small class="muted font-normal">Not included in the score</small></b></div></div><div class="warning mt-5"><strong class="text-xs">⚠ Seasonal risk stays visible</strong><p class="muted mt-2 text-xs">A high fit score must not override current local advisories.</p></div></aside></div><section class="mt-8 flex flex-wrap items-center justify-between gap-6 rounded bg-forest px-8 py-7 text-white"><div><h2 class="serif text-2xl">Take the shortlist back to the field.</h2><p class="mt-2 text-sm text-white/75">Save this shortlist on your device, then verify drainage and local conditions before planting at scale.</p></div><button class="button" type="button" data-save-shortlist>${saved ? "Saved on this device ✓" : "Save this shortlist ↗"}</button></section>`;
       recommendationPage.querySelector("[data-sort-results]").addEventListener("click", () => { sortMode = sortMode === "fit" ? "name" : "fit"; renderRecommendations(payload, mode); });
       recommendationPage.querySelector("[data-scroll-compare]").addEventListener("click", () => document.querySelector("#compare")?.scrollIntoView({ behavior: "smooth", block: "start" }));
       recommendationPage.querySelector("[data-save-shortlist]").addEventListener("click", (event) => { localStorage.setItem("tanimtech-saved-shortlist", "true"); event.currentTarget.textContent = "Saved on this device ✓"; showToast("Shortlist saved in this browser."); });
@@ -528,9 +585,9 @@
     fetch("/api/recommendations", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(conditions) })
       .then((response) => response.ok ? response.json() : Promise.reject(new Error("Recommendation API unavailable")))
       .then((payload) => renderRecommendations(payload, "API CONNECTED"))
-      .catch(() => { renderRecommendations({ results: localRecommend(), note: "The Flask API is not available on this static deployment, so the same transparent four-factor engine is running locally." }, "BROWSER DEMO"); });
+      .catch(() => { renderRecommendations({ results: localRecommend(), note: "The API is unavailable on this static deployment; the same transparent ECOCROP screening calculation is running locally." }, "LOCAL CALCULATION"); });
   }
-  if (new URLSearchParams(window.location.search).has("demo-results")) {
+  if (new URLSearchParams(window.location.search).has("results")) {
     showToast("Recommendations loaded from your saved field values.");
   }
 

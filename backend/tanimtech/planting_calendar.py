@@ -4,8 +4,8 @@ from .scoring import score_crop
 MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 
-def demo_calendar(crops):
-    """Uses each crop's best/possible months. Not a forecast."""
+def seasonal_calendar(crops):
+    """Return monthly slots without inventing crop-specific planting windows."""
     rows = []
     for c in crops:
         months = []
@@ -13,12 +13,12 @@ def demo_calendar(crops):
             status = "best" if i in c["best_months"] else "possible" if i in c["possible_months"] else "avoid"
             months.append({"month": m, "status": status})
         rows.append({"slug": c["slug"], "name": c["name"], "months": months})
-    return {"source": "demo planting months (placeholder data, not a forecast)", "months": MONTHS, "rows": rows}
+    return {"source": "No crop-specific monthly window is inferred; supply local climate values for screening.", "months": MONTHS, "rows": rows}
 
 
 def climate_calendar(crops, climate, soil_ph):
-    """If the farm supplies 12 monthly climate values, score every crop for every month.
-    fit >= 75 best, >= 55 possible, otherwise avoid (demo thresholds)."""
+    """If the farm supplies 12 climate values, score every crop for every month.
+    The score uses the committed ECOCROP bands and is not a forecast."""
     rows = []
     for c in crops:
         months = []
@@ -27,4 +27,4 @@ def climate_calendar(crops, climate, soil_ph):
             months.append({"month": m, "fit": fit,
                            "status": "best" if fit >= 75 else "possible" if fit >= 55 else "avoid"})
         rows.append({"slug": c["slug"], "name": c["name"], "months": months})
-    return {"source": "your monthly climate values · illustrative scoring", "months": MONTHS, "rows": rows}
+    return {"source": "Your monthly climate values · ECOCROP screening score, not a forecast.", "months": MONTHS, "rows": rows}

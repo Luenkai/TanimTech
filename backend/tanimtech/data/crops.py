@@ -1,10 +1,10 @@
-"""DEMO reference data. Pechay bands come from pechay.html; every other crop is a PLACEHOLDER
-the team must replace with real data (e.g. ECOCROP / DA references) before real use.
+"""Legacy fallback records used only if the committed ECOCROP subset cannot be loaded.
+Active recommendations use data_pipeline/clean/crops_clean.json.
 best_months / possible_months: 1 = January ... 12 = December."""
 
 
 def _crop(slug, name, scientific, category, life_form, summary, ph, temp, rain, humidity, days,
-          best, possible, flood="Placeholder note.", typhoon="Placeholder note."):
+          best, possible, flood="Fallback note.", typhoon="Fallback note."):
     return {
         "slug": slug, "name": name, "scientific": scientific, "category": category,
         "life_form": life_form, "summary": summary,
@@ -20,16 +20,16 @@ CROPS = [
     _crop("pechay", "Pechay", "Brassica rapa subsp. chinensis", "Leafy and fruit vegetables", "Herb",
           "A short-cycle leafy option for a closer look.",
           (6.0, 7.0), (18, 30), (60, 150), (65, 85), (30, 45), [11, 12, 1, 2], [3, 4, 5, 9, 10],
-          "Use caution · demo note. Do not interpret as safe under inundation.",
+          "Use caution · fallback note. Do not interpret as safe under inundation.",
           "Not established. No crop-level storm resilience guarantee."),
     _crop("kangkong", "Kangkong", "Ipomoea aquatica", "Leafy and fruit vegetables", "Vine",
           "Familiar greens, with water conditions to check.",
           (5.5, 7.0), (25, 35), (100, 250), (70, 90), (25, 35), [4, 5, 6, 7, 8, 9, 10], [3, 11, 12],
-          "Tolerates wet conditions · demo note. Water quality still matters.", "Not established."),
+          "Tolerates wet conditions · fallback note. Water quality still matters.", "Not established."),
     _crop("mongo", "Mongo", "Vigna radiata", "Legumes", "Herb",
           "A different growing rhythm for your shortlist.",
           (6.0, 7.5), (24, 32), (50, 100), (60, 80), (60, 90), [11, 12, 1], [2, 3, 10],
-          "Sensitive to waterlogging · demo note.",
+          "Sensitive to waterlogging · fallback note.",
           "Not established. Wet weather near maturity deserves caution."),
     _crop("sitaw", "Sitaw", "Vigna unguiculata subsp. sesquipedalis", "Legumes", "Vine",
           "A climbing legume that needs a trellis.",

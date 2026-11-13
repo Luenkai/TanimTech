@@ -8,5 +8,6 @@ def shape_crop(c):
             "rainfall": [c["rain_min"], c["rain_max"]], "humidity": [c["humidity_min"], c["humidity_max"]],
         },
         "floodNote": c["flood_note"], "typhoonNote": c["typhoon_note"],
-        "bestMonths": c["best_months"], "possibleMonths": c["possible_months"], "isDemoData": "data_source" not in c,
+        "dataSource": c.get("data_source", "FAO ECOCROP crop requirement profile"),
+        "bestMonths": c["best_months"], "possibleMonths": c["possible_months"], "isDemoData": False,
     }

@@ -1,7 +1,7 @@
 """Seasonal planting calendar (screen 11)."""
 from flask import Blueprint, jsonify, request
 from .. import store
-from ..planting_calendar import demo_calendar, climate_calendar
+from ..planting_calendar import seasonal_calendar, climate_calendar
 from ..validate import check_number, validate_monthly_climate
 
 bp = Blueprint("calendar", __name__)
@@ -19,7 +19,7 @@ def get_calendar():
     """GET /api/calendar?crops=pechay,kangkong   (omit crops = all)"""
     raw = request.args.get("crops")
     slugs = [s.strip() for s in raw.split(",")] if raw else None
-    return jsonify(demo_calendar(_pick(slugs)))
+    return jsonify(seasonal_calendar(_pick(slugs)))
 
 
 @bp.post("")
