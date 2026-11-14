@@ -15,13 +15,13 @@
 
 * { box-sizing: border-box; }
 .hidden { display: none !important; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; font-size: clamp(.9375rem, calc(.875rem + .22vw), 1.125rem); }
 body {
   margin: 0;
   background: var(--paper);
   color: var(--ink);
   font-family: "DM Sans", Arial, sans-serif;
-  font-size: 14px;
+  font-size: 1rem;
   line-height: 1.55;
 }
 h1, h2, h3, .serif { font-family: "DM Serif Display", Georgia, serif; font-weight: 400; }
@@ -109,7 +109,7 @@ button { cursor: pointer; color: inherit; }
   .site-footer .footer-inner > *, .site-footer .footer-bottom > * { min-width: 0; }
 }
 @media (max-width: 560px) {
-  body { font-size: 14px; }
+  body { font-size: 1rem; }
   .header-inner { padding-inline: 16px; }
   .page-shell { padding-inline: 16px; }
   .subnav { padding-inline: 16px; }

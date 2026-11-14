@@ -41,6 +41,14 @@ class BackendTests(unittest.TestCase):
         self.assertEqual(sum(b["maxPoints"] for b in res[0]["breakdown"]), 100)
         self.assertIn("dataEvidence", res[0])
 
+    def test_soil_dataset_and_optional_details(self):
+        dataset = self.c.get("/api/soil/dataset")
+        self.assertEqual(dataset.status_code, 200)
+        self.assertTrue(any(p["slug"] == "loam" for p in dataset.json["profiles"]))
+        r = self.c.post("/api/recommendations", json={**SAMPLE, "soilTexture": "Sandy", "drainage": "Rapid", "organicMatter": 2.5})
+        self.assertEqual(r.status_code, 200)
+        self.assertTrue(all("soilMatch" in item for item in r.json["results"]))
+
     def test_recommendation_validation(self):
         r = self.c.post("/api/recommendations", json={"soilPh": 20, "temperature": 27, "humidity": 78})
         self.assertEqual(r.status_code, 400)

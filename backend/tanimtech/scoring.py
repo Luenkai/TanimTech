@@ -4,6 +4,7 @@ from NASA POWER as context because ECOCROP does not publish a comparable humidit
 requirement for these profiles. Add-on context never adds points."""
 from .util import round_half_up
 from .kaggle_data import evidence_for
+from .soil_analysis import soil_matches
 
 FACTORS = [
     {"key": "soilPh",      "label": "Soil pH",     "weight": 35, "min": "ph_min",       "max": "ph_max"},
@@ -68,6 +69,10 @@ def context_notes(ctx):
     risk = (ctx.get("monthlyRisk") or "").lower()
     if ctx.get("season") == "Wet season" or risk.startswith(("caution", "high")):
         notes.append("Wet-season / storm risk: heavy rain can still stress crops. Follow local advisories.")
+    if ctx.get("soilTexture") or ctx.get("soilType"):
+        notes.append("Soil details are used as an advisory suitability check; they do not replace a representative laboratory test.")
+    if ctx.get("drainage") == "Poor":
+        notes.append("Poor drainage is a field risk. Confirm raised beds or other water-management options before planting.")
     notes.append("Drainage, pests and seed quality are not included in the score.")
     return notes
 
@@ -90,8 +95,10 @@ def recommend(crops, data, ctx=None):
             "notes": context_notes(ctx),
             "disclaimer": "Fit / 100 · not a probability of success. Requirement bands are from FAO ECOCROP.",
             "dataEvidence": evidence_for(crop["slug"]),
+            "soilMatch": soil_matches(crop["slug"], ctx),
         })
-    results.sort(key=lambda r: -r["fit"])  # stable sort keeps list order for ties
+    # Soil suitability narrows ordering only; the displayed fit remains the core score out of 100.
+    results.sort(key=lambda r: (-r["fit"], -(r["soilMatch"].get("points") or 0)))
     for i, r in enumerate(results):
         r["label"] = "CLOSEST FIT" if i == 0 else "ALTERNATIVE"
     return results

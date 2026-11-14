@@ -27,7 +27,7 @@ def _parse_profile(body):
 
 
 def _ctx(p, **extra):
-    return {"soilType": p.get("soilType"), "season": p.get("season"), "monthlyRisk": p.get("monthlyRisk"), **extra}
+    return {"soilType": p.get("soilType"), "soilTexture": p.get("soilTexture"), "drainage": p.get("drainage"), "moisture": p.get("moisture"), "salinity": p.get("salinity"), "organicMatter": p.get("organicMatter"), "soilNotes": p.get("soilNotes"), "season": p.get("season"), "monthlyRisk": p.get("monthlyRisk"), **extra}
 
 
 def _missing():

@@ -76,6 +76,8 @@
   const cameraVideo = document.querySelector("[data-camera-video]");
   const cameraMessage = document.querySelector("[data-camera-message]");
   const consentCheckbox = document.querySelector("[data-photo-consent]");
+  const analyzeSoilButton = document.querySelector("[data-analyze-soil]");
+  const soilAnalysisResult = document.querySelector("[data-soil-analysis-result]");
   let cameraStream = null;
   let photoObjectUrl = null;
   let currentPhoto = null;
@@ -173,6 +175,7 @@
     photoObjectUrl = nextUrl;
     currentPhoto = { blob, name, type: blob.type, size: blob.size, updatedAt: Date.now() };
     photoStored = !saveToDevice;
+    if (analyzeSoilButton) analyzeSoilButton.disabled = !photoStored || !consentCheckbox?.checked;
     photoImage.classList.remove("hidden");
     photoPlaceholder.classList.add("hidden");
     if (photoName) photoName.textContent = name;
@@ -186,6 +189,7 @@
       try {
         await savePhotoToDevice(currentPhoto);
         photoStored = true;
+        if (analyzeSoilButton) analyzeSoilButton.disabled = !consentCheckbox?.checked;
         showToast("Photo ready. It is saved only in this browser on this device.");
       } catch (error) {
         photoStored = false;
@@ -294,6 +298,53 @@
       window.location.href = event.currentTarget.href;
     });
   }
+
+  consentCheckbox?.addEventListener("change", () => {
+    if (analyzeSoilButton) analyzeSoilButton.disabled = !currentPhoto || !photoStored || !consentCheckbox.checked;
+  });
+
+  analyzeSoilButton?.addEventListener("click", async () => {
+    if (!consentCheckbox?.checked || !currentPhoto?.blob) {
+      showToast("Choose a photo and confirm model review first.");
+      return;
+    }
+    analyzeSoilButton.disabled = true;
+    analyzeSoilButton.textContent = "Analyzing…";
+    if (soilAnalysisResult) {
+      soilAnalysisResult.classList.remove("hidden");
+      soilAnalysisResult.textContent = "Reviewing visible traits. This may take a moment…";
+    }
+    const htmlEscape = (value) => String(value ?? "").replace(/[&<>\"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character]));
+    try {
+      const form = new FormData();
+      form.append("image", currentPhoto.blob, currentPhoto.name || "soil-photo.jpg");
+      const soilDetails = Object.fromEntries(["soilTexture", "drainage", "moisture", "salinity", "organicMatter", "soilNotes"].map((key) => [key, state[key] || ""]));
+      form.append("details", JSON.stringify(soilDetails));
+      const response = await fetch("/api/soil/analyze", { method: "POST", body: form });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || "Soil analysis is unavailable.");
+      const analysis = payload.analysis;
+      state.soilAnalysis = analysis;
+      if (analysis.suggestedSoilType && analysis.suggestedSoilType !== "Unknown") {
+        state.soilType = analysis.suggestedSoilType;
+        state.soilTexture = analysis.suggestedSoilType;
+        state.soilTypeSource = "model-suggested";
+      }
+      saveState();
+      if (soilAnalysisResult) {
+        const observations = (analysis.observations || []).map((item) => `<li>${htmlEscape(item)}</li>`).join("");
+        const checks = (analysis.recommendedChecks || []).map((item) => `<li>${htmlEscape(item)}</li>`).join("");
+        soilAnalysisResult.innerHTML = `<strong>Model suggestion: ${htmlEscape(analysis.suggestedSoilType)} · ${htmlEscape(analysis.confidence)} confidence</strong><p class="mt-2">Visible observations</p><ul class="mt-1 list-disc pl-5">${observations || "<li>No clear visual traits were returned.</li>"}</ul><p class="mt-2">Recommended checks</p><ul class="mt-1 list-disc pl-5">${checks || "<li>Use a representative soil test before relying on this suggestion.</li>"}</ul><p class="mt-3 muted">This suggestion is saved as model-suggested context. Confirm or override it in the field conditions form.</p>`;
+      }
+      showToast("Soil review complete. Confirm the suggestion before using it.");
+    } catch (error) {
+      if (soilAnalysisResult) soilAnalysisResult.textContent = error.message;
+      showToast(error.message);
+    } finally {
+      analyzeSoilButton.disabled = !currentPhoto || !photoStored || !consentCheckbox.checked;
+      analyzeSoilButton.textContent = "Analyze soil with model";
+    }
+  });
 
   const removePhotoButtons = document.querySelectorAll("[data-remove-photo]");
   removePhotoButtons.forEach((button) => {
@@ -514,6 +565,8 @@
       soilType: state.soilType || "", season: state.season || "",
       region: state.region || "", planningMonth: state.planningMonth || "",
       plantCategory: state.plantCategory || "All categories", lifeForm: state.lifeForm || "No preference",
+      soilTexture: state.soilTexture || "", drainage: state.drainage || "", moisture: state.moisture || "",
+      salinity: state.salinity || "", organicMatter: inputValue("organicMatter"), soilNotes: state.soilNotes || "",
     };
     if ([conditions.soilPh, conditions.temperature, conditions.humidity, conditions.rainfall].some((value) => value === null)) {
       recommendationPage.innerHTML = '<p class="eyebrow">CROP PLANNING / RECOMMENDATIONS</p><h1 class="section-heading mt-3">Enter your field conditions first.</h1><p class="muted mt-3">Recommendations are not generated from placeholder values. Add your measured pH, temperature, humidity, and annual rainfall to continue.</p><div class="notice mt-8"><a class="button button-primary" href="conditions.html">Enter field conditions ↗</a></div>';
@@ -573,7 +626,7 @@
       if (!currentResults.length) { recommendationPage.innerHTML = '<section class="warning mt-8"><strong>No crops matched the selected filters.</strong><p class="muted mt-2 text-xs">Return to your conditions and broaden the category or life-form filters.</p></section>'; return; }
       const first = currentResults[0];
       const evidenceCount = currentResults.filter((result) => result.dataEvidence?.available).length;
-      const cards = currentResults.slice(0, 3).map((result, index) => `<article class="card overflow-hidden"><img class="h-52 w-full object-cover" src="images/${escapeHtml(cropImage[result.slug] || "hero-farm.jpg")}" alt="${escapeHtml(result.name)}"><div class="p-6"><div class="flex items-center justify-between"><span class="badge" ${index ? 'style="background:#edf0e9"' : ""}>${index ? "ALTERNATIVE" : "CLOSEST FIT"}</span><small class="muted">${result.growingDays ? result.growingDays[0] : result.days[0]}–${result.growingDays ? result.growingDays[1] : result.days[1]} days</small></div><div class="mt-3 flex items-center justify-between"><h2 class="serif text-3xl">${escapeHtml(result.name)}</h2><span class="serif text-3xl">${result.fit}</span></div><p class="muted text-xs">Fit / 100 · not a probability of success</p><div class="score-line my-4"><span style="width:${result.fit}%"></span></div><p class="eyebrow">WHY IT APPEARS</p><p class="mt-2 text-xs">${escapeHtml(result.whyItAppears)}</p><p class="eyebrow mt-4">WHAT TO CHECK</p><p class="mt-2 text-xs">${escapeHtml(result.whatToCheck)}</p><span class="badge mt-4">${result.dataEvidence?.available ? "CLEANED KAGGLE PROFILE" : "ECOCROP REQUIREMENTS"}</span>${evidenceMarkup(result)}${guideMarkup(result)}</div></article>`).join("");
+      const cards = currentResults.slice(0, 3).map((result, index) => `<article class="card overflow-hidden"><img class="h-52 w-full object-cover" src="images/${escapeHtml(cropImage[result.slug] || "hero-farm.jpg")}" alt="${escapeHtml(result.name)}"><div class="p-6"><div class="flex items-center justify-between"><span class="badge" ${index ? 'style="background:#edf0e9"' : ""}>${index ? "ALTERNATIVE" : "CLOSEST FIT"}</span><small class="muted">${result.growingDays ? result.growingDays[0] : result.days[0]}–${result.growingDays ? result.growingDays[1] : result.days[1]} days</small></div><div class="mt-3 flex items-center justify-between"><h2 class="serif text-3xl">${escapeHtml(result.name)}</h2><span class="serif text-3xl">${result.fit}</span></div><p class="muted text-xs">Fit / 100 · not a probability of success</p><div class="score-line my-4"><span style="width:${result.fit}%"></span></div><p class="eyebrow">WHY IT APPEARS</p><p class="mt-2 text-xs">${escapeHtml(result.whyItAppears)}</p><p class="eyebrow mt-4">WHAT TO CHECK</p><p class="mt-2 text-xs">${escapeHtml(result.whatToCheck)}</p><span class="badge mt-4">${result.dataEvidence?.available ? "CLEANED KAGGLE PROFILE" : "ECOCROP REQUIREMENTS"}</span>${result.soilMatch?.status && result.soilMatch.status !== "unknown" ? `<p class="muted mt-3 text-xs">Soil reference: <b>${escapeHtml(result.soilMatch.status)}</b> for ${escapeHtml(result.soilMatch.label)} texture.</p>` : ""}${evidenceMarkup(result)}${guideMarkup(result)}</div></article>`).join("");
       const breakdown = (first.breakdown || []).map((item) => `<div class="mini-row"><b>${escapeHtml(item.label)}<br><small class="muted font-normal">${item.value}</small></b><span>${formatBand(item.band)}<br><small class="muted">Reference band</small></span><span class="badge">${item.points} / ${item.maxPoints}</span></div>`).join("");
       const saved = localStorage.getItem("tanimtech-saved-shortlist") === "true";
       recommendationPage.innerHTML = `<p class="eyebrow">CROP PLANNING / ${mode === "API CONNECTED" ? "API SHORTLIST" : "LOCAL CALCULATION"}</p><div class="flex flex-wrap items-end justify-between gap-5"><div><h1 class="section-heading mt-3">Crops worth a closer look.</h1><p class="muted mt-3">${mode === "API CONNECTED" ? "Live fit scores from the recommendation API." : "Fit scores calculated from your entries while the API is unavailable."}</p></div><a class="button button-primary" href="conditions.html">Edit conditions ↗</a></div><div class="notice mt-6 grid grid-cols-2 gap-3 text-xs sm:grid-cols-5"><span>pH ${conditions.soilPh}</span><span>${conditions.temperature} °C mean</span><span>${conditions.humidity}% RH</span><span>${conditions.rainfall} mm / year</span><span>${escapeHtml(conditions.planningMonth)} <span class="badge ml-2">${mode === "API CONNECTED" ? "API RESULTS" : "LOCAL RESULTS"}</span></span></div><div class="mt-6 flex flex-wrap items-center justify-between gap-4"><p class="muted text-xs">${currentResults.length} matches · ${evidenceCount} backed by cleaned Kaggle profiles · ${escapeHtml(conditions.region)}</p><div class="flex flex-wrap gap-3"><button class="field-control min-h-10 text-xs" type="button" data-sort-results>Sort: ${sortMode === "fit" ? "highest fit" : "crop name"} ↕</button><button class="button button-primary" type="button" data-scroll-compare>Compare top 3 ↗</button></div></div><div class="mt-6 grid gap-5 lg:grid-cols-3">${cards}</div><p class="muted mt-4 text-xs">${escapeHtml(payload.note || "Fit is a transparent screening score, not a yield prediction.")} Cleaned Kaggle profiles are evidence context; they do not turn fit into a forecast.</p><div id="compare" class="mt-10 grid items-start gap-6 lg:grid-cols-[2fr_1fr]"><section class="card p-7"><p class="eyebrow">EXPLAIN THE FIT / ${first.fit} OF 100</p><h2 class="serif mt-3">Why ${escapeHtml(first.name)} ranks first</h2><p class="muted mt-3">The recommendation engine keeps the four weighted core factors visible. Add-on context provides guidance and never adds score points.</p><div class="mt-5">${breakdown}</div><p class="muted mt-4 text-xs">${escapeHtml(first.dataEvidence?.source || "FAO ECOCROP requirement bands")}</p></section><aside class="card p-7"><p class="eyebrow">FIT ≠ CERTAINTY</p><h2 class="serif mt-3 text-3xl">What the score can’t tell you</h2><div class="mt-4"><div class="mini-row"><span class="muted">Input completeness</span><b>4 / 4 core values<br><small class="muted font-normal">Entered, not independently verified</small></b></div><div class="mini-row"><span class="muted">Field blind spots</span><b>Drainage · pests · seed quality<br><small class="muted font-normal">Not included in the score</small></b></div></div><div class="warning mt-5"><strong class="text-xs">⚠ Seasonal risk stays visible</strong><p class="muted mt-2 text-xs">A high fit score must not override current local advisories.</p></div></aside></div><section class="mt-8 flex flex-wrap items-center justify-between gap-6 rounded bg-forest px-8 py-7 text-white"><div><h2 class="serif text-2xl">Take the shortlist back to the field.</h2><p class="mt-2 text-sm text-white/75">Save this shortlist on your device, then verify drainage and local conditions before planting at scale.</p></div><button class="button" type="button" data-save-shortlist>${saved ? "Saved on this device ✓" : "Save this shortlist ↗"}</button></section>`;

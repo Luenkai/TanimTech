@@ -1,0 +1,57 @@
+{
+  "version": "1.0",
+  "title": "TanimTech soil suitability reference",
+  "description": "Advisory reference bands for screening crop fit. These records do not replace a laboratory soil test or local agronomy advice.",
+  "profiles": [
+    {
+      "slug": "clay",
+      "name": "Clay",
+      "description": "Fine-textured soil with high water and nutrient holding capacity; drainage is the main field check.",
+      "preferredDrainage": ["Moderate", "Well-drained"],
+      "organicMatter": [2, 6],
+      "salinity": ["Low", "Moderate"],
+      "ph": [5.5, 7.5],
+      "cropSuitability": {"pechay": "good", "kangkong": "good", "mongo": "caution", "sitaw": "caution", "talong": "caution", "kamote": "poor", "mais": "good"}
+    },
+    {
+      "slug": "loam",
+      "name": "Loam",
+      "description": "Balanced texture that commonly supports both water retention and root aeration when structure is maintained.",
+      "preferredDrainage": ["Moderate", "Well-drained"],
+      "organicMatter": [2, 8],
+      "salinity": ["Low", "Moderate"],
+      "ph": [5.8, 7.2],
+      "cropSuitability": {"pechay": "good", "kangkong": "good", "mongo": "good", "sitaw": "good", "talong": "good", "kamote": "good", "mais": "good"}
+    },
+    {
+      "slug": "sandy",
+      "name": "Sandy",
+      "description": "Coarse-textured soil that drains quickly and may need closer attention to moisture, nutrients, and organic matter.",
+      "preferredDrainage": ["Well-drained", "Rapid"],
+      "organicMatter": [1, 5],
+      "salinity": ["Low"],
+      "ph": [5.5, 7.5],
+      "cropSuitability": {"pechay": "caution", "kangkong": "poor", "mongo": "good", "sitaw": "good", "talong": "good", "kamote": "good", "mais": "caution"}
+    },
+    {
+      "slug": "silty",
+      "name": "Silty",
+      "description": "Smooth, water-holding soil that can crust or compact; surface drainage and structure deserve attention.",
+      "preferredDrainage": ["Moderate", "Well-drained"],
+      "organicMatter": [2, 7],
+      "salinity": ["Low", "Moderate"],
+      "ph": [5.8, 7.5],
+      "cropSuitability": {"pechay": "good", "kangkong": "good", "mongo": "caution", "sitaw": "caution", "talong": "caution", "kamote": "caution", "mais": "good"}
+    },
+    {
+      "slug": "peaty",
+      "name": "Peaty / organic-rich",
+      "description": "Organic-rich soil with high water-holding capacity; acidity, subsidence, and nutrient balance should be tested.",
+      "preferredDrainage": ["Moderate", "Well-drained"],
+      "organicMatter": [8, 40],
+      "salinity": ["Low"],
+      "ph": [4.5, 6.5],
+      "cropSuitability": {"pechay": "caution", "kangkong": "good", "mongo": "poor", "sitaw": "caution", "talong": "poor", "kamote": "caution", "mais": "poor"}
+    }
+  ]
+}

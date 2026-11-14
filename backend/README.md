@@ -17,7 +17,7 @@ python -m unittest -v           # run the tests
 |---|---|
 | 2 Farm overview | `GET /api/profiles/<id>/overview` |
 | 3 Growing conditions / 7 Recommendations | `POST /api/recommendations` |
-| 4-6 Soil photo / soil type | no endpoint: photos stay in the browser; send soil type as `soilType` (+ `soilTypeSource`) |
+| 4-6 Soil photo / soil type | `GET /api/soil/dataset`, `POST /api/soil/analyze` (opt-in image review); send soil type as `soilType` (+ `soilTypeSource`) |
 | 8 Crop details | `GET /api/crops/<slug>` |
 | 9 Crop explorer | `GET /api/crops?q=&category=&lifeForm=&maxDays=&sort=name\|days` |
 | 10 Crop comparison | `POST /api/compare` `{ "slugs": ["pechay","kangkong"], ...conditions }` |
@@ -27,7 +27,7 @@ python -m unittest -v           # run the tests
 
 Example `POST /api/recommendations`:
 ```json
-{ "soilPh": 6.4, "temperature": 27, "humidity": 78, "rainfall": 101, "soilType": "Loam", "season": "Wet season" }
+{ "soilPh": 6.4, "temperature": 27, "humidity": 78, "rainfall": 101, "soilType": "Loam", "soilTexture": "Loam", "drainage": "Well-drained", "organicMatter": 3.5, "soilTypeSource": "manual", "season": "Wet season" }
 ```
 
 ## Adding the database later

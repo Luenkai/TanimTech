@@ -17,7 +17,7 @@ def create_app():
     except ImportError:
         pass
 
-    from .routes import crops, recommendations, compare, calendar, profiles, methodology
+    from .routes import crops, recommendations, compare, calendar, profiles, methodology, soil
 
     @app.get("/api/health")
     def health():
@@ -29,6 +29,7 @@ def create_app():
     app.register_blueprint(calendar.bp, url_prefix="/api/calendar")
     app.register_blueprint(profiles.bp, url_prefix="/api/profiles")
     app.register_blueprint(methodology.bp, url_prefix="/api/methodology")
+    app.register_blueprint(soil.bp, url_prefix="/api/soil")
 
     # Serve the existing website. Only the HTML pages in the root and the css/js/images folders
     # are public, so backend source code and storage/store.json are never exposed.

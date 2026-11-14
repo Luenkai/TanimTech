@@ -21,3 +21,9 @@ TanimTech does not infer soil chemistry from a photo. For Philippine verificatio
 ## Scoring scope
 
 The fit score uses soil pH, temperature, and annual rainfall. Relative humidity is displayed as climate context but receives zero score weight because the committed ECOCROP records do not provide a comparable humidity requirement. Drainage, pests, seed quality, market demand, and local advisories remain field checks rather than model outputs.
+
+## Soil reference dataset and image review
+
+`backend/data/soil_profiles.json` is a committed advisory dataset covering clay, loam, sandy, silty, and peaty/organic-rich textures. It records broad pH, organic-matter, salinity, and drainage guidance plus crop-level suitability labels. It is used only as a transparent soil-context ranking signal; it does not add points to the core fit score and is not a laboratory classification.
+
+`POST /api/soil/analyze` accepts an opted-in JPG, PNG, or WebP image up to 10 MB. The backend forwards the image to the configured OpenAI-compatible vision model and asks for cautious observations, a possible texture suggestion, limitations, and recommended checks. Set `OPENAI_API_KEY`; optionally set `OPENAI_API_BASE` and `SOIL_VISION_MODEL`. If the service is not configured, users can continue with manual soil details and the recommendation API remains available.

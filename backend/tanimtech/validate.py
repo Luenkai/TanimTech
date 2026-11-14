@@ -10,11 +10,15 @@ CORE = {
 OPTIONS = {
     "elevation": ["Lowland", "Upland", "Unknown"],
     "soilType": ["Clay", "Loam", "Sandy", "Unknown"],
-    "soilTypeSource": ["manual", "user-confirmed"],
+    "soilTypeSource": ["manual", "user-confirmed", "model-suggested"],
     "season": ["Dry season", "Wet season", "Unknown"],
     "plantCategory": ["All categories", "Leafy and fruit vegetables", "Legumes", "Grains", "Root crops",
                       "Fruit trees", "Plantation crops", "Edible trees and herbs"],
     "lifeForm": ["No preference", "Herb", "Vine", "Tree"],
+}
+SOIL_DETAILS = {
+    "soilTexture": {"min": 0, "max": 100, "label": "Soil texture confidence"},
+    "organicMatter": {"min": 0, "max": 100, "label": "Organic matter"},
 }
 
 
@@ -56,6 +60,29 @@ def validate_conditions(body):
         value = body.get(key)
         if isinstance(value, str) and value.strip():
             context[key] = value.strip()[:100]
+    for key in ("soilTexture", "drainage", "organicMatter", "moisture", "salinity", "nitrogen", "phosphorus", "potassium", "soilNotes"):
+        value = body.get(key)
+        if value is None or value == "":
+            continue
+        if key == "soilNotes":
+            if isinstance(value, str):
+                context[key] = value.strip()[:300]
+            continue
+        if key in ("soilTexture", "drainage", "salinity", "moisture"):
+            allowed = {"soilTexture": ["Clay", "Loam", "Sandy", "Silty", "Peaty", "Unknown"], "drainage": ["Poor", "Moderate", "Well-drained", "Rapid", "Unknown"], "salinity": ["Low", "Moderate", "High", "Unknown"], "moisture": ["Dry", "Moist", "Waterlogged", "Unknown"]}[key]
+            if value not in allowed:
+                errors.append(f"{key} must be one of: {', '.join(allowed)}.")
+            else:
+                context[key] = value
+        else:
+            try:
+                number = float(value)
+                limits = {"organicMatter": (0, 100), "nitrogen": (0, 10000), "phosphorus": (0, 10000), "potassium": (0, 10000)}[key]
+                if not math.isfinite(number) or not limits[0] <= number <= limits[1]:
+                    raise ValueError
+                context[key] = number
+            except (TypeError, ValueError):
+                errors.append(f"{key} must be a number in its supported range.")
     return errors, core, context
 
 
