@@ -3,22 +3,38 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Your profile — TanimTech</title>
-  <script src="js/access-gate.js?v=1"></script>
+  <script src="js/access-gate.js?v=6"></script>
+  <script src="js/supabase-config.js?v=1"></script>
   <script src="https://cdn.tailwindcss.com"></script><script>tailwind.config={theme:{extend:{colors:{paper:'#f6f5ee',forest:'#174b3a',ink:'#274c3e',muted:'#788073',line:'#dce0d4',leaf:'#e9efdc',lime:'#d9e99b'}}}}</script>
-  <link rel="stylesheet" href="css/site.css?v=5">
+  <link rel="stylesheet" href="css/site.css?v=8">
 </head>
 <body>
-  <header class="site-header"><div class="header-inner"><a class="brand" href="index.html"><span class="brand-mark">♧</span>tanimtech.</a><nav class="main-nav"><a href="index.html#guide">How to use</a><a href="index.html#crops">Explore crops</a><a href="index.html#methodology">Sources</a></nav><div class="header-actions"><span class="workspace-pill">MY PROFILE</span><a class="avatar" href="profile.html" aria-label="Open your TanimTech profile">TT</a></div></div></header>
-  <div class="subnav"><nav class="subnav-links"><a href="index.html">Overview</a><a href="conditions.html">Get recommendations</a><a class="active" href="profile.html">My profile</a><a href="recommendations.html">Compare crops</a></nav><span>Private planning workspace</span></div>
+  <header class="site-header"><div class="header-inner"><a class="brand" href="homepage.html"><span class="brand-mark">♧</span>tanimtech.</a><nav class="main-nav" aria-label="Main navigation">
+    <a href="homepage.html">Overview</a>
+    <details class="nav-dropdown"><summary>Explore</summary><div class="nav-dropdown-menu"><a href="crop-guide.html">Crop guide</a><a href="homepage.html#crops">Featured crops</a></div></details>
+    <details class="nav-dropdown"><summary class="current">Plan</summary><div class="nav-dropdown-menu"><a href="conditions.html">Get recommendations</a><a href="recommendations.html">Compare crops</a><a href="homepage.html#calendar">Climate inputs</a><a href="profile.html" aria-current="page">My profile</a></div></details>
+    <details class="nav-dropdown"><summary>More</summary><div class="nav-dropdown-menu"><a href="homepage.html#how-it-works">How it works</a><a href="homepage.html#methodology">Methodology</a><a href="soil-photo.html">Soil photo</a><a href="photo-review.html">Photo review</a><a href="soil-context.html">Soil context</a></div></details>
+  </nav><div class="header-actions"><a class="avatar" data-user-avatar href="profile.html" aria-label="Open your TanimTech profile">TT</a></div></div></header>
   <main class="page-shell py-10" data-profile-page>
-    <p class="eyebrow">MY PROFILE / PLANTING WORKSPACE</p><h1 class="section-heading mt-3">Your planting decisions, in one place.</h1><p class="muted mt-3">Keep your field profiles and revisit crop recommendations made from this browser.</p>
+    <p class="eyebrow">MY PROFILE / PLANTING WORKSPACE</p><h1 class="section-heading mt-3">Your account and planting workspace.</h1><p class="muted mt-3">View and update your account details, then manage saved field profiles and recommendations.</p>
+    <section class="card mt-8 p-7" data-account-details>
+      <p class="eyebrow">ACCOUNT DETAILS</p><h2 class="section-title mt-3">Your account information.</h2>
+      <p class="muted mt-3 text-sm" data-account-source>Loading account details…</p>
+      <form class="mt-6 grid gap-5 md:grid-cols-2" data-account-form>
+        <label><span class="field-label">Username</span><span class="field-control"><input data-account-username type="text" minlength="3" maxlength="20" autocomplete="username" required></span></label>
+        <label><span class="field-label">Gmail address</span><span class="field-control"><input data-account-email type="email" autocomplete="email" required></span></label>
+        <label><span class="field-label">New password</span><span class="field-control"><input data-account-password type="password" minlength="8" autocomplete="new-password" placeholder="Leave blank to keep current password"></span></label>
+        <label><span class="field-label">Confirm new password</span><span class="field-control"><input data-account-confirm type="password" autocomplete="new-password" placeholder="Re-enter new password"></span></label>
+        <div class="md:col-span-2"><p class="field-note">Username: 3–20 letters, numbers, or underscores. New passwords need uppercase, lowercase, a number, and a symbol.</p><button class="button button-primary mt-4" type="submit">Save account changes</button><p class="field-note mt-3" data-account-message aria-live="polite">Your email, username, and password are private account details.</p></div>
+      </form>
+    </section>
     <section class="card mt-8 p-7" data-profile-state>
       <div class="flex flex-wrap items-center justify-between gap-5"><div><p class="eyebrow">LOCAL PROFILE</p><h2 class="serif mt-3 text-3xl">Your field workspace</h2><p class="muted mt-3 text-sm">Your profile and saved recommendations stay in this browser. Use the same device to revisit them.</p></div><span class="badge">THIS DEVICE</span></div>
       <div class="mt-6 flex flex-wrap items-end gap-3"><label class="min-w-[240px] flex-1"><span class="field-label">Profile name</span><span class="field-control"><input data-profile-name type="text" maxlength="80" placeholder="e.g. Maria’s farm"></span></label><button class="button button-primary" type="button" data-save-profile-name>Save name</button><button class="button" type="button" data-export-report>Download PDF report</button></div>
       <p class="field-note mt-4" data-auth-message>Saved locally. Clearing browser storage removes this profile and its history.</p>
     </section>
   </main>
-  <footer class="site-footer"><div class="footer-inner"><a class="footer-brand" href="index.html">tanimtech.</a><p>Plan from measured conditions and traceable sources.</p><nav class="footer-links"><a href="index.html#guide">How to use</a><a href="index.html#methodology">Sources</a><a href="conditions.html">Start planning</a></nav></div><div class="footer-bottom"><p>© 2026 TanimTech · Philippine crop planning</p><p>Private workspace · screening, not a yield guarantee.</p></div></footer>
-  <script src="js/site.js?v=10"></script>
+  <footer class="site-footer"><div class="footer-inner"><a class="footer-brand" href="homepage.html">tanimtech.</a><p>Plan from measured conditions and traceable sources.</p><nav class="footer-links"><a href="homepage.html#guide">How to use</a><a href="homepage.html#methodology">Sources</a><a href="conditions.html">Start planning</a></nav></div><div class="footer-bottom"><p>© 2026 TanimTech · Philippine crop planning</p><p>Private workspace · screening, not a yield guarantee.</p></div></footer>
+  <script src="js/site.js?v=18"></script>
 </body>
 </html>

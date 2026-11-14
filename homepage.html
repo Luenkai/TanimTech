@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TanimTech — Field and crop planning</title>
+  <script src="js/access-gate.js?v=6"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{paper:'#f6f5ee',forest:'#174b3a',ink:'#274c3e',muted:'#788073',line:'#dce0d4',leaf:'#e9efdc',lime:'#d9e99b'}}}}</script>
+  <link rel="stylesheet" href="css/site.css?v=8">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="homepage.html"><span class="brand-mark">♧</span>tanimtech.</a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="homepage.html" aria-current="page">Overview</a>
+        <details class="nav-dropdown"><summary>Explore</summary><div class="nav-dropdown-menu"><a href="crop-guide.html">Crop guide</a><a href="#crops">Featured crops</a></div></details>
+        <details class="nav-dropdown"><summary>Plan</summary><div class="nav-dropdown-menu"><a href="conditions.html">Get recommendations</a><a href="recommendations.html">Compare crops</a><a href="#calendar">Climate inputs</a><a href="profile.html">My profile</a></div></details>
+        <details class="nav-dropdown"><summary>More</summary><div class="nav-dropdown-menu"><a href="#how-it-works">How it works</a><a href="#methodology">Methodology</a><a href="soil-photo.html">Soil photo</a><a href="photo-review.html">Photo review</a><a href="soil-context.html">Soil context</a></div></details>
+      </nav>
+      <div class="header-actions"><a class="button button-primary" href="#analysis">Choose analysis</a><a class="avatar" data-user-avatar href="profile.html" aria-label="Open your TanimTech profile">TT</a></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="page-shell py-12 md:py-16">
+      <div class="grid items-center gap-8 lg:grid-cols-[1.05fr_.95fr] lg:gap-12">
+        <div>
+          <p class="eyebrow">FIELD AND CROP PLANNING / PHILIPPINES</p>
+          <h1 class="section-heading mt-4 max-w-2xl">Start with your field. Find possible crops.</h1>
+          <p class="muted mt-5 max-w-2xl text-lg">Choose a soil photo review or enter field measurements. TanimTech compares available information with crop profiles to suggest possibilities—not guarantee a harvest.</p>
+          <div class="mt-7 flex flex-wrap gap-3">
+            <a class="button button-primary" href="#analysis">Choose an analysis method</a>
+            <a class="button" href="crop-guide.html">Browse crop profiles</a>
+          </div>
+          <p class="muted mt-5 text-sm">Current dataset: 7 crop profiles. Results are screening guidance, not a forecast.</p>
+        </div>
+        <figure class="relative m-0 overflow-hidden rounded-lg">
+          <img class="h-72 w-full object-cover sm:h-96" src="images/hero-farm.jpg" alt="">
+          <figcaption class="absolute inset-x-4 bottom-4 rounded bg-white p-4 text-sm font-bold shadow-sm sm:inset-x-6 sm:bottom-6 sm:p-5">Better planting decisions begin with clear field information.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="analysis" class="bg-leaf py-12 md:py-16">
+      <div class="page-shell">
+        <p class="eyebrow">TWO WAYS TO GET STARTED</p>
+        <h2 class="section-title mt-3">Choose your analysis method.</h2>
+        <p class="muted mt-3 max-w-3xl text-base">Use the information you have now. You can continue with either option.</p>
+        <div class="mt-7 grid gap-5 md:grid-cols-2">
+          <article class="card flex flex-col p-6 sm:p-8">
+            <div class="flex items-center gap-4">
+              <span class="analysis-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7h3l1.5-2h7L17 7h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg></span>
+              <div><p class="eyebrow">OPTION 1 / CAMERA</p><h3 class="serif mt-1 text-3xl">Use a soil photo</h3></div>
+            </div>
+            <p class="mt-5 text-base">Take a photo with your camera or choose one from your device for visual review.</p>
+            <p class="muted mt-3 text-sm">Photo review does not measure pH or identify crop suitability. Automated camera analysis is not active yet.</p>
+            <a class="button mt-6 self-start" href="soil-photo.html">Open camera option</a>
+          </article>
+          <article class="card flex flex-col p-6 sm:p-8">
+            <div class="flex items-center gap-4">
+              <span class="analysis-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+              <div><p class="eyebrow">OPTION 2 / MANUAL INPUT</p><h3 class="serif mt-1 text-3xl">Enter field measurements</h3></div>
+            </div>
+            <p class="mt-5 text-base">Enter soil pH and climate values to compare your field with the crop dataset.</p>
+            <p class="muted mt-3 text-sm">The shortlist shows possible matches from the 7 available profiles. It is not a yield prediction.</p>
+            <a class="button button-primary mt-6 self-start" href="conditions.html">Enter field conditions</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="crops" class="page-shell py-12 md:py-16">
+      <div class="card flex flex-wrap items-center justify-between gap-6 p-6 sm:p-8">
+        <div>
+          <p class="eyebrow">CROP DATASET</p>
+          <h2 class="section-title mt-2">Explore the available crop guides.</h2>
+          <p class="muted mt-3 text-base">Browse all 7 profiles and view each crop’s reference ranges and notes.</p>
+        </div>
+        <a class="button" href="crop-guide.html">View crop guides</a>
+      </div>
+    </section>
+
+    <section id="how-it-works" class="border-y border-line bg-white py-10 md:py-12">
+      <div class="page-shell">
+        <span id="guide"></span>
+        <p class="eyebrow">HOW IT WORKS</p>
+        <div class="mt-5 grid gap-6 md:grid-cols-3">
+          <article><span class="badge">01</span><h3 class="serif mt-3 text-2xl">Choose a method</h3><p class="muted mt-2 text-base">Use a photo for visual review or enter measured field values.</p></article>
+          <article><span class="badge">02</span><h3 class="serif mt-3 text-2xl">Review possible matches</h3><p class="muted mt-2 text-base">Compare your inputs with available crop requirements.</p></article>
+          <article><span class="badge">03</span><h3 class="serif mt-3 text-2xl">Check locally</h3><p class="muted mt-2 text-base">Confirm field conditions and local advice before planting.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="calendar" class="page-shell py-10">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <div><p class="eyebrow">CLIMATE INPUTS</p><p class="mt-2 text-base">Load climate values for a representative location in the field conditions form.</p></div>
+        <a class="button" href="conditions.html">Set field conditions</a>
+      </div>
+    </section>
+
+    <section id="methodology" class="bg-forest py-10 text-white">
+      <div class="page-shell flex flex-wrap items-center justify-between gap-5">
+        <div><p class="eyebrow text-lime">IMPORTANT LIMIT</p><h2 class="serif mt-2 text-3xl">Possible fit is not a promise.</h2><p class="mt-2 max-w-3xl text-base text-white/80">Crop suggestions use the available dataset and your entered values. Check the source ranges and consult local agricultural guidance.</p></div>
+        <a class="button" href="crop-guide.html">Review crop data</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner"><a class="footer-brand" href="homepage.html">tanimtech.</a><p>Clear information for more thoughtful planting decisions.</p><nav class="footer-links"><a href="#methodology">Data limits</a><a href="conditions.html">Start planning</a></nav></div>
+    <div class="footer-bottom"><p>© 2026 TanimTech · Philippine crop planning</p><p>Reference guidance, not a yield guarantee.</p></div>
+  </footer>
+  <script src="js/site.js?v=18"></script>
+</body>
+</html>

@@ -1,3 +1,4 @@
+import json
 import os
 import tempfile
 import unittest
@@ -41,6 +42,29 @@ class BackendTests(unittest.TestCase):
         self.assertTrue(all(x["growingDays"][1] <= 45 for x in self.c.get("/api/crops?maxDays=45").json["crops"]))
         self.assertEqual(self.c.get("/api/crops/pechay").json["bands"]["soilPh"], [6, 7.5])
         self.assertEqual(self.c.get("/api/crops/nope").status_code, 404)
+
+    def test_static_crop_guide_data_matches_cleaned_dataset(self):
+        response = self.c.get("/js/crop-guide-data.json")
+        try:
+            self.assertEqual(response.status_code, 200)
+            public_crops = {crop["slug"]: crop for crop in response.json["crops"]}
+        finally:
+            response.close()
+        source_path = os.path.join(os.path.dirname(__file__), "..", "data_pipeline", "clean", "crops_clean.json")
+        with open(source_path, encoding="utf-8") as source_file:
+            source_crops = json.load(source_file)
+
+        self.assertEqual(set(public_crops), {crop["slug"] for crop in source_crops})
+        for source in source_crops:
+            crop = public_crops[source["slug"]]
+            self.assertEqual(crop["growingDays"], [source["days_min"], source["days_max"]])
+            self.assertEqual(crop["bands"], {
+                "soilPh": [source["ph_min"], source["ph_max"]],
+                "temperature": [source["temp_min"], source["temp_max"]],
+                "rainfall": [source["rain_min"], source["rain_max"]],
+                "humidity": [source["humidity_min"], source["humidity_max"]],
+            })
+            self.assertEqual(crop["dataSource"], source["data_source"])
 
     def test_recommendations(self):
         r = self.c.post("/api/recommendations", json={**SAMPLE, "season": "Wet season"})
@@ -108,10 +132,21 @@ class BackendTests(unittest.TestCase):
         self.assertEqual(self.c.get("/api/recommendations/saved").json["recommendations"][0]["inputs"]["soilTexture"], "Loam")
 
     def test_website_served_safely(self):
-        self.assertEqual(self.c.get("/").status_code, 200)
-        self.assertEqual(self.c.get("/conditions.html").status_code, 200)
-        self.assertEqual(self.c.get("/profile.html").status_code, 200)
-        self.assertEqual(self.c.get("/js/site.js").status_code, 200)
+        for path, content in (("/", b"data-login-page"), ("/homepage.html", b"Start with your field")):
+            response = self.c.get(path)
+            try:
+                self.assertEqual(response.status_code, 200)
+                self.assertIn(content, response.data)
+            finally:
+                response.close()
+        for path in ("/index.html", "/signup.html", "/conditions.html", "/profile.html", "/crop-guide.html", "/js/site.js", "/js/crop-guide.js"):
+            response = self.c.get(path)
+            try:
+                self.assertEqual(response.status_code, 200)
+            finally:
+                response.close()
+        self.assertEqual(self.c.get("/login.html").status_code, 404)
+        self.assertEqual(self.c.get("/pechay.html").status_code, 404)
         self.assertEqual(self.c.get("/backend/app.py").status_code, 404)
         self.assertEqual(self.c.get("/backend/storage/store.json").status_code, 404)
         self.assertEqual(self.c.get("/api/nothing").status_code, 404)

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-labelledby="title">
+  <title id="title">Kamote vine and sweet potato roots</title>
+  <rect width="800" height="480" fill="#edf1e4"/>
+  <path d="M0 309c194-37 520-30 800 7v164H0z" fill="#d5c7a6"/>
+  <path d="M0 326c247-26 510-11 800 18" fill="none" stroke="#a78d65" stroke-width="10"/>
+  <path d="M100 291c106-62 171-51 245-12 69-50 150-44 236 9 73-36 145-23 219 8" fill="none" stroke="#4d854d" stroke-width="9" stroke-linecap="round"/>
+  <g fill="#78a960">
+    <path d="M157 275c-54-52-91-12-50 20 24 18 45 13 50-20zm84-4c44-59 92-26 54 13-21 22-43 18-54-13zm112 7c-52-54-91-12-48 20 25 17 45 12 48-20zm112-12c46-57 93-20 52 17-24 20-44 14-52-17zm115 21c-53-52-91-7-46 22 25 16 45 9 46-22zm99-10c45-57 92-18 50 18-24 20-44 15-50-18z"/>
+  </g>
+  <path d="M345 300c3 40 6 54 16 70m88-70c-4 42-1 54-15 72m89-73c-1 39-7 54-2 74" fill="none" stroke="#7b5b3e" stroke-width="7"/>
+  <path d="M360 356c-42 13-55 54-31 81 20 22 57 16 77-8 22-26 14-69-16-78-11-4-20-1-30 5z" fill="#bd8760"/>
+  <path d="M450 357c-36 8-50 43-32 70 17 24 54 23 76 1 24-25 16-64-12-74-11-4-21-2-32 3z" fill="#c59a70"/>
+  <path d="M554 362c-28 12-36 43-18 62 17 18 48 12 63-9 16-22 7-52-17-59-10-3-19 0-28 6z" fill="#b77d57"/>
+</svg>
