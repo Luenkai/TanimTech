@@ -18,6 +18,15 @@
     toastTimer = window.setTimeout(() => toastRegion.replaceChildren(), 3600);
   };
 
+  const readJsonResponse = async (response) => {
+    const text = await response.text();
+    try {
+      return text ? JSON.parse(text) : {};
+    } catch (error) {
+      throw new Error("This page is running without the TanimTech API. Your local profile is still available.");
+    }
+  };
+
   const readState = () => {
     try {
       const saved = localStorage.getItem(storageKey);
@@ -562,15 +571,18 @@
     const profileData = Object.fromEntries(allInputs.map((input) => [input.dataset.inputKey, input.value]).filter(([, value]) => value !== ""));
     profileData.name = window.prompt("Name this field profile", `Field profile · ${state.region || "my field"}`);
     if (!profileData.name) return;
+    const localProfiles = (() => { try { return JSON.parse(localStorage.getItem("tanimtech-local-profiles") || "[]"); } catch { return []; } })();
+    localProfiles.unshift({ ...profileData, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+    localStorage.setItem("tanimtech-local-profiles", JSON.stringify(localProfiles.slice(0, 12)));
     saveProfileButton.disabled = true;
     try {
       const response = await fetch("/api/profiles", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(profileData) });
-      const payload = await response.json();
-      if (response.status === 401) throw new Error("Sign in from your profile before saving field conditions.");
+      const payload = await readJsonResponse(response);
+      if (response.status === 401) throw new Error("Field profile saved locally on this device.");
       if (!response.ok) throw new Error(payload.errors?.join(" ") || "The field profile could not be saved.");
-      showToast("Field profile saved to your TanimTech profile.");
+      showToast("Field profile saved.");
     } catch (error) {
-      showToast(error.message);
+      showToast(error.message.includes("locally") || error.message.includes("without the TanimTech API") ? error.message : "Field profile saved locally on this device.");
     } finally {
       saveProfileButton.disabled = false;
     }
@@ -660,16 +672,18 @@
       recommendationPage.querySelector("[data-scroll-compare]").addEventListener("click", () => document.querySelector("#compare")?.scrollIntoView({ behavior: "smooth", block: "start" }));
       recommendationPage.querySelector("[data-save-shortlist]").addEventListener("click", async (event) => {
         localStorage.setItem("tanimtech-saved-shortlist", "true");
+        const localSaved = (() => { try { return JSON.parse(localStorage.getItem("tanimtech-saved-recommendations") || "[]"); } catch { return []; } })();
+        localSaved.unshift({ label: `Shortlist · ${conditions.region || "my field"}`, inputs: conditions, results: currentResults, createdAt: new Date().toISOString() });
+        localStorage.setItem("tanimtech-saved-recommendations", JSON.stringify(localSaved.slice(0, 12)));
         event.currentTarget.disabled = true;
         try {
           const response = await fetch("/api/recommendations/saved", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...conditions, label: `Shortlist · ${conditions.region || "my field"}` }) });
-          if (response.status === 401) throw new Error("Sign in from your profile to save this shortlist to your account.");
+          if (response.status === 401) throw new Error("Saved locally on this device.");
           if (!response.ok) throw new Error("The shortlist could not be saved to your account.");
           event.currentTarget.textContent = "Saved to profile ✓";
-          showToast("Shortlist saved to your TanimTech profile.");
+          showToast("Shortlist saved to your profile.");
         } catch (error) {
-          event.currentTarget.disabled = false;
-          event.currentTarget.textContent = "Save this shortlist ↗";
+          event.currentTarget.textContent = "Saved on this device ✓";
           showToast(error.message);
         }
       });
@@ -685,40 +699,30 @@
   if (profilePage) {
     const profileState = profilePage.querySelector("[data-profile-state]");
     const profileEscape = (value) => String(value ?? "").replace(/[&<>\"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character]));
-    const showLogin = (message = "") => {
-      const button = profilePage.querySelector("[data-auth-login]");
-      const status = profilePage.querySelector("[data-auth-message]");
-      if (status) status.textContent = message || "Sign in to save recommendations and keep your farm profiles private.";
-      button?.addEventListener("click", async () => {
-        button.disabled = true;
-        try {
-          const config = await fetch("/api/auth/config").then((response) => response.json());
-          if (!config.configured) throw new Error("Manus login is not configured for this deployment yet.");
-          window.location.href = "/api/auth/login";
-        } catch (error) {
-          button.disabled = false;
-          if (status) status.textContent = error.message;
-          showToast(error.message);
-        }
-      }, { once: true });
+    const readLocal = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); } catch { return fallback; } };
+    const localProfiles = readLocal("tanimtech-local-profiles", []);
+    const localRecommendations = readLocal("tanimtech-saved-recommendations", []);
+    const nameInput = profilePage.querySelector("[data-profile-name]");
+    const savedName = localStorage.getItem("tanimtech-profile-name") || "Field planner";
+    if (nameInput) nameInput.value = savedName;
+    profilePage.querySelector("[data-save-profile-name]")?.addEventListener("click", () => {
+      const name = nameInput?.value.trim() || "Field planner";
+      localStorage.setItem("tanimtech-profile-name", name);
+      showToast("Profile name saved on this device.");
+    });
+    const renderLocalProfile = (profiles, saved, note = "Saved locally. Clearing browser storage removes this profile and its history.") => {
+      const profileCards = profiles.length ? profiles.map((item) => `<article class="card p-6"><div class="flex items-center justify-between gap-3"><span class="badge">FIELD PROFILE</span><small class="muted">${profileEscape((item.updatedAt || item.createdAt || "").slice(0, 10))}</small></div><h3 class="serif mt-4 text-2xl">${profileEscape(item.name)}</h3><p class="muted mt-2 text-xs">pH ${profileEscape(item.soilPh)} · ${profileEscape(item.temperature)} °C · ${profileEscape(item.rainfall)} mm/year</p></article>`).join("") : '<div class="notice text-xs">No saved farm profiles yet. Save field conditions from the conditions page to see them here.</div>';
+      const recommendationCards = saved.length ? saved.slice(0, 6).map((item) => { const top = item.results?.[0]; return `<article class="card p-6"><div class="flex items-center justify-between gap-3"><span class="badge">SAVED SHORTLIST</span><small class="muted">${profileEscape((item.createdAt || "").slice(0, 10))}</small></div><h3 class="serif mt-4 text-2xl">${profileEscape(item.label)}</h3><p class="muted mt-2 text-xs">${top ? `Closest fit: ${profileEscape(top.name)} · ${top.fit}/100` : "No crop result saved"}</p><div class="mt-4 flex flex-wrap gap-2">${(item.results || []).slice(0, 3).map((result) => `<span class="badge">${profileEscape(result.name)}</span>`).join("")}</div></article>`; }).join("") : '<div class="notice text-xs">No saved recommendation shortlists yet. Generate a shortlist, then choose “Save this shortlist”.</div>';
+      profileState.innerHTML = `<div class="flex flex-wrap items-start justify-between gap-5"><div><p class="eyebrow">LOCAL PROFILE</p><h2 class="serif mt-3 text-3xl">${profileEscape(nameInput?.value || savedName)}</h2><p class="muted mt-2 text-sm">This device</p></div><span class="badge">PRIVATE LOCAL SPACE</span></div><p class="field-note mt-4">${profileEscape(note)}</p><div class="divider my-7"></div><p class="eyebrow">YOUR FARM PROFILES</p><h2 class="serif mt-3 text-3xl">Saved field conditions.</h2><div class="mt-5 grid gap-5 md:grid-cols-2">${profileCards}</div><div class="divider my-8"></div><p class="eyebrow">YOUR RECOMMENDATION HISTORY</p><h2 class="serif mt-3 text-3xl">Shortlists made for you.</h2><div class="mt-5 grid gap-5 md:grid-cols-2">${recommendationCards}</div><p class="field-note mt-6">Recommendations are screening results based on the inputs saved at the time. They are not forecasts or guarantees.</p>`;
     };
-    fetch("/api/auth/me")
-      .then((response) => response.json())
-      .then(async (authState) => {
-        if (!authState.authenticated) {
-          showLogin();
-          return;
-        }
-        const [profileResponse, savedResponse] = await Promise.all([fetch("/api/profiles"), fetch("/api/recommendations/saved")]);
-        const profiles = profileResponse.ok ? (await profileResponse.json()).profiles : [];
-        const saved = savedResponse.ok ? (await savedResponse.json()).recommendations : [];
-        const user = authState.user;
-        const profileCards = profiles.length ? profiles.map((item) => `<article class="card p-6"><div class="flex items-center justify-between gap-3"><span class="badge">FIELD PROFILE</span><small class="muted">${profileEscape((item.updatedAt || "").slice(0, 10))}</small></div><h3 class="serif mt-4 text-2xl">${profileEscape(item.name)}</h3><p class="muted mt-2 text-xs">pH ${profileEscape(item.soilPh)} · ${profileEscape(item.temperature)} °C · ${profileEscape(item.rainfall)} mm/year</p><a class="mt-4 inline-block text-xs font-bold text-forest" href="recommendations.html?profile=${item.id}">View recommendations ↗</a></article>`).join("") : '<div class="notice text-xs">No saved farm profiles yet. Start with your field conditions and save a profile when profile management is connected to your workflow.</div>';
-        const recommendationCards = saved.length ? saved.slice(0, 6).map((item) => { const top = item.results?.[0]; return `<article class="card p-6"><div class="flex items-center justify-between gap-3"><span class="badge">SAVED SHORTLIST</span><small class="muted">${profileEscape((item.createdAt || "").slice(0, 10))}</small></div><h3 class="serif mt-4 text-2xl">${profileEscape(item.label)}</h3><p class="muted mt-2 text-xs">${top ? `Closest fit: ${profileEscape(top.name)} · ${top.fit}/100` : "No crop result saved"}</p><div class="mt-4 flex flex-wrap gap-2">${(item.results || []).slice(0, 3).map((result) => `<span class="badge">${profileEscape(result.name)}</span>`).join("")}</div></article>`; }).join("") : '<div class="notice text-xs">No saved recommendation shortlists yet. Generate a shortlist, then choose “Save this shortlist”.</div>';
-        profileState.innerHTML = `<div class="flex flex-wrap items-start justify-between gap-5"><div><p class="eyebrow">ACCOUNT</p><h2 class="serif mt-3 text-3xl">${profileEscape(user.name || "TanimTech user")}</h2><p class="muted mt-2 text-sm">${profileEscape(user.email || "Manus account")}</p></div><button class="button" type="button" data-auth-logout>Sign out</button></div><div class="divider my-7"></div><p class="eyebrow">YOUR FARM PROFILES</p><h2 class="serif mt-3 text-3xl">Saved field conditions.</h2><div class="mt-5 grid gap-5 md:grid-cols-2">${profileCards}</div><div class="divider my-8"></div><p class="eyebrow">YOUR RECOMMENDATION HISTORY</p><h2 class="serif mt-3 text-3xl">Shortlists made for you.</h2><div class="mt-5 grid gap-5 md:grid-cols-2">${recommendationCards}</div><p class="field-note mt-6">Recommendations are screening results based on the inputs saved at the time. They are not forecasts or guarantees.</p>`;
-        profileState.querySelector("[data-auth-logout]")?.addEventListener("click", async () => { await fetch("/api/auth/logout", { method: "POST" }); window.location.reload(); });
-      })
-      .catch(() => showLogin("Account status could not be loaded. You can try signing in again."));
+    renderLocalProfile(localProfiles, localRecommendations);
+    fetch("/api/auth/me").then(readJsonResponse).then(async (authState) => {
+      if (!authState.authenticated) return;
+      const [profileResponse, savedResponse] = await Promise.all([fetch("/api/profiles"), fetch("/api/recommendations/saved")]);
+      const profiles = profileResponse.ok ? (await readJsonResponse(profileResponse)).profiles : localProfiles;
+      const saved = savedResponse.ok ? (await readJsonResponse(savedResponse)).recommendations : localRecommendations;
+      renderLocalProfile(profiles, saved, "Account data loaded from the TanimTech API.");
+    }).catch(() => { /* Static deployments use the local profile above. */ });
   }
   if (new URLSearchParams(window.location.search).has("results")) {
     showToast("Recommendations loaded from your saved field values.");
