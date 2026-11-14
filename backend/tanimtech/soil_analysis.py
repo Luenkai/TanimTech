@@ -40,7 +40,7 @@ def _vision_request(image_bytes, mime_type, details):
     if not api_key:
         raise RuntimeError("Soil image analysis is not configured. Set OPENAI_API_KEY on the backend.")
     base_url = os.environ.get("OPENAI_API_BASE", "https://api.openai.com/v1").rstrip("/")
-    model = os.environ.get("SOIL_VISION_MODEL", "gpt-4o-mini")
+    model = os.environ.get("SOIL_VISION_MODEL", "gpt-6-luna")
     prompt = (
         "Assess this soil image only as a cautious visual screening aid. Do not claim laboratory measurements. "
         "Return JSON with keys suggestedTexture (one of clay, loam, sandy, silty, peaty, unknown), "
@@ -50,8 +50,20 @@ def _vision_request(image_bytes, mime_type, details):
     )
     payload = {
         "model": model,
-        "temperature": 0,
-        "response_format": {"type": "json_object"},
+        "reasoning": {"effort": "low"},
+        "max_completion_tokens": 1200,
+        "response_format": {"type": "json_schema", "json_schema": {"name": "soil_visual_review", "strict": True, "schema": {
+            "type": "object",
+            "properties": {
+                "suggestedTexture": {"type": "string", "enum": ["clay", "loam", "sandy", "silty", "peaty", "unknown"]},
+                "confidence": {"type": "string", "enum": ["low", "medium", "high"]},
+                "observations": {"type": "array", "items": {"type": "string"}},
+                "limitations": {"type": "array", "items": {"type": "string"}},
+                "recommendedChecks": {"type": "array", "items": {"type": "string"}},
+            },
+            "required": ["suggestedTexture", "confidence", "observations", "limitations", "recommendedChecks"],
+            "additionalProperties": False,
+        }}},
         "messages": [{"role": "user", "content": [
             {"type": "text", "text": prompt},
             {"type": "image_url", "image_url": {"url": f"data:{mime_type};base64,{base64.b64encode(image_bytes).decode()}"}},
@@ -68,7 +80,13 @@ def _vision_request(image_bytes, mime_type, details):
             result = json.loads(response.read().decode())
     except (urllib.error.URLError, TimeoutError) as exc:
         raise RuntimeError("The soil analysis service could not be reached. Try again or continue manually.") from exc
+    if result.get("error"):
+        error = result["error"]
+        raise RuntimeError(error.get("message", "The soil analysis service returned an error.") if isinstance(error, dict) else str(error))
     content = result.get("choices", [{}])[0].get("message", {}).get("content", "")
+    if isinstance(content, list):
+        content = "".join(item.get("text", "") for item in content if isinstance(item, dict))
+    content = str(content).strip().removeprefix("```json").removesuffix("```").strip()
     try:
         return json.loads(content)
     except (TypeError, ValueError) as exc:

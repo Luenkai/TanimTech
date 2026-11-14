@@ -695,6 +695,25 @@
       .catch(() => { renderRecommendations({ results: localRecommend(), note: "The API is unavailable on this static deployment; the same transparent ECOCROP screening calculation is running locally." }, "LOCAL CALCULATION"); });
   }
 
+  const loginPage = document.querySelector("[data-login-page]");
+  if (loginPage) {
+    loginPage.querySelector("[data-login-form]")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const username = loginPage.querySelector("[data-login-username]")?.value.trim();
+      const password = loginPage.querySelector("[data-login-password]")?.value;
+      const message = loginPage.querySelector("[data-login-message]");
+      if (username === "admin" && password === "TanimTech2026!") {
+        localStorage.setItem("tanimtech-login-session", "true");
+        const requested = new URLSearchParams(window.location.search).get("next") || "index.html";
+        const next = requested.startsWith("/") && !requested.startsWith("//") ? requested : "index.html";
+        window.location.href = next;
+        return;
+      }
+      if (message) message.textContent = "That demo username or password is incorrect.";
+      showToast("Incorrect demo credentials.");
+    });
+  }
+
   const profilePage = document.querySelector("[data-profile-page]");
   if (profilePage) {
     const profileState = profilePage.querySelector("[data-profile-state]");
@@ -705,6 +724,24 @@
     const nameInput = profilePage.querySelector("[data-profile-name]");
     const savedName = localStorage.getItem("tanimtech-profile-name") || "Field planner";
     if (nameInput) nameInput.value = savedName;
+    const pdfSafe = (value) => String(value ?? "").replace(/[^\x20-\x7E]/g, "?").replace(/[\\()]/g, "\\$&");
+    const wrapPdf = (value, width = 92) => { const words = String(value ?? "").split(/\s+/); const lines = []; let line = ""; words.forEach((word) => { if ((line + " " + word).trim().length > width) { if (line) lines.push(line); line = word; } else line = (line + " " + word).trim(); }); if (line) lines.push(line); return lines; };
+    const downloadReport = (profiles, saved) => {
+      const lines = [`TanimTech planting report`, `Profile: ${nameInput?.value || savedName}`, `Generated: ${new Date().toISOString().slice(0, 10)}`, "", "FARM PROFILE HISTORY"];
+      if (!profiles.length) lines.push("No saved field profiles.");
+      profiles.forEach((item, index) => { lines.push(`${index + 1}. ${item.name || "Field profile"}`); lines.push(`   pH ${item.soilPh ?? "-"} | Temperature ${item.temperature ?? "-"} C | Humidity ${item.humidity ?? "-"}% | Rainfall ${item.rainfall ?? "-"} mm/year`); if (item.soilTexture || item.drainage || item.soilNotes) lines.push(`   Soil: ${item.soilTexture || "-"} | Drainage: ${item.drainage || "-"} | Notes: ${item.soilNotes || "-"}`); });
+      lines.push("", "SAVED CROP RECOMMENDATIONS");
+      if (!saved.length) lines.push("No saved crop recommendation shortlists.");
+      saved.forEach((item, index) => { lines.push(`${index + 1}. ${item.label || "Saved shortlist"} (${(item.createdAt || "").slice(0, 10)})`); (item.results || []).slice(0, 5).forEach((result, resultIndex) => lines.push(`   ${resultIndex + 1}. ${result.name || "Crop"} - fit ${result.fit ?? "-"}/100`)); });
+      lines.push("", "Fit is a transparent screening score, not a probability of success or a yield guarantee.");
+      const wrapped = lines.flatMap((line) => line ? wrapPdf(line) : [""]); const perPage = 48; const pages = [];
+      for (let i = 0; i < wrapped.length; i += perPage) pages.push(wrapped.slice(i, i + perPage));
+      const objects = [null, "<< /Type /Catalog /Pages 2 0 R >>", "", "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>"]; const pageIds = [];
+      pages.forEach((pageLines) => { const pageId = objects.length; objects.push(""); const contentId = objects.length; objects.push(""); pageIds.push(pageId); objects[pageId] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents ${contentId} 0 R >>`; const commands = ["BT", "/F1 11 Tf", "50 760 Td", "14 TL", ...pageLines.map((line, lineIndex) => `${lineIndex ? "T* " : ""}(${pdfSafe(line)}) Tj`), "ET"].join("\n"); objects[contentId] = `<< /Length ${commands.length} >>\nstream\n${commands}\nendstream`; });
+      objects[2] = `<< /Type /Pages /Kids [${pageIds.map((id) => `${id} 0 R`).join(" ")}] /Count ${pageIds.length} >>`;
+      let pdf = "%PDF-1.4\n"; const offsets = [0]; objects.slice(1).forEach((object, index) => { offsets.push(pdf.length); pdf += `${index + 1} 0 obj\n${object}\nendobj\n`; }); const xref = pdf.length; pdf += `xref\n0 ${objects.length}\n0000000000 65535 f \n${offsets.slice(1).map((offset) => `${String(offset).padStart(10, "0")} 00000 n `).join("\n")}\ntrailer\n<< /Size ${objects.length} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+      const blob = new Blob([pdf], { type: "application/pdf" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = `${(nameInput?.value || "tanimtech-profile").toLowerCase().replace(/[^a-z0-9]+/g, "-")}-report.pdf`; link.click(); URL.revokeObjectURL(url); showToast("PDF report downloaded.");
+    };
     profilePage.querySelector("[data-save-profile-name]")?.addEventListener("click", () => {
       const name = nameInput?.value.trim() || "Field planner";
       localStorage.setItem("tanimtech-profile-name", name);
@@ -713,7 +750,9 @@
     const renderLocalProfile = (profiles, saved, note = "Saved locally. Clearing browser storage removes this profile and its history.") => {
       const profileCards = profiles.length ? profiles.map((item) => `<article class="card p-6"><div class="flex items-center justify-between gap-3"><span class="badge">FIELD PROFILE</span><small class="muted">${profileEscape((item.updatedAt || item.createdAt || "").slice(0, 10))}</small></div><h3 class="serif mt-4 text-2xl">${profileEscape(item.name)}</h3><p class="muted mt-2 text-xs">pH ${profileEscape(item.soilPh)} · ${profileEscape(item.temperature)} °C · ${profileEscape(item.rainfall)} mm/year</p></article>`).join("") : '<div class="notice text-xs">No saved farm profiles yet. Save field conditions from the conditions page to see them here.</div>';
       const recommendationCards = saved.length ? saved.slice(0, 6).map((item) => { const top = item.results?.[0]; return `<article class="card p-6"><div class="flex items-center justify-between gap-3"><span class="badge">SAVED SHORTLIST</span><small class="muted">${profileEscape((item.createdAt || "").slice(0, 10))}</small></div><h3 class="serif mt-4 text-2xl">${profileEscape(item.label)}</h3><p class="muted mt-2 text-xs">${top ? `Closest fit: ${profileEscape(top.name)} · ${top.fit}/100` : "No crop result saved"}</p><div class="mt-4 flex flex-wrap gap-2">${(item.results || []).slice(0, 3).map((result) => `<span class="badge">${profileEscape(result.name)}</span>`).join("")}</div></article>`; }).join("") : '<div class="notice text-xs">No saved recommendation shortlists yet. Generate a shortlist, then choose “Save this shortlist”.</div>';
-      profileState.innerHTML = `<div class="flex flex-wrap items-start justify-between gap-5"><div><p class="eyebrow">LOCAL PROFILE</p><h2 class="serif mt-3 text-3xl">${profileEscape(nameInput?.value || savedName)}</h2><p class="muted mt-2 text-sm">This device</p></div><span class="badge">PRIVATE LOCAL SPACE</span></div><p class="field-note mt-4">${profileEscape(note)}</p><div class="divider my-7"></div><p class="eyebrow">YOUR FARM PROFILES</p><h2 class="serif mt-3 text-3xl">Saved field conditions.</h2><div class="mt-5 grid gap-5 md:grid-cols-2">${profileCards}</div><div class="divider my-8"></div><p class="eyebrow">YOUR RECOMMENDATION HISTORY</p><h2 class="serif mt-3 text-3xl">Shortlists made for you.</h2><div class="mt-5 grid gap-5 md:grid-cols-2">${recommendationCards}</div><p class="field-note mt-6">Recommendations are screening results based on the inputs saved at the time. They are not forecasts or guarantees.</p>`;
+      profileState.innerHTML = `<div class="flex flex-wrap items-start justify-between gap-5"><div><p class="eyebrow">LOCAL PROFILE</p><h2 class="serif mt-3 text-3xl">${profileEscape(nameInput?.value || savedName)}</h2><p class="muted mt-2 text-sm">This device</p></div><span class="flex flex-wrap items-center gap-3"><span class="badge">PRIVATE LOCAL SPACE</span><button class="button" type="button" data-export-report>Download PDF report</button><button class="button" type="button" data-local-logout>Sign out</button></span></div><p class="field-note mt-4">${profileEscape(note)}</p><div class="divider my-7"></div><p class="eyebrow">YOUR FARM PROFILES</p><h2 class="serif mt-3 text-3xl">Saved field conditions.</h2><div class="mt-5 grid gap-5 md:grid-cols-2">${profileCards}</div><div class="divider my-8"></div><p class="eyebrow">YOUR RECOMMENDATION HISTORY</p><h2 class="serif mt-3 text-3xl">Shortlists made for you.</h2><div class="mt-5 grid gap-5 md:grid-cols-2">${recommendationCards}</div><p class="field-note mt-6">Recommendations are screening results based on the inputs saved at the time. They are not forecasts or guarantees.</p>`;
+      profileState.querySelector("[data-export-report]")?.addEventListener("click", () => downloadReport(profiles, saved));
+      profileState.querySelector("[data-local-logout]")?.addEventListener("click", () => window.tanimtechAuth?.signOut());
     };
     renderLocalProfile(localProfiles, localRecommendations);
     fetch("/api/auth/me").then(readJsonResponse).then(async (authState) => {

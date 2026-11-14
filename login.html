@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in — TanimTech</title>
+  <script src="js/access-gate.js?v=1"></script>
+  <script src="https://cdn.tailwindcss.com"></script><script>tailwind.config={theme:{extend:{colors:{paper:'#f6f5ee',forest:'#174b3a',ink:'#274c3e',muted:'#788073',line:'#dce0d4',leaf:'#e9efdc',lime:'#d9e99b'}}}}</script>
+  <link rel="stylesheet" href="css/site.css?v=5">
+</head>
+<body>
+  <main class="page-shell grid min-h-screen items-center py-12" data-login-page>
+    <section class="mx-auto w-full max-w-xl">
+      <a class="brand" href="login.html"><span class="brand-mark">♧</span>tanimtech.</a>
+      <div class="card mt-8 p-7 sm:p-10">
+        <p class="eyebrow">FIELD PLANNING / SIGN IN</p>
+        <h1 class="section-heading mt-3">Start with your own field workspace.</h1>
+        <p class="muted mt-4">Sign in to continue to TanimTech and keep your crop recommendations and farm profile history on this device.</p>
+        <form class="mt-7" data-login-form>
+          <label class="block"><span class="field-label">Username</span><span class="field-control"><input data-login-username type="text" autocomplete="username" required placeholder="Enter username"></span></label>
+          <label class="mt-5 block"><span class="field-label">Password</span><span class="field-control"><input data-login-password type="password" autocomplete="current-password" required placeholder="Enter password"></span></label>
+          <button class="button button-primary mt-6 w-full" type="submit">Continue to TanimTech <span>↗</span></button>
+          <p class="field-note mt-3" data-login-message aria-live="polite">Use the demo account below to test the workspace.</p>
+        </form>
+        <div class="notice mt-7 text-xs"><b>Demo admin account</b><p class="muted mt-2">Username: <code>admin</code><br>Password: <code>TanimTech2026!</code></p><p class="muted mt-3">This is a client-side demo gate for testing. It is not suitable for protecting private production data.</p></div>
+      </div>
+      <p class="muted mt-5 text-center text-xs">Source-aware crop planning for your field · screening, not a yield guarantee.</p>
+    </section>
+  </main>
+  <script src="js/site.js?v=11"></script>
+</body>
+</html>
