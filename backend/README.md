@@ -40,9 +40,17 @@ outputs live in `data_pipeline/clean/`, including the crop-soil and yield-condit
 Run `python -m data_pipeline.clean_kaggle` after replacing the raw inputs to regenerate them.
 
 `POST /api/recommendations` includes `dataEvidence` for every crop and identifies the matching
-cleaned Kaggle profile. `GET /api/recommendations/data-status` reports which profile artifacts are
-available. The four-factor fit score remains transparent and the cleaned data is shown as evidence,
+cleaned Kaggle profile. `GET /api/recommendations/data-status` reports which profile artifacts
+are available. The four-factor fit score remains transparent and the cleaned data is shown as evidence,
 not converted into a false confidence estimate.
+
+## Accounts and saved planning work
+
+The profile workspace uses Manus OAuth. Configure `MANUS_PROJECT_ID`, `MANUS_OAUTH_PORTAL_URL`,
+`MANUS_OAUTH_API_URL`, and `MANUS_JWT_SECRET` in the deployment environment. The application session
+uses the reserved-compatible `webdev_app_session` cookie name and protects farm profiles and saved
+recommendation history by user. `GET /api/auth/me` reports the current account, while
+`GET/POST /api/recommendations/saved` stores and retrieves crop shortlists for that account.
 
 The frontend recommendations page posts the saved condition inputs to the API and displays the live
 fit breakdown plus a cleaned-data badge. If the API is unavailable, the original static preview

@@ -6,6 +6,7 @@ import unittest
 os.environ["TANIM_STORE_FILE"] = os.path.join(tempfile.mkdtemp(), "store.json")
 
 from tanimtech import create_app  # noqa: E402
+from tanimtech import store  # noqa: E402
 
 SAMPLE = {"soilPh": 6.4, "temperature": 27, "humidity": 78, "rainfall": 1500}
 
@@ -14,6 +15,9 @@ class BackendTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.c = create_app().test_client()
+        cls.user = store.users.upsert("test-open-id", "Test Farmer", "farmer@example.test")
+        with cls.c.session_transaction() as session:
+            session["userId"] = cls.user["id"]
 
     def test_health_and_methodology(self):
         self.assertEqual(self.c.get("/api/health").json, {"status": "ok"})
@@ -22,6 +26,12 @@ class BackendTests(unittest.TestCase):
         status = self.c.get("/api/recommendations/data-status")
         self.assertEqual(status.status_code, 200)
         self.assertTrue(status.json["available"])
+
+    def test_auth_status_and_protected_routes(self):
+        self.assertTrue(self.c.get("/api/auth/me").json["authenticated"])
+        anonymous = create_app().test_client()
+        self.assertFalse(anonymous.get("/api/auth/me").json["authenticated"])
+        self.assertEqual(anonymous.get("/api/profiles").status_code, 401)
 
     def test_explorer_filters(self):
         self.assertEqual(self.c.get("/api/crops").json["count"], 7)
@@ -90,9 +100,17 @@ class BackendTests(unittest.TestCase):
         self.assertEqual(self.c.delete(f"/api/profiles/{pid}").status_code, 204)
         self.assertEqual(self.c.get(f"/api/profiles/{pid}").status_code, 404)
 
+    def test_saved_recommendations(self):
+        body = {**SAMPLE, "soilTexture": "Loam", "label": "November field"}
+        saved = self.c.post("/api/recommendations/saved", json=body)
+        self.assertEqual(saved.status_code, 201)
+        self.assertEqual(saved.json["label"], "November field")
+        self.assertEqual(self.c.get("/api/recommendations/saved").json["recommendations"][0]["inputs"]["soilTexture"], "Loam")
+
     def test_website_served_safely(self):
         self.assertEqual(self.c.get("/").status_code, 200)
         self.assertEqual(self.c.get("/conditions.html").status_code, 200)
+        self.assertEqual(self.c.get("/profile.html").status_code, 200)
         self.assertEqual(self.c.get("/js/site.js").status_code, 200)
         self.assertEqual(self.c.get("/backend/app.py").status_code, 404)
         self.assertEqual(self.c.get("/backend/storage/store.json").status_code, 404)

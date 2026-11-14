@@ -550,6 +550,32 @@
     });
   });
 
+  const saveProfileButton = document.querySelector("[data-save-profile]");
+  saveProfileButton?.addEventListener("click", async () => {
+    const firstInvalid = coreInputs.find((input) => !input.value || !input.validity.valid);
+    if (firstInvalid) {
+      firstInvalid.focus();
+      firstInvalid.reportValidity();
+      showToast("Enter all four valid field values before saving a profile.");
+      return;
+    }
+    const profileData = Object.fromEntries(allInputs.map((input) => [input.dataset.inputKey, input.value]).filter(([, value]) => value !== ""));
+    profileData.name = window.prompt("Name this field profile", `Field profile · ${state.region || "my field"}`);
+    if (!profileData.name) return;
+    saveProfileButton.disabled = true;
+    try {
+      const response = await fetch("/api/profiles", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(profileData) });
+      const payload = await response.json();
+      if (response.status === 401) throw new Error("Sign in from your profile before saving field conditions.");
+      if (!response.ok) throw new Error(payload.errors?.join(" ") || "The field profile could not be saved.");
+      showToast("Field profile saved to your TanimTech profile.");
+    } catch (error) {
+      showToast(error.message);
+    } finally {
+      saveProfileButton.disabled = false;
+    }
+  });
+
   const recommendationPage = document.querySelector("[data-recommendations-page]");
   if (recommendationPage) {
     const escapeHtml = (value) => String(value ?? "").replace(/[&<>\"']/g, (character) => ({
@@ -632,13 +658,67 @@
       recommendationPage.innerHTML = `<p class="eyebrow">CROP PLANNING / ${mode === "API CONNECTED" ? "API SHORTLIST" : "LOCAL CALCULATION"}</p><div class="flex flex-wrap items-end justify-between gap-5"><div><h1 class="section-heading mt-3">Crops worth a closer look.</h1><p class="muted mt-3">${mode === "API CONNECTED" ? "Live fit scores from the recommendation API." : "Fit scores calculated from your entries while the API is unavailable."}</p></div><a class="button button-primary" href="conditions.html">Edit conditions ↗</a></div><div class="notice mt-6 grid grid-cols-2 gap-3 text-xs sm:grid-cols-5"><span>pH ${conditions.soilPh}</span><span>${conditions.temperature} °C mean</span><span>${conditions.humidity}% RH</span><span>${conditions.rainfall} mm / year</span><span>${escapeHtml(conditions.planningMonth)} <span class="badge ml-2">${mode === "API CONNECTED" ? "API RESULTS" : "LOCAL RESULTS"}</span></span></div><div class="mt-6 flex flex-wrap items-center justify-between gap-4"><p class="muted text-xs">${currentResults.length} matches · ${evidenceCount} backed by cleaned Kaggle profiles · ${escapeHtml(conditions.region)}</p><div class="flex flex-wrap gap-3"><button class="field-control min-h-10 text-xs" type="button" data-sort-results>Sort: ${sortMode === "fit" ? "highest fit" : "crop name"} ↕</button><button class="button button-primary" type="button" data-scroll-compare>Compare top 3 ↗</button></div></div><div class="mt-6 grid gap-5 lg:grid-cols-3">${cards}</div><p class="muted mt-4 text-xs">${escapeHtml(payload.note || "Fit is a transparent screening score, not a yield prediction.")} Cleaned Kaggle profiles are evidence context; they do not turn fit into a forecast.</p><div id="compare" class="mt-10 grid items-start gap-6 lg:grid-cols-[2fr_1fr]"><section class="card p-7"><p class="eyebrow">EXPLAIN THE FIT / ${first.fit} OF 100</p><h2 class="serif mt-3">Why ${escapeHtml(first.name)} ranks first</h2><p class="muted mt-3">The recommendation engine keeps the four weighted core factors visible. Add-on context provides guidance and never adds score points.</p><div class="mt-5">${breakdown}</div><p class="muted mt-4 text-xs">${escapeHtml(first.dataEvidence?.source || "FAO ECOCROP requirement bands")}</p></section><aside class="card p-7"><p class="eyebrow">FIT ≠ CERTAINTY</p><h2 class="serif mt-3 text-3xl">What the score can’t tell you</h2><div class="mt-4"><div class="mini-row"><span class="muted">Input completeness</span><b>4 / 4 core values<br><small class="muted font-normal">Entered, not independently verified</small></b></div><div class="mini-row"><span class="muted">Field blind spots</span><b>Drainage · pests · seed quality<br><small class="muted font-normal">Not included in the score</small></b></div></div><div class="warning mt-5"><strong class="text-xs">⚠ Seasonal risk stays visible</strong><p class="muted mt-2 text-xs">A high fit score must not override current local advisories.</p></div></aside></div><section class="mt-8 flex flex-wrap items-center justify-between gap-6 rounded bg-forest px-8 py-7 text-white"><div><h2 class="serif text-2xl">Take the shortlist back to the field.</h2><p class="mt-2 text-sm text-white/75">Save this shortlist on your device, then verify drainage and local conditions before planting at scale.</p></div><button class="button" type="button" data-save-shortlist>${saved ? "Saved on this device ✓" : "Save this shortlist ↗"}</button></section>`;
       recommendationPage.querySelector("[data-sort-results]").addEventListener("click", () => { sortMode = sortMode === "fit" ? "name" : "fit"; renderRecommendations(payload, mode); });
       recommendationPage.querySelector("[data-scroll-compare]").addEventListener("click", () => document.querySelector("#compare")?.scrollIntoView({ behavior: "smooth", block: "start" }));
-      recommendationPage.querySelector("[data-save-shortlist]").addEventListener("click", (event) => { localStorage.setItem("tanimtech-saved-shortlist", "true"); event.currentTarget.textContent = "Saved on this device ✓"; showToast("Shortlist saved in this browser."); });
+      recommendationPage.querySelector("[data-save-shortlist]").addEventListener("click", async (event) => {
+        localStorage.setItem("tanimtech-saved-shortlist", "true");
+        event.currentTarget.disabled = true;
+        try {
+          const response = await fetch("/api/recommendations/saved", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...conditions, label: `Shortlist · ${conditions.region || "my field"}` }) });
+          if (response.status === 401) throw new Error("Sign in from your profile to save this shortlist to your account.");
+          if (!response.ok) throw new Error("The shortlist could not be saved to your account.");
+          event.currentTarget.textContent = "Saved to profile ✓";
+          showToast("Shortlist saved to your TanimTech profile.");
+        } catch (error) {
+          event.currentTarget.disabled = false;
+          event.currentTarget.textContent = "Save this shortlist ↗";
+          showToast(error.message);
+        }
+      });
       recommendationPage.querySelectorAll("[data-crop-guide]").forEach((button) => button.addEventListener("click", () => renderGuideDialog(button.dataset.cropGuide)));
     };
     fetch("/api/recommendations", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(conditions) })
       .then((response) => response.ok ? response.json() : Promise.reject(new Error("Recommendation API unavailable")))
       .then((payload) => renderRecommendations(payload, "API CONNECTED"))
       .catch(() => { renderRecommendations({ results: localRecommend(), note: "The API is unavailable on this static deployment; the same transparent ECOCROP screening calculation is running locally." }, "LOCAL CALCULATION"); });
+  }
+
+  const profilePage = document.querySelector("[data-profile-page]");
+  if (profilePage) {
+    const profileState = profilePage.querySelector("[data-profile-state]");
+    const profileEscape = (value) => String(value ?? "").replace(/[&<>\"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character]));
+    const showLogin = (message = "") => {
+      const button = profilePage.querySelector("[data-auth-login]");
+      const status = profilePage.querySelector("[data-auth-message]");
+      if (status) status.textContent = message || "Sign in to save recommendations and keep your farm profiles private.";
+      button?.addEventListener("click", async () => {
+        button.disabled = true;
+        try {
+          const config = await fetch("/api/auth/config").then((response) => response.json());
+          if (!config.configured) throw new Error("Manus login is not configured for this deployment yet.");
+          window.location.href = "/api/auth/login";
+        } catch (error) {
+          button.disabled = false;
+          if (status) status.textContent = error.message;
+          showToast(error.message);
+        }
+      }, { once: true });
+    };
+    fetch("/api/auth/me")
+      .then((response) => response.json())
+      .then(async (authState) => {
+        if (!authState.authenticated) {
+          showLogin();
+          return;
+        }
+        const [profileResponse, savedResponse] = await Promise.all([fetch("/api/profiles"), fetch("/api/recommendations/saved")]);
+        const profiles = profileResponse.ok ? (await profileResponse.json()).profiles : [];
+        const saved = savedResponse.ok ? (await savedResponse.json()).recommendations : [];
+        const user = authState.user;
+        const profileCards = profiles.length ? profiles.map((item) => `<article class="card p-6"><div class="flex items-center justify-between gap-3"><span class="badge">FIELD PROFILE</span><small class="muted">${profileEscape((item.updatedAt || "").slice(0, 10))}</small></div><h3 class="serif mt-4 text-2xl">${profileEscape(item.name)}</h3><p class="muted mt-2 text-xs">pH ${profileEscape(item.soilPh)} · ${profileEscape(item.temperature)} °C · ${profileEscape(item.rainfall)} mm/year</p><a class="mt-4 inline-block text-xs font-bold text-forest" href="recommendations.html?profile=${item.id}">View recommendations ↗</a></article>`).join("") : '<div class="notice text-xs">No saved farm profiles yet. Start with your field conditions and save a profile when profile management is connected to your workflow.</div>';
+        const recommendationCards = saved.length ? saved.slice(0, 6).map((item) => { const top = item.results?.[0]; return `<article class="card p-6"><div class="flex items-center justify-between gap-3"><span class="badge">SAVED SHORTLIST</span><small class="muted">${profileEscape((item.createdAt || "").slice(0, 10))}</small></div><h3 class="serif mt-4 text-2xl">${profileEscape(item.label)}</h3><p class="muted mt-2 text-xs">${top ? `Closest fit: ${profileEscape(top.name)} · ${top.fit}/100` : "No crop result saved"}</p><div class="mt-4 flex flex-wrap gap-2">${(item.results || []).slice(0, 3).map((result) => `<span class="badge">${profileEscape(result.name)}</span>`).join("")}</div></article>`; }).join("") : '<div class="notice text-xs">No saved recommendation shortlists yet. Generate a shortlist, then choose “Save this shortlist”.</div>';
+        profileState.innerHTML = `<div class="flex flex-wrap items-start justify-between gap-5"><div><p class="eyebrow">ACCOUNT</p><h2 class="serif mt-3 text-3xl">${profileEscape(user.name || "TanimTech user")}</h2><p class="muted mt-2 text-sm">${profileEscape(user.email || "Manus account")}</p></div><button class="button" type="button" data-auth-logout>Sign out</button></div><div class="divider my-7"></div><p class="eyebrow">YOUR FARM PROFILES</p><h2 class="serif mt-3 text-3xl">Saved field conditions.</h2><div class="mt-5 grid gap-5 md:grid-cols-2">${profileCards}</div><div class="divider my-8"></div><p class="eyebrow">YOUR RECOMMENDATION HISTORY</p><h2 class="serif mt-3 text-3xl">Shortlists made for you.</h2><div class="mt-5 grid gap-5 md:grid-cols-2">${recommendationCards}</div><p class="field-note mt-6">Recommendations are screening results based on the inputs saved at the time. They are not forecasts or guarantees.</p>`;
+        profileState.querySelector("[data-auth-logout]")?.addEventListener("click", async () => { await fetch("/api/auth/logout", { method: "POST" }); window.location.reload(); });
+      })
+      .catch(() => showLogin("Account status could not be loaded. You can try signing in again."));
   }
   if (new URLSearchParams(window.location.search).has("results")) {
     showToast("Recommendations loaded from your saved field values.");

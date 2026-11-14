@@ -8,6 +8,13 @@ PUBLIC_DIRS = {"css", "js", "images"}
 
 def create_app():
     app = Flask(__name__, static_folder=None)
+    app.secret_key = os.environ.get("TANIM_SESSION_SECRET") or os.environ.get("MANUS_JWT_SECRET") or "tanimtech-local-session-secret"
+    app.config.update(
+        SESSION_COOKIE_NAME="webdev_app_session",
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE="None",
+        SESSION_COOKIE_SECURE=bool(os.environ.get("MANUS_PROJECT_ID")),
+    )
     app.json.sort_keys = False  # keep the key order we write
     app.url_map.strict_slashes = False  # /api/crops and /api/crops/ both work
 
@@ -17,7 +24,7 @@ def create_app():
     except ImportError:
         pass
 
-    from .routes import crops, recommendations, compare, calendar, profiles, methodology, soil
+    from .routes import crops, recommendations, compare, calendar, profiles, methodology, soil, auth
 
     @app.get("/api/health")
     def health():
@@ -30,6 +37,7 @@ def create_app():
     app.register_blueprint(profiles.bp, url_prefix="/api/profiles")
     app.register_blueprint(methodology.bp, url_prefix="/api/methodology")
     app.register_blueprint(soil.bp, url_prefix="/api/soil")
+    app.register_blueprint(auth.bp, url_prefix="/api/auth")
 
     # Serve the existing website. Only the HTML pages in the root and the css/js/images folders
     # are public, so backend source code and storage/store.json are never exposed.

@@ -1,11 +1,17 @@
 """Saved farm profiles (screen 12) + farm overview (screen 2) + "Save this shortlist"."""
 from flask import Blueprint, jsonify, request
+from .. import auth
 from .. import store
 from ..planting_calendar import seasonal_calendar, climate_calendar
 from ..scoring import recommend
 from ..validate import validate_conditions, validate_monthly_climate
 
 bp = Blueprint("profiles", __name__)
+
+
+def _user_or_401():
+    user = auth.current_user()
+    return (user, None) if user else (None, (jsonify({"error": "Sign in to manage farm profiles."}), 401))
 
 
 def _parse_profile(body):
@@ -43,40 +49,58 @@ def _calendar_for(p):
 
 @bp.get("")
 def list_profiles():
-    return jsonify({"profiles": store.profiles.list()})
+    user, error = _user_or_401()
+    if error:
+        return error
+    return jsonify({"profiles": store.profiles.list(user["id"])})
 
 
 @bp.post("")
 def create_profile():
+    user, error = _user_or_401()
+    if error:
+        return error
     errors, data = _parse_profile(request.get_json(silent=True))
     if errors:
         return jsonify({"errors": errors}), 400
-    return jsonify(store.profiles.create(data)), 201
+    return jsonify(store.profiles.create(data, user["id"])), 201
 
 
 @bp.get("/<int:pid>")
 def get_profile(pid):
-    p = store.profiles.get(pid)
+    user, error = _user_or_401()
+    if error:
+        return error
+    p = store.profiles.get(pid, user["id"])
     return jsonify(p) if p else _missing()
 
 
 @bp.put("/<int:pid>")
 def update_profile(pid):
+    user, error = _user_or_401()
+    if error:
+        return error
     errors, data = _parse_profile(request.get_json(silent=True))
     if errors:
         return jsonify({"errors": errors}), 400
-    p = store.profiles.update(pid, data)
+    p = store.profiles.update(pid, data, user["id"])
     return jsonify(p) if p else _missing()
 
 
 @bp.delete("/<int:pid>")
 def delete_profile(pid):
-    return ("", 204) if store.profiles.remove(pid) else _missing()
+    user, error = _user_or_401()
+    if error:
+        return error
+    return ("", 204) if store.profiles.remove(pid, user["id"]) else _missing()
 
 
 @bp.get("/<int:pid>/recommendations")
 def profile_recommendations(pid):
-    p = store.profiles.get(pid)
+    user, error = _user_or_401()
+    if error:
+        return error
+    p = store.profiles.get(pid, user["id"])
     if not p:
         return _missing()
     ctx = _ctx(p, plantCategory=request.args.get("plantCategory"), lifeForm=request.args.get("lifeForm"))
@@ -85,13 +109,19 @@ def profile_recommendations(pid):
 
 @bp.get("/<int:pid>/calendar")
 def profile_calendar(pid):
-    p = store.profiles.get(pid)
+    user, error = _user_or_401()
+    if error:
+        return error
+    p = store.profiles.get(pid, user["id"])
     return jsonify(_calendar_for(p)) if p else _missing()
 
 
 @bp.get("/<int:pid>/overview")
 def profile_overview(pid):
-    p = store.profiles.get(pid)
+    user, error = _user_or_401()
+    if error:
+        return error
+    p = store.profiles.get(pid, user["id"])
     if not p:
         return _missing()
     results = recommend(store.crops.all(), p, _ctx(p))
@@ -107,7 +137,10 @@ def profile_overview(pid):
 
 @bp.post("/<int:pid>/shortlists")
 def save_shortlist(pid):
-    p = store.profiles.get(pid)
+    user, error = _user_or_401()
+    if error:
+        return error
+    p = store.profiles.get(pid, user["id"])
     if not p:
         return _missing()
     body = request.get_json(silent=True)
@@ -117,6 +150,9 @@ def save_shortlist(pid):
 
 @bp.get("/<int:pid>/shortlists")
 def list_shortlists(pid):
-    if not store.profiles.get(pid):
+    user, error = _user_or_401()
+    if error:
+        return error
+    if not store.profiles.get(pid, user["id"]):
         return _missing()
     return jsonify({"shortlists": store.shortlists.list_for_profile(pid)})
