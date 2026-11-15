@@ -27,3 +27,15 @@ The fit score uses soil pH, temperature, and annual rainfall. Relative humidity 
 `backend/data/soil_profiles.json` is a committed advisory dataset covering clay, loam, sandy, silty, and peaty/organic-rich textures. It records broad pH, organic-matter, salinity, and drainage guidance plus crop-level suitability labels. It is used only as a transparent soil-context ranking signal; it does not add points to the core fit score and is not a laboratory classification.
 
 `POST /api/soil/analyze` accepts an opted-in JPG, PNG, or WebP image up to 10 MB. The backend forwards the image to the configured OpenAI-compatible vision model and asks for cautious observations, a possible texture suggestion, limitations, and recommended checks. Set `OPENAI_API_KEY`; optionally set `OPENAI_API_BASE` and `SOIL_VISION_MODEL`. If the service is not configured, users can continue with manual soil details and the recommendation API remains available.
+
+## Extended edible plant catalog
+
+`backend/data/edible_catalog.json` holds the 719 edible plants from the full FAO ECOCROP database (OpenCLIM export) that have complete pH, temperature, rainfall and crop-cycle bands. Edible means ECOCROP files the plant under fruits & nuts, vegetables, roots/tubers, pulses or cereals; forage, timber, ornamental, weed and medicinal-only species are excluded. Bands use the optimum range, falling back to the absolute range. A few entries are borderline edibles that ECOCROP classes as fruit or nut crops (for example rain tree pods), so review before recommending an unfamiliar plant. Rebuild with `python -m data_pipeline.build_edible_catalog`.
+
+## Trefle plant API (optional)
+
+[Trefle](https://trefle.io) adds species, common names, photos and edible parts when `TREFLE_TOKEN` is set. Its growth fields are incomplete and give tolerance limits, so Trefle plants are only scored through a matching ECOCROP record.
+
+## SoilGrids soil lookup
+
+`GET /api/soil/lookup` uses the [ISRIC SoilGrids 2.0 REST API](https://rest.isric.org/soilgrids/v2.0/docs) (clay, sand, silt, pH in water, organic carbon, CEC, nitrogen; 0–30 cm thickness-weighted mean). It is a modelled 250 m prediction, not a laboratory measurement, and pH is only copied into the form when the user clicks to accept it.
