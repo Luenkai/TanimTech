@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Edible plant explorer — TanimTech</title>
+  <script src="js/access-gate.js?v=1"></script>
+  <script src="https://cdn.tailwindcss.com"></script><script>tailwind.config={theme:{extend:{colors:{paper:'#f6f5ee',forest:'#174b3a',ink:'#274c3e',muted:'#788073',line:'#dce0d4',leaf:'#e9efdc',lime:'#d9e99b'}}}}</script>
+  <link rel="stylesheet" href="css/site.css?v=5">
+</head>
+<body>
+  <header class="site-header"><div class="header-inner"><a class="brand" href="index.html"><span class="brand-mark">♧</span>tanimtech.</a><nav class="main-nav"><a href="index.html#guide">How to use</a><a href="index.html#crops">Explore crops</a><a href="plants.html">Plant explorer</a><a href="index.html#methodology">Sources</a></nav><div class="header-actions"><span class="workspace-pill">FIELD PLANNING</span><a class="avatar" href="profile.html" aria-label="Open your TanimTech profile">TT</a></div></div></header>
+  <div class="subnav"><nav class="subnav-links"><a href="index.html">Overview</a><a href="conditions.html">Get recommendations</a><a class="active" href="plants.html">Plant explorer</a><a href="recommendations.html">Compare crops</a></nav><span>Edible crops, vegetables and fruit trees</span></div>
+  <main class="page-shell py-12" data-plants-page>
+    <p class="eyebrow">PLANT EXPLORER / EDIBLE PLANTS API</p>
+    <h1 class="section-heading mt-3">Browse edible crops, vegetables and fruit trees.</h1>
+    <p class="muted mt-3 max-w-2xl">Search by English, Filipino or scientific name. Results come from the plant API at <code>/api/plants/search</code>: the bundled FAO ECOCROP catalog, plus live Trefle results when a Trefle token is configured on the server.</p>
+
+    <section class="card mt-8 p-6">
+      <form class="grid items-end gap-4 sm:grid-cols-2 lg:grid-cols-[2fr_1.2fr_1fr_1fr_auto]" data-plant-form>
+        <label><span class="field-label">Search</span><span class="field-control"><input data-plant-q type="search" maxlength="80" placeholder="e.g. mango, nangka, kamatis, Citrus" aria-label="Search plants"></span></label>
+        <label><span class="field-label">Type</span><span class="field-control"><select data-plant-group aria-label="Plant type"><option value="">All edible plants</option><option value="fruit-tree">Fruit trees</option><option value="fruit">Fruits &amp; nuts (non-tree)</option><option value="vegetable">Vegetables</option><option value="root">Root crops</option><option value="legume">Legumes / pulses</option><option value="grain">Grains / cereals</option></select><span aria-hidden="true">⌄</span></span></label>
+        <label><span class="field-label">Life form</span><span class="field-control"><select data-plant-life aria-label="Life form"><option value="">Any</option><option>Tree</option><option>Shrub</option><option>Herb</option><option>Vine</option></select><span aria-hidden="true">⌄</span></span></label>
+        <label><span class="field-label">Source</span><span class="field-control"><select data-plant-source aria-label="Data source"><option value="auto">All sources</option><option value="ecocrop">ECOCROP catalog</option><option value="trefle">Trefle (live)</option></select><span aria-hidden="true">⌄</span></span></label>
+        <button class="button button-primary" type="submit">Search ↗</button>
+      </form>
+      <div class="notice mt-5 text-xs" data-plant-status>Checking data sources…</div>
+    </section>
+
+    <div class="mt-6 flex flex-wrap items-center justify-between gap-3"><p class="muted text-xs" data-plant-count aria-live="polite"></p><p class="text-xs"><button type="button" class="font-bold text-forest" data-toggle-request>Show API request ↗</button></p></div>
+    <pre class="notice hidden mt-3 overflow-x-auto text-xs" data-plant-request></pre>
+    <div class="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3" data-plant-results></div>
+    <div class="mt-8 flex items-center justify-between gap-4" data-plant-pager></div>
+  </main>
+  <footer class="site-footer"><div class="footer-inner"><a class="footer-brand" href="index.html">tanimtech.</a><p>Plan from measured conditions and traceable sources.</p><nav class="footer-links"><a href="index.html#guide">How to use</a><a href="index.html#methodology">Sources</a><a href="index.html#how-it-works">Help</a></nav></div><div class="footer-bottom"><p>© 2026 TanimTech · Philippine crop planning</p><p>ECOCROP bands are expert estimates, not field-trial results.</p></div></footer>
+  <script src="js/plants.js?v=1"></script>
+</body>
+</html>

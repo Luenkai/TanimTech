@@ -95,7 +95,10 @@ def recommend(crops, data, ctx=None):
             "notes": context_notes(ctx),
             "disclaimer": "Fit / 100 · not a probability of success. Requirement bands are from FAO ECOCROP.",
             "dataEvidence": evidence_for(crop["slug"]),
-            "soilMatch": soil_matches(crop["slug"], ctx),
+            "soilMatch": soil_matches(crop["slug"], ctx, crop),
+            "source": "extended" if crop.get("ecoport_code") else "core",
+            "dataSource": crop.get("data_source", "FAO ECOCROP crop requirement profile"),
+            "scientific": crop.get("scientific", ""),
         })
     # Soil suitability narrows ordering only; the displayed fit remains the core score out of 100.
     results.sort(key=lambda r: (-r["fit"], -(r["soilMatch"].get("points") or 0)))
