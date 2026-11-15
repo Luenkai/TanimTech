@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="css/site.css?v=5">
 </head>
 <body>
-  <header class="site-header"><div class="header-inner"><a class="brand" href="index.html"><span class="brand-mark">♧</span>tanimtech.</a><nav class="main-nav"><a href="index.html#guide">How to use</a><a href="index.html#crops">Explore crops</a><a href="index.html#methodology">Sources</a></nav><div class="header-actions"><span class="workspace-pill">FIELD PLANNING</span><a class="avatar" href="profile.html" aria-label="Open your TanimTech profile">TT</a></div></div></header>
+  <header class="site-header"><div class="header-inner"><a class="brand" href="index.html"><span class="brand-mark">♧</span>tanimtech.</a><nav class="main-nav"><a href="index.html#guide">How to use</a><a href="index.html#crops">Explore crops</a><a href="plants.html">Plant explorer</a><a href="index.html#methodology">Sources</a></nav><div class="header-actions"><span class="workspace-pill">FIELD PLANNING</span><a class="avatar" href="profile.html" aria-label="Open your TanimTech profile">TT</a></div></div></header>
   <div class="subnav"><nav class="subnav-links"><a href="index.html">Overview</a><a class="active" href="conditions.html">Get recommendations</a><a href="index.html#guide">How to use</a><a href="recommendations.html">Compare crops</a></nav><span>Enter your field data / Philippines</span></div>
   <main class="page-shell py-12">
     <p class="eyebrow">CROP PLANNING / FIELD CONDITIONS</p>
@@ -38,6 +38,12 @@
           </div>
           <button class="button button-primary mt-5" type="button" data-load-climate>Load NASA POWER climate ↗</button>
           <p class="field-note mt-3" data-climate-status>Nothing loaded yet. A climate lookup does not provide soil pH.</p>
+          <div class="divider my-7"></div>
+          <p class="eyebrow">SOIL TYPE LOOKUP / ISRIC SOILGRIDS</p><h3 class="serif mt-3 text-2xl">Find the soil type at these coordinates</h3>
+          <p class="muted mt-3 text-xs">Uses the same coordinates. SoilGrids is a modelled 250 m map: it estimates clay, silt and sand, organic matter and pH for the top 30 cm. Treat it as a first estimate and confirm with a soil test.</p>
+          <button class="button button-primary mt-5" type="button" data-load-soil>Look up soil type ↗</button>
+          <p class="field-note mt-3" data-soil-status>Nothing looked up yet.</p>
+          <div class="notice mt-4 hidden text-xs" data-soil-result></div>
         </section>
 
         <section class="card p-7">
@@ -47,8 +53,9 @@
             <label><span class="field-label">Soil type</span><span class="field-control"><select data-context-input data-input-key="soilType" aria-label="Soil type"><option value="" selected>Not entered</option><option>Clay</option><option>Loam</option><option>Sandy</option><option>Unknown</option></select><span aria-hidden="true">⌄</span></span></label>
             <label><span class="field-label">Season</span><span class="field-control"><select data-context-input data-input-key="season" aria-label="Season"><option value="" selected>Not entered</option><option>Dry season</option><option>Wet season</option><option>Unknown</option></select><span aria-hidden="true">⌄</span></span></label>
             <label><span class="field-label">Planning month</span><span class="field-control"><select data-context-input data-input-key="planningMonth" aria-label="Planning month"><option value="" selected>Select month</option><option value="January">January</option><option value="February">February</option><option value="March">March</option><option value="April">April</option><option value="May">May</option><option value="June">June</option><option value="July">July</option><option value="August">August</option><option value="September">September</option><option value="October">October</option><option value="November">November</option><option value="December">December</option></select><span aria-hidden="true">⌄</span></span></label>
-            <label><span class="field-label">Preferred plant category</span><span class="field-control"><select data-context-input data-input-key="plantCategory" aria-label="Preferred plant category"><option value="All categories" selected>All categories</option><option>Leafy and fruit vegetables</option><option>Legumes</option><option>Grains</option><option>Root crops</option></select><span aria-hidden="true">⌄</span></span></label>
-            <label><span class="field-label">Life form</span><span class="field-control"><select data-context-input data-input-key="lifeForm" aria-label="Life form"><option value="No preference" selected>No preference</option><option>Herb</option><option>Vine</option><option>Tree</option></select><span aria-hidden="true">⌄</span></span></label>
+            <label><span class="field-label">Preferred plant category</span><span class="field-control"><select data-context-input data-input-key="plantCategory" aria-label="Preferred plant category"><option value="All categories" selected>All categories</option><option>Leafy and fruit vegetables</option><option>Legumes</option><option>Grains</option><option>Root crops</option><option>Fruit trees</option><option>Fruits &amp; nuts</option><option>Vegetables</option></select><span aria-hidden="true">⌄</span></span></label>
+            <label><span class="field-label">Life form</span><span class="field-control"><select data-context-input data-input-key="lifeForm" aria-label="Life form"><option value="No preference" selected>No preference</option><option>Herb</option><option>Vine</option><option>Tree</option><option>Shrub</option></select><span aria-hidden="true">⌄</span></span></label>
+            <label><span class="field-label">Plant list <span class="badge">New</span></span><span class="field-control"><select data-context-input data-input-key="catalog" aria-label="Plant list"><option value="extended" selected>Extended edible catalog (crops, vegetables, fruit trees)</option><option value="core">Core 7 crops only</option></select><span aria-hidden="true">⌄</span></span><span class="field-note">The extended list adds ~700 edible plants from FAO ECOCROP. Browse them in the <a class="font-bold text-forest" href="plants.html">plant explorer</a>.</span></label>
           </div>
           <div class="divider my-7"></div>
           <p class="eyebrow">OPTIONAL / SOIL DETAILS</p><h3 class="serif mt-3 text-2xl">Narrow the shortlist with what you know.</h3>
@@ -72,6 +79,6 @@
     </div>
   </main>
   <footer class="site-footer"><div class="footer-inner"><a class="footer-brand" href="index.html">tanimtech.</a><p>Plan from measured conditions and traceable sources.</p><nav class="footer-links"><a href="index.html#guide">How to use</a><a href="index.html#methodology">Sources</a><a href="index.html#how-it-works">Help</a></nav></div><div class="footer-bottom"><p>© 2026 TanimTech · Philippine crop planning</p><p>Source-aware planning, not a yield guarantee.</p></div></footer>
-  <script src="js/site.js?v=10"></script>
+  <script src="js/site.js?v=11"></script>
 </body>
 </html>
