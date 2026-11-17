@@ -2,7 +2,7 @@
 from flask import Blueprint, jsonify, request
 
 from .. import soilgrids
-from ..soil_analysis import DATASET, analyze_image
+from ..soil_analysis import DATASET, SoilAnalysisError, analyze_image
 from ..upstream import UpstreamError
 
 bp = Blueprint("soil", __name__)
@@ -62,7 +62,8 @@ def analyze():
     uploaded = request.files.get("image")
     if not uploaded or not uploaded.filename:
         return jsonify({"error": "Choose a soil image first."}), 400
-    if uploaded.mimetype not in {"image/jpeg", "image/png", "image/webp"}:
+    mime_type = uploaded.mimetype or ""
+    if mime_type not in {"image/jpeg", "image/png", "image/webp"}:
         return jsonify({"error": "Upload a JPG, PNG, or WebP soil image."}), 400
     image = uploaded.read()
     if not image:
@@ -76,9 +77,9 @@ def analyze():
     except (TypeError, ValueError):
         details = {}
     try:
-        return jsonify({"analysis": analyze_image(image, uploaded.mimetype, details)})
-    except RuntimeError as exc:
-        return jsonify({"error": str(exc)}), 503
+        return jsonify({"analysis": analyze_image(image, mime_type, details)})
+    except SoilAnalysisError as exc:
+        return jsonify({"error": str(exc)}), exc.status_code
 
 
 @bp.errorhandler(413)
