@@ -10,7 +10,7 @@ from unittest import mock
 os.environ["TANIM_STORE_FILE"] = os.path.join(tempfile.mkdtemp(), "store.json")
 
 from tanimtech import create_app  # noqa: E402
-from tanimtech.soil_analysis import SoilAnalysisError, _vision_request  # noqa: E402
+from tanimtech.soil_analysis import SoilAnalysisError, _vision_request, analyze_image  # noqa: E402
 
 
 class FakeResponse(io.BytesIO):
@@ -64,7 +64,7 @@ class SoilAnalysisTests(unittest.TestCase):
         with mock.patch("tanimtech.routes.soil.analyze_image", return_value=expected) as analyze:
             response = client.post(
                 "/api/soil/analyze",
-                data={"image": (io.BytesIO(b"image-data"), "soil.jpg", "image/jpeg"), "details": '{"soilTexture":"loam"}'},
+                data={"image": (io.BytesIO(b"image-data"), "soil.jpg", "image/jpeg"), "consent": "true", "details": '{"soilTexture":"loam"}'},
                 content_type="multipart/form-data",
             )
         self.assertEqual(response.status_code, 200)
@@ -79,11 +79,75 @@ class SoilAnalysisTests(unittest.TestCase):
         ):
             response = client.post(
                 "/api/soil/analyze",
-                data={"image": (io.BytesIO(b"image-data"), "soil.jpg", "image/jpeg")},
+                data={"image": (io.BytesIO(b"image-data"), "soil.jpg", "image/jpeg"), "consent": "true"},
                 content_type="multipart/form-data",
             )
         self.assertEqual(response.status_code, 502)
         self.assertEqual(response.json["error"], "The model does not exist.")
+
+    def test_analyze_endpoint_requires_explicit_consent(self):
+        client = create_app().test_client()
+        with mock.patch("tanimtech.routes.soil.analyze_image") as analyze:
+            response = client.post(
+                "/api/soil/analyze",
+                data={"image": (io.BytesIO(b"image-data"), "soil.jpg", "image/jpeg")},
+                content_type="multipart/form-data",
+            )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("consent", response.json["error"].lower())
+        analyze.assert_not_called()
+
+    def test_every_vision_texture_round_trips_into_recommendations(self):
+        client = create_app().test_client()
+        textures = ["clay", "loam", "sandy", "silty", "peaty", "unknown"]
+        for texture in textures:
+            with self.subTest(texture=texture):
+                raw = {
+                    "suggestedTexture": texture,
+                    "confidence": "medium",
+                    "observations": [],
+                    "limitations": [],
+                    "recommendedChecks": [],
+                }
+                with mock.patch("tanimtech.soil_analysis._vision_request", return_value=raw):
+                    analysis = analyze_image(b"image-data", "image/jpeg")
+                canonical = "Unknown" if texture == "unknown" else texture.title()
+                self.assertEqual(analysis["suggestedSoilType"], canonical)
+                self.assertTrue(analysis["soilProfileName"])
+                response = client.post("/api/recommendations", json={
+                    "soilPh": 6.4,
+                    "temperature": 27,
+                    "humidity": 78,
+                    "rainfall": 1500,
+                    "catalog": "extended",
+                    "soilType": canonical,
+                    "soilTexture": canonical,
+                    "soilTypeSource": "model-suggested",
+                })
+                self.assertEqual(response.status_code, 200, response.get_data(as_text=True))
+                self.assertTrue(response.json["results"])
+
+    def test_legacy_peaty_display_label_is_normalized(self):
+        response = create_app().test_client().post("/api/recommendations", json={
+            "soilPh": 6.4,
+            "temperature": 27,
+            "humidity": 78,
+            "rainfall": 1500,
+            "soilType": "Peaty / organic-rich",
+            "soilTexture": "Peaty / organic-rich",
+        })
+        self.assertEqual(response.status_code, 200, response.get_data(as_text=True))
+        self.assertEqual(response.json["context"]["soilType"], "Peaty")
+        self.assertEqual(response.json["context"]["soilTexture"], "Peaty")
+
+    def test_methodology_describes_opt_in_photo_review_accurately(self):
+        response = create_app().test_client().get("/api/methodology")
+        self.assertEqual(response.status_code, 200)
+        text = " ".join(response.json["limitations"] + response.json["notScored"])
+        self.assertIn("explicit", text)
+        self.assertIn("not a soil test", text)
+        self.assertNotIn("never analysed", text)
+        self.assertNotIn("never analyzed", text)
 
 
 if __name__ == "__main__":

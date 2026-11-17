@@ -198,7 +198,11 @@ def analyze_image(image_bytes, mime_type, details=None):
     profile = profile_for(texture)
     return {
         "suggestedTexture": texture,
-        "suggestedSoilType": profile["name"] if profile else "Unknown",
+        # Keep this value canonical for the browser's recommendation form. The
+        # richer dataset display name (e.g. "Peaty / organic-rich") is metadata,
+        # not a valid soilTexture enum value.
+        "suggestedSoilType": texture.title() if profile else "Unknown",
+        "soilProfileName": profile["name"] if profile else "Unknown",
         "confidence": raw.get("confidence", "low"),
         "observations": [str(x) for x in raw.get("observations", [])][:6],
         "limitations": [str(x) for x in raw.get("limitations", [])][:6] or ["A photo cannot measure pH, nutrients, salinity, or drainage."],

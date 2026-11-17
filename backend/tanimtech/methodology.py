@@ -14,11 +14,11 @@ def get_methodology():
         "addOnContext": ["Soil type", "Region or province", "Elevation", "Season", "Planning month",
                          "Typhoon or flood risk", "Plant category", "Life form"],
         "notScored": ["Drainage", "Pests and disease", "Seed quality", "Sunlight", "Land area",
-                      "Soil photo (never analysed)"],
+                      "Opt-in soil photo suggestion"],
         "limitations": [
             "Fit is not a probability of success or a yield forecast.",
             "Reference bands are illustrative demo data, not a verified ECOCROP connection.",
-            "Soil photos stay on the device and are never analysed; soil type is always user-entered.",
+            "A soil photo is sent to the configured vision service only after explicit model-review consent and user action; its tentative visible-texture suggestion is not a soil test.",
             "Monthly climate values must not be compared with annual requirements.",
             "A high fit never overrides local weather advisories or an agriculture adviser.",
         ],

@@ -79,7 +79,10 @@
       const saved = localStorage.getItem(storageKey);
       if (!saved) return {};
       const parsed = JSON.parse(saved);
-      return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+      const state = parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+      if (state.soilType === "Peaty / organic-rich") state.soilType = "Peaty";
+      if (state.soilTexture === "Peaty / organic-rich") state.soilTexture = "Peaty";
+      return state;
     } catch (error) {
       showToast("Saved inputs could not be loaded. Your current entries are still available on this page.");
       return {};
@@ -237,7 +240,7 @@
     if (photoName) photoName.textContent = name;
     if (photoDetails) {
       const sizeMb = (blob.size / (1024 * 1024)).toFixed(2);
-      photoDetails.textContent = `${blob.type || "Image"} · ${sizeMb} MB · stored only on this device`;
+      photoDetails.textContent = `${blob.type || "Image"} · ${sizeMb} MB · saved locally; sent only for opt-in model review`;
     }
     if (photoStatus) photoStatus.textContent = "PHOTO READY";
 
@@ -347,7 +350,7 @@
         return;
       }
       if (!consentCheckbox?.checked) {
-        showToast("Please confirm local photo use before continuing. Nothing is uploaded.");
+        showToast("Confirm consent for optional model review before continuing. The preview link itself does not upload the photo.");
         consentCheckbox?.focus();
         return;
       }
@@ -374,6 +377,7 @@
     try {
       const form = new FormData();
       form.append("image", currentPhoto.blob, currentPhoto.name || "soil-photo.jpg");
+      form.append("consent", "true");
       const soilDetails = Object.fromEntries(["soilTexture", "drainage", "moisture", "salinity", "organicMatter", "soilNotes"].map((key) => [key, state[key] || ""]));
       form.append("details", JSON.stringify(soilDetails));
       const response = await fetch("/api/soil/analyze", { method: "POST", body: form });
@@ -392,6 +396,7 @@
         const checks = (analysis.recommendedChecks || []).map((item) => `<li>${htmlEscape(item)}</li>`).join("");
         soilAnalysisResult.innerHTML = `<strong>Model suggestion: ${htmlEscape(analysis.suggestedSoilType)} · ${htmlEscape(analysis.confidence)} confidence</strong><p class="mt-2">Visible observations</p><ul class="mt-1 list-disc pl-5">${observations || "<li>No clear visual traits were returned.</li>"}</ul><p class="mt-2">Recommended checks</p><ul class="mt-1 list-disc pl-5">${checks || "<li>Use a representative soil test before relying on this suggestion.</li>"}</ul><p class="mt-3 muted">This suggestion is saved as model-suggested context. Confirm or override it in the field conditions form.</p>`;
       }
+      if (photoDetails) photoDetails.textContent = "Saved locally; sent to the configured vision service for this opt-in review.";
       showToast("Soil review complete. Confirm the suggestion before using it.");
     } catch (error) {
       if (soilAnalysisResult) soilAnalysisResult.textContent = error.message;
@@ -415,7 +420,7 @@
         }
         photoPlaceholder?.classList.remove("hidden");
         if (photoName) photoName.textContent = "No photo selected";
-        if (photoDetails) photoDetails.textContent = "JPG or PNG · Maximum 10 MB · stays on this device";
+        if (photoDetails) photoDetails.textContent = "JPG or PNG · Maximum 10 MB · local until opt-in review";
         if (photoStatus) photoStatus.textContent = "NO PHOTO SELECTED";
         if (consentCheckbox) consentCheckbox.checked = false;
         currentPhoto = null;
@@ -728,6 +733,21 @@
       mongo: { available: true, source: "Cleaned Kaggle crop-soil and yield-condition profiles", soilProfile: "Moong (Green Gram) · 740 soil observations", yieldProfile: "Moong (Green Gram) · 740 yield observations across 26 states" },
       mais: { available: true, source: "Cleaned Kaggle crop-soil and yield-condition profiles", soilProfile: "Maize · 753 soil observations", yieldProfile: "Maize · 975 yield observations across 28 states" },
     };
+    const coreSoilSuitability = {
+      clay: { pechay: "good", kangkong: "good", mongo: "caution", sitaw: "caution", talong: "caution", kamote: "poor", mais: "good" },
+      loam: { pechay: "good", kangkong: "good", mongo: "good", sitaw: "good", talong: "good", kamote: "good", mais: "good" },
+      sandy: { pechay: "caution", kangkong: "poor", mongo: "good", sitaw: "good", talong: "good", kamote: "good", mais: "caution" },
+      silty: { pechay: "good", kangkong: "good", mongo: "caution", sitaw: "caution", talong: "caution", kamote: "caution", mais: "good" },
+      peaty: { pechay: "caution", kangkong: "good", mongo: "poor", sitaw: "caution", talong: "poor", kamote: "caution", mais: "poor" },
+    };
+    const localSoilMatch = (crop) => {
+      const rawTexture = String(conditions.soilTexture || conditions.soilType || "").trim().toLowerCase();
+      const texture = rawTexture === "peaty / organic-rich" ? "peaty" : rawTexture;
+      const status = coreSoilSuitability[texture]?.[crop.slug];
+      return status
+        ? { status, points: { good: 100, caution: 60, poor: 20 }[status], label: texture[0].toUpperCase() + texture.slice(1) }
+        : { status: "unknown", points: null, label: "No soil profile" };
+    };
     const scoreFactor = (value, band, weight) => {
       const [lo, hi] = band; const width = hi - lo;
       if (lo <= value && value <= hi) {
@@ -744,8 +764,8 @@
         const breakdown = factors.map(([key, label, weight], index) => { const value = conditions[key]; const band = crop.bands[index]; return { factor: key, label, value, band, points: scoreFactor(value, band, weight), maxPoints: weight, status: value < band[0] ? "below" : value > band[1] ? "above" : "within" }; });
         const within = breakdown.filter((item) => item.status === "within" && item.maxPoints > 0).map((item) => item.label.toLowerCase());
         const off = breakdown.filter((item) => item.status !== "within");
-        return { ...crop, fit: breakdown.reduce((sum, item) => sum + item.points, 0), breakdown, whyItAppears: within.length ? `${within[0][0].toUpperCase() + within[0].slice(1)} and other scored values sit within the FAO ECOCROP requirement bands.` : "The scored values sit outside the strongest ECOCROP requirement bands.", whatToCheck: off.length ? off.map((item) => `${item.label} (${item.value}) is ${item.status} the ${item.band[0]}–${item.band[1]} requirement band.`).join(" ") : "The scored requirements are within band; drainage, pests, and seed quality are still unassessed.", dataEvidence: evidenceByCrop[crop.slug] || { available: false, source: "No matching cleaned evidence profile; crop requirement bands are from FAO ECOCROP." } };
-      }).sort((a, b) => b.fit - a.fit).map((result, index) => ({ ...result, label: index === 0 ? "CLOSEST FIT" : "ALTERNATIVE" }));
+        return { ...crop, fit: breakdown.reduce((sum, item) => sum + item.points, 0), breakdown, whyItAppears: within.length ? `${within[0][0].toUpperCase() + within[0].slice(1)} and other scored values sit within the FAO ECOCROP requirement bands.` : "The scored values sit outside the strongest ECOCROP requirement bands.", whatToCheck: off.length ? off.map((item) => `${item.label} (${item.value}) is ${item.status} the ${item.band[0]}–${item.band[1]} requirement band.`).join(" ") : "The scored requirements are within band; drainage, pests, and seed quality are still unassessed.", dataEvidence: evidenceByCrop[crop.slug] || { available: false, source: "No matching cleaned evidence profile; crop requirement bands are from FAO ECOCROP." }, soilMatch: localSoilMatch(crop) };
+      }).sort((a, b) => b.fit - a.fit || (b.soilMatch.points || 0) - (a.soilMatch.points || 0)).map((result, index) => ({ ...result, label: index === 0 ? "CLOSEST FIT" : "ALTERNATIVE" }));
     };
     let sortMode = "fit";
     let currentResults = [];
@@ -754,7 +774,7 @@
     const guideMarkup = (result) => `<a class="button mt-4" href="crop-guide.html?crop=${encodeURIComponent(result.slug)}">Open crop guide ↗</a>`;
     const renderRecommendations = (payload, mode = "API CONNECTED") => {
       currentResults = Array.isArray(payload.results) ? [...payload.results] : [];
-      if (sortMode === "name") currentResults.sort((a, b) => a.name.localeCompare(b.name)); else currentResults.sort((a, b) => b.fit - a.fit);
+      if (sortMode === "name") currentResults.sort((a, b) => a.name.localeCompare(b.name)); else currentResults.sort((a, b) => b.fit - a.fit || (b.soilMatch?.points || 0) - (a.soilMatch?.points || 0));
       if (!currentResults.length) { recommendationPage.innerHTML = '<section class="warning mt-8"><strong>No crops matched the selected filters.</strong><p class="muted mt-2 text-xs">Return to your conditions and broaden the category or life-form filters.</p></section>'; return; }
       const first = currentResults[0];
       const evidenceCount = currentResults.filter((result) => result.dataEvidence?.available).length;
