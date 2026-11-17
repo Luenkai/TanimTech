@@ -119,6 +119,8 @@
     translatePage(saved);
   };
   addLanguageSelector();
+  const configuredApiBase = document.querySelector('meta[name="tanimtech-api-base"]')?.content || window.TANIMTECH_API_BASE || "";
+  const apiUrl = (path) => `${String(configuredApiBase).replace(/\/$/, "")}${path}`;
   const storageKey = "tanimtech-field-inputs";
   const toastRegion = document.createElement("div");
   toastRegion.className = "toast-region";
@@ -185,12 +187,12 @@
     symbol: (password) => /[^A-Za-z0-9\s]/.test(password),
   };
 
-  const readJsonResponse = async (response) => {
+  const readJsonResponse = async (response, fallback = "This page is running without the TanimTech API. Your local profile is still available.") => {
     const text = await response.text();
     try {
       return text ? JSON.parse(text) : {};
     } catch (error) {
-      throw new Error("This page is running without the TanimTech API. Your local profile is still available.");
+      throw new Error(fallback);
     }
   };
 
@@ -496,8 +498,8 @@
       form.append("image", currentPhoto.blob, currentPhoto.name || "soil-photo.jpg");
       const soilDetails = Object.fromEntries(["soilTexture", "drainage", "moisture", "salinity", "organicMatter", "soilNotes"].map((key) => [key, state[key] || ""]));
       form.append("details", JSON.stringify(soilDetails));
-      const response = await fetch("/api/soil/analyze", { method: "POST", body: form });
-      const payload = await response.json();
+      const response = await fetch(apiUrl("/api/soil/analyze"), { method: "POST", body: form });
+      const payload = await readJsonResponse(response, "Soil model review is unavailable because this deployment is not connected to the TanimTech backend. Continue with the manual soil fields or configure TANIMTECH_API_BASE.");
       if (!response.ok) throw new Error(payload.error || "Soil analysis is unavailable.");
       const analysis = payload.analysis;
       state.soilAnalysis = analysis;
