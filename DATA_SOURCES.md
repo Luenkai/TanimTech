@@ -26,7 +26,7 @@ The fit score uses soil pH, temperature, and annual rainfall. Relative humidity 
 
 `backend/data/soil_profiles.json` is a committed advisory dataset covering clay, loam, sandy, silty, and peaty/organic-rich textures. It records broad pH, organic-matter, salinity, and drainage guidance plus crop-level suitability labels. It is used only as a transparent soil-context ranking signal; it does not add points to the core fit score and is not a laboratory classification.
 
-`POST /api/soil/analyze` accepts an opted-in JPG, PNG, or WebP image up to 10 MB. The backend forwards the image to the configured OpenAI-compatible vision model and asks for cautious observations, a possible texture suggestion, limitations, and recommended checks. Set `OPENAI_API_KEY`; optionally set `OPENAI_API_BASE` and `SOIL_VISION_MODEL`. If the service is not configured, users can continue with manual soil details and the recommendation API remains available.
+`POST /api/soil/analyze` accepts an opted-in JPG, PNG, or WebP image up to 10 MB. The backend forwards the image to the configured OpenAI-compatible vision model and asks for cautious observations, a possible texture suggestion, limitations, and recommended checks. Set `OPENAI_API_KEY` (or `OPENAI_API_TOKEN`) on the backend; optionally set `OPENAI_API_BASE` with or without `/v1` or `/chat/completions`, `SOIL_VISION_MODEL`, and `SOIL_REASONING`. The browser keeps the image local until the user checks consent and presses the analysis button. If the service is not configured, users can continue with manual soil details and the recommendation API remains available.
 
 ## Extended edible plant catalog
 
