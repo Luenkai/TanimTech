@@ -28,21 +28,6 @@
         <div class="md:col-span-2"><p class="field-note">Username: 3–20 letters, numbers, or underscores. New passwords need uppercase, lowercase, a number, and a symbol.</p><button class="button button-primary mt-4" type="submit">Save account changes</button><p class="field-note mt-3" data-account-message aria-live="polite">Your email, username, and password are private account details.</p></div>
       </form>
     </section>
-    <section class="card mt-8 p-7" data-personal-profile>
-      <div class="flex flex-wrap items-start justify-between gap-5">
-        <div><p class="eyebrow">PERSONAL PROFILE</p><h2 class="section-title mt-3">Tell people what you build.</h2><p class="muted mt-3 text-sm">Add a short bio and the technologies you currently use. These details are saved only on this device.</p></div>
-        <span class="badge">PORTFOLIO SNAPSHOT</span>
-      </div>
-      <form class="mt-6" data-personal-profile-form>
-        <label class="block"><span class="field-label">Bio</span><span class="field-control"><textarea data-personal-bio rows="4" maxlength="500" placeholder="Write a short introduction about your work and interests."></textarea></span></label>
-        <label class="mt-5 block"><span class="field-label">Current tech stack</span><span class="field-control"><textarea data-personal-stack rows="3" maxlength="500" placeholder="JavaScript, Python, Flask, ..."></textarea></span><span class="field-note">Separate technologies with commas. They will appear as profile tags.</span></label>
-        <div class="mt-5 flex flex-wrap items-center gap-3"><button class="button button-primary" type="submit">Save personal profile</button><button class="button" type="button" data-reset-personal-profile>Reset project defaults</button><p class="field-note" data-personal-profile-message aria-live="polite">Saved locally on this device.</p></div>
-      </form>
-      <div class="divider my-7"></div>
-      <div data-personal-profile-preview>
-        <p class="eyebrow">PROFILE PREVIEW</p><h3 class="serif mt-3 text-3xl" data-personal-preview-name>Your TanimTech profile</h3><p class="muted mt-3 max-w-3xl" data-personal-preview-bio></p><div class="mt-4 flex flex-wrap gap-2" data-personal-preview-stack></div>
-      </div>
-    </section>
     <section class="card mt-8 p-7" data-profile-state>
       <div class="flex flex-wrap items-center justify-between gap-5"><div><p class="eyebrow">LOCAL PROFILE</p><h2 class="serif mt-3 text-3xl">Your field workspace</h2><p class="muted mt-3 text-sm">Your profile and saved recommendations stay in this browser. Use the same device to revisit them.</p></div><span class="badge">THIS DEVICE</span></div>
       <div class="mt-6 flex flex-wrap items-end gap-3"><label class="min-w-[240px] flex-1"><span class="field-label">Profile name</span><span class="field-control"><input data-profile-name type="text" maxlength="80" placeholder="e.g. Maria’s farm"></span></label><button class="button button-primary" type="button" data-save-profile-name>Save name</button><button class="button" type="button" data-export-report>Download PDF report</button></div>

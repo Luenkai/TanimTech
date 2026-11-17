@@ -1144,42 +1144,6 @@
     const nameInput = profilePage.querySelector("[data-profile-name]");
     const savedName = localStorage.getItem("tanimtech-profile-name") || "Field planner";
     if (nameInput) nameInput.value = savedName;
-    const personalDefaults = {
-      bio: "I build practical tools that connect AI, data, and farmer-friendly interfaces to support better crop planning in the Philippines.",
-      stack: ["HTML/CSS", "JavaScript", "Tailwind CSS", "Python", "Flask", "OpenAI Vision", "Supabase", "Netlify"],
-    };
-    const personalForm = profilePage.querySelector("[data-personal-profile-form]");
-    const personalBio = profilePage.querySelector("[data-personal-bio]");
-    const personalStack = profilePage.querySelector("[data-personal-stack]");
-    const personalMessage = profilePage.querySelector("[data-personal-profile-message]");
-    const personalPreviewName = profilePage.querySelector("[data-personal-preview-name]");
-    const personalPreviewBio = profilePage.querySelector("[data-personal-preview-bio]");
-    const personalPreviewStack = profilePage.querySelector("[data-personal-preview-stack]");
-    const personalProfile = readLocal("tanimtech-personal-profile", personalDefaults);
-    const renderPersonalProfile = (profile) => {
-      const bio = profile.bio || personalDefaults.bio;
-      const stack = Array.isArray(profile.stack) && profile.stack.length ? profile.stack : personalDefaults.stack;
-      if (personalBio) personalBio.value = bio;
-      if (personalStack) personalStack.value = stack.join(", ");
-      if (personalPreviewName) personalPreviewName.textContent = readCurrentUser().username ? `${readCurrentUser().username}'s profile` : "Your TanimTech profile";
-      if (personalPreviewBio) personalPreviewBio.textContent = bio;
-      if (personalPreviewStack) personalPreviewStack.innerHTML = stack.map((item) => `<span class="badge">${profileEscape(item)}</span>`).join("");
-    };
-    renderPersonalProfile(personalProfile);
-    personalForm?.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const stack = personalStack.value.split(/[\n,]+/).map((item) => item.trim()).filter(Boolean).filter((item, index, items) => items.indexOf(item) === index).slice(0, 16);
-      const profile = { bio: personalBio.value.trim() || personalDefaults.bio, stack: stack.length ? stack : personalDefaults.stack };
-      localStorage.setItem("tanimtech-personal-profile", JSON.stringify(profile));
-      renderPersonalProfile(profile);
-      if (personalMessage) personalMessage.textContent = "Personal profile saved on this device.";
-      showToast("Bio and tech stack saved on this device.");
-    });
-    profilePage.querySelector("[data-reset-personal-profile]")?.addEventListener("click", () => {
-      localStorage.setItem("tanimtech-personal-profile", JSON.stringify(personalDefaults));
-      renderPersonalProfile(personalDefaults);
-      if (personalMessage) personalMessage.textContent = "Project defaults restored.";
-    });
     const accountForm = profilePage.querySelector("[data-account-form]");
     const accountUsernameInput = profilePage.querySelector("[data-account-username]");
     const accountEmailInput = profilePage.querySelector("[data-account-email]");
