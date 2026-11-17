@@ -481,6 +481,42 @@
     if (analyzeSoilButton) analyzeSoilButton.disabled = !currentPhoto || !photoStored || !consentCheckbox.checked;
   });
 
+  const localSoilReview = async (blob) => {
+    const image = await createImageBitmap(blob);
+    const canvas = document.createElement("canvas");
+    canvas.width = 64;
+    canvas.height = 64;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    context.drawImage(image, 0, 0, 64, 64);
+    image.close();
+    const pixels = context.getImageData(0, 0, 64, 64).data;
+    let red = 0, green = 0, blue = 0, brightness = 0;
+    for (let i = 0; i < pixels.length; i += 4) {
+      red += pixels[i]; green += pixels[i + 1]; blue += pixels[i + 2];
+      brightness += (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
+    }
+    const count = pixels.length / 4;
+    red /= count; green /= count; blue /= count; brightness /= count;
+    const suggestedSoilType = brightness < 75 && red > blue * 1.18 ? "Loam" : red > blue * 1.25 && brightness > 105 ? "Sandy" : blue > red * 1.08 ? "Silty" : "Clay";
+    const cropGroups = {
+      Sandy: ["kamote", "mani", "pinya", "papaya", "sitaw"],
+      Clay: ["palay", "gabi", "kangkong", "kalabasa", "mais"],
+      Silty: ["pechay", "repolyo", "sibuyas", "labanos", "kamatis"],
+      Loam: ["pechay", "talong", "kamatis", "okra", "mongo"],
+    };
+    const dataset = await fetch("js/philippine-edible-catalog.json").then((response) => response.json());
+    const bySlug = new Map((dataset.crops || []).map((crop) => [crop.slug, crop]));
+    return {
+      suggestedSoilType, confidence: "low", observations: [
+        `The photo has a ${suggestedSoilType.toLowerCase()}-leaning color and brightness profile.`,
+        "Image-only review cannot confirm texture, pH, nutrients, drainage, or organic matter.",
+      ],
+      recommendedCrops: (cropGroups[suggestedSoilType] || []).map((slug) => bySlug.get(slug)).filter(Boolean).map((crop) => ({ slug: crop.slug, name: crop.name, category: crop.category, status: "possible" })),
+      recommendedChecks: ["Confirm texture by hand or with a soil test.", "Check drainage and organic matter before planting.", "Treat this as a screening suggestion, not a laboratory result."],
+      localFallback: true,
+    };
+  };
+
   analyzeSoilButton?.addEventListener("click", async () => {
     if (!consentCheckbox?.checked || !currentPhoto?.blob) {
       showToast("Choose a photo and confirm model review first.");
@@ -517,8 +553,22 @@
       }
       showToast("Soil review complete. Confirm the suggestion before using it.");
     } catch (error) {
-      if (soilAnalysisResult) soilAnalysisResult.textContent = error.message;
-      showToast(error.message);
+      try {
+        const fallback = await localSoilReview(currentPhoto.blob);
+        state.soilAnalysis = fallback;
+        state.soilType = fallback.suggestedSoilType;
+        state.soilTexture = fallback.suggestedSoilType;
+        state.soilTypeSource = "local-photo-screening";
+        saveState();
+        const observations = fallback.observations.map((item) => `<li>${htmlEscape(item)}</li>`).join("");
+        const cropMatches = fallback.recommendedCrops.map((crop) => `<li><a class="font-bold text-forest" href="crop-guide.html?crop=${encodeURIComponent(crop.slug)}">${htmlEscape(crop.name)}</a> <span class="muted">· possible fit · ${htmlEscape(crop.category)}</span></li>`).join("");
+        const checks = fallback.recommendedChecks.map((item) => `<li>${htmlEscape(item)}</li>`).join("");
+        if (soilAnalysisResult) soilAnalysisResult.innerHTML = `<strong>Tentative local suggestion: ${htmlEscape(fallback.suggestedSoilType)} · low confidence</strong><p class="mt-2">Visible image screening</p><ul class="mt-1 list-disc pl-5">${observations}</ul><p class="mt-2">Possible crops from the Philippine list</p><ul class="mt-1 list-disc pl-5">${cropMatches}</ul><p class="mt-2">Recommended checks</p><ul class="mt-1 list-disc pl-5">${checks}</ul><p class="mt-3 muted">The model backend was unavailable, so this is a browser-only color screening. Confirm the soil type with a field or laboratory test.</p>`;
+        showToast("Tentative local photo screening complete. Confirm the soil before planting.");
+      } catch (fallbackError) {
+        if (soilAnalysisResult) soilAnalysisResult.textContent = `Photo screening could not run: ${fallbackError.message}`;
+        showToast("Photo screening could not run. Continue with the manual soil fields.");
+      }
     } finally {
       analyzeSoilButton.disabled = !currentPhoto || !photoStored || !consentCheckbox.checked;
       analyzeSoilButton.textContent = "Analyze soil with model";
