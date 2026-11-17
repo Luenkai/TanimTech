@@ -33,27 +33,6 @@ DATASET = load_dataset()
 PROFILES = {p["slug"]: p for p in DATASET.get("profiles", [])}
 
 
-def _setting(name, default=""):
-    """Read a process setting, then a local .env without requiring python-dotenv."""
-    value = os.environ.get(name)
-    if value:
-        return value.strip().strip('"').strip("'")
-    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
-    for path in (os.path.join(project_root, ".env"), os.path.join(project_root, "backend", ".env")):
-        try:
-            with open(path, encoding="utf-8") as fh:
-                for raw in fh:
-                    line = raw.strip()
-                    if not line or line.startswith("#") or "=" not in line:
-                        continue
-                    key, candidate = line.split("=", 1)
-                    if key.strip() == name and candidate.strip():
-                        return candidate.strip().strip('"').strip("'")
-        except OSError:
-            continue
-    return default
-
-
 def profile_for(texture):
     return PROFILES.get(str(texture or "").strip().lower())
 
@@ -98,7 +77,7 @@ def _error_message(exc):
 
 
 def _vision_request(image_bytes, mime_type, details):
-    api_key = _setting("OPENAI_API_KEY") or _setting("OPENAI_API_TOKEN")
+    api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
         raise SoilAnalysisError("Soil image analysis is not configured. Set OPENAI_API_KEY on the backend.")
     if not image_bytes:
@@ -108,14 +87,8 @@ def _vision_request(image_bytes, mime_type, details):
     if mime_type not in {"image/jpeg", "image/png", "image/webp"}:
         raise SoilAnalysisError("Upload a JPG, PNG, or WebP soil image.", status_code=400)
 
-    base_url = _setting("OPENAI_API_BASE", "https://api.openai.com/v1").rstrip("/")
-    model = _setting("SOIL_VISION_MODEL") or DEFAULT_VISION_MODEL
-    if base_url.endswith("/chat/completions"):
-        endpoint = base_url
-    elif base_url.endswith("/v1"):
-        endpoint = f"{base_url}/chat/completions"
-    else:
-        endpoint = f"{base_url}/v1/chat/completions"
+    base_url = os.environ.get("OPENAI_API_BASE", "https://api.openai.com/v1").rstrip("/")
+    model = os.environ.get("SOIL_VISION_MODEL") or DEFAULT_VISION_MODEL
     prompt = (
         "Assess this soil image only as a cautious visual screening aid. Do not claim laboratory measurements. "
         "Return JSON with keys suggestedTexture (one of clay, loam, sandy, silty, peaty, unknown), "
@@ -125,6 +98,7 @@ def _vision_request(image_bytes, mime_type, details):
     )
     payload = {
         "model": model,
+        "reasoning": {"effort": "low"},
         "max_completion_tokens": 1200,
         "response_format": {"type": "json_schema", "json_schema": {"name": "soil_visual_review", "strict": True, "schema": {
             "type": "object",
@@ -143,14 +117,8 @@ def _vision_request(image_bytes, mime_type, details):
             {"type": "image_url", "image_url": {"url": "data:{};base64,{}".format(mime_type, base64.b64encode(image_bytes).decode("ascii"))}},
         ]}],
     }
-    # Reasoning controls are accepted by some GPT-5 endpoints but rejected by many
-    # OpenAI-compatible providers. Keep them opt-in so an existing key works with
-    # both the default model and a provider-specific vision model.
-    reasoning = _setting("SOIL_REASONING").lower()
-    if model.lower().startswith("gpt-5") and reasoning in {"low", "medium", "high"}:
-        payload["reasoning"] = {"effort": reasoning}
     request = urllib.request.Request(
-        endpoint,
+        f"{base_url}/chat/completions",
         data=json.dumps(payload).encode(),
         headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
         method="POST",
@@ -198,11 +166,7 @@ def analyze_image(image_bytes, mime_type, details=None):
     profile = profile_for(texture)
     return {
         "suggestedTexture": texture,
-        # Keep this value canonical for the browser's recommendation form. The
-        # richer dataset display name (e.g. "Peaty / organic-rich") is metadata,
-        # not a valid soilTexture enum value.
-        "suggestedSoilType": texture.title() if profile else "Unknown",
-        "soilProfileName": profile["name"] if profile else "Unknown",
+        "suggestedSoilType": profile["name"] if profile else "Unknown",
         "confidence": raw.get("confidence", "low"),
         "observations": [str(x) for x in raw.get("observations", [])][:6],
         "limitations": [str(x) for x in raw.get("limitations", [])][:6] or ["A photo cannot measure pH, nutrients, salinity, or drainage."],

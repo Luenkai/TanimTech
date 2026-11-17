@@ -7,11 +7,9 @@ CORE = {
     "humidity":    {"min": 0,   "max": 100,  "label": "Humidity"},
     "rainfall":    {"min": 0,   "max": 5000, "label": "Rainfall"},
 }
-SOIL_TEXTURES = ["Clay", "Loam", "Sandy", "Silty", "Peaty", "Unknown"]
-SOIL_TYPE_ALIASES = {"Peaty / organic-rich": "Peaty"}
 OPTIONS = {
     "elevation": ["Lowland", "Upland", "Unknown"],
-    "soilType": SOIL_TEXTURES,
+    "soilType": ["Clay", "Loam", "Sandy", "Unknown"],
     "soilTypeSource": ["manual", "user-confirmed", "model-suggested"],
     "season": ["Dry season", "Wet season", "Unknown"],
     "plantCategory": ["All categories", "Leafy and fruit vegetables", "Legumes", "Grains", "Root crops",
@@ -54,8 +52,6 @@ def validate_conditions(body):
             core[key] = value
     for key, allowed in OPTIONS.items():
         value = body.get(key)
-        if key == "soilType" and isinstance(value, str):
-            value = SOIL_TYPE_ALIASES.get(value, value)
         if value is None or value == "":
             continue
         if value not in allowed:
@@ -68,8 +64,6 @@ def validate_conditions(body):
             context[key] = value.strip()[:100]
     for key in ("soilTexture", "drainage", "organicMatter", "moisture", "salinity", "nitrogen", "phosphorus", "potassium", "soilNotes"):
         value = body.get(key)
-        if key == "soilTexture" and isinstance(value, str):
-            value = SOIL_TYPE_ALIASES.get(value, value)
         if value is None or value == "":
             continue
         if key == "soilNotes":
@@ -77,7 +71,7 @@ def validate_conditions(body):
                 context[key] = value.strip()[:300]
             continue
         if key in ("soilTexture", "drainage", "salinity", "moisture"):
-            allowed = {"soilTexture": SOIL_TEXTURES, "drainage": ["Poor", "Moderate", "Well-drained", "Rapid", "Unknown"], "salinity": ["Low", "Moderate", "High", "Unknown"], "moisture": ["Dry", "Moist", "Waterlogged", "Unknown"]}[key]
+            allowed = {"soilTexture": ["Clay", "Loam", "Sandy", "Silty", "Peaty", "Unknown"], "drainage": ["Poor", "Moderate", "Well-drained", "Rapid", "Unknown"], "salinity": ["Low", "Moderate", "High", "Unknown"], "moisture": ["Dry", "Moist", "Waterlogged", "Unknown"]}[key]
             if value not in allowed:
                 errors.append(f"{key} must be one of: {', '.join(allowed)}.")
             else:

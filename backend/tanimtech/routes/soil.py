@@ -60,8 +60,6 @@ def dataset():
 @bp.post("/analyze")
 def analyze():
     uploaded = request.files.get("image")
-    if request.form.get("consent") != "true":
-        return jsonify({"error": "Confirm consent before sending a soil image for model review."}), 400
     if not uploaded or not uploaded.filename:
         return jsonify({"error": "Choose a soil image first."}), 400
     mime_type = uploaded.mimetype or ""
