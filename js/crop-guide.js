@@ -88,7 +88,7 @@
     select.value = crop.slug;
     errorPanel.classList.add("hidden");
     content.classList.remove("hidden");
-    status.textContent = `${crop.name} · ${crops.length} edible plant profiles · ${cropDataSource}`;
+    status.textContent = `${crop.name} · ${crops.length} Philippine edible crop profiles · ${cropDataSource}`;
     const url = new URL(window.location.href);
     url.searchParams.set("crop", crop.slug);
     window.history.replaceState(null, "", url);
@@ -111,29 +111,15 @@
   };
   const loadCrops = async () => {
     select.disabled = true;
-    status.textContent = "Loading edible plant profiles…";
+    status.textContent = "Loading Philippine edible crop profiles…";
     errorPanel.classList.add("hidden");
     try {
-      try {
-        await loadPlantCatalog();
-      } catch (apiError) {
-        try {
-          const response = await fetch("js/edible-catalog.json");
-          if (!response.ok) throw new Error(`Bundled plant catalog returned HTTP ${response.status}.`);
-          const payload = await response.json();
-          if (!Array.isArray(payload.plants) || !payload.plants.length) throw new Error("Bundled plant catalog has no profiles.");
-          crops = payload.plants.map(asGuideCrop);
-          cropDataSource = "bundled ECOCROP catalog";
-        } catch (catalogError) {
-          const response = await fetch("js/crop-guide-data.json");
-          if (!response.ok) throw new Error(`Local crop data returned HTTP ${response.status}.`);
-          const payload = await response.json();
-          if (!Array.isArray(payload.crops) || !payload.crops.length) throw apiError;
-          crops = payload.crops;
-          cropDataSource = "seven-crop local fallback";
-          status.textContent = `The plant API and bundled catalog are unavailable (${catalogError.message}). Showing the seven-crop fallback.`;
-        }
-      }
+      const response = await fetch("js/philippine-edible-catalog.json");
+      if (!response.ok) throw new Error(`Philippine crop dataset returned HTTP ${response.status}.`);
+      const payload = await response.json();
+      if (!Array.isArray(payload.crops) || !payload.crops.length) throw new Error("The Philippine crop dataset has no profiles.");
+      crops = payload.crops;
+      cropDataSource = "Philippine edible crop dataset";
       select.replaceChildren(new Option("Choose a crop", ""));
       crops.forEach((crop) => select.add(new Option(crop.name, crop.slug)));
       select.disabled = false;
