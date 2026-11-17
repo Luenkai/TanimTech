@@ -3,17 +3,21 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Crop recommendations — TanimTech</title>
-  <script src="js/access-gate.js?v=1"></script>
+  <script src="js/access-gate.js?v=6"></script>
   <script src="https://cdn.tailwindcss.com"></script><script>tailwind.config={theme:{extend:{colors:{paper:'#f6f5ee',forest:'#174b3a',ink:'#274c3e',muted:'#788073',line:'#dce0d4',leaf:'#e9efdc',lime:'#d9e99b'}}}}</script>
-  <link rel="stylesheet" href="css/site.css?v=5">
+  <link rel="stylesheet" href="css/site.css?v=8">
 </head>
 <body>
-  <header class="site-header"><div class="header-inner"><a class="brand" href="index.html"><span class="brand-mark">♧</span>tanimtech.</a><nav class="main-nav"><a href="index.html#guide">How to use</a><a href="index.html#crops">Explore crops</a><a href="index.html#methodology">Sources</a></nav><div class="header-actions"><span class="workspace-pill">FIELD PLANNING</span><a class="avatar" href="profile.html" aria-label="Open your TanimTech profile">TT</a></div></div></header>
-  <div class="subnav"><nav class="subnav-links"><a href="index.html">Overview</a><a class="active" href="conditions.html">Get recommendations</a><a href="index.html#guide">How to use</a><a href="recommendations.html">Compare crops</a></nav><span>Source-aware crop fit</span></div>
+  <header class="site-header"><div class="header-inner"><a class="brand" href="homepage.html"><span class="brand-mark">♧</span>tanimtech.</a><nav class="main-nav" aria-label="Main navigation">
+    <a href="homepage.html">Overview</a>
+    <details class="nav-dropdown"><summary>Explore</summary><div class="nav-dropdown-menu"><a href="crop-guide.html">Crop guide</a><a href="homepage.html#crops">Featured crops</a></div></details>
+    <details class="nav-dropdown"><summary class="current">Plan</summary><div class="nav-dropdown-menu"><a href="conditions.html">Get recommendations</a><a href="recommendations.html" aria-current="page">Compare crops</a><a href="homepage.html#calendar">Climate inputs</a><a href="profile.html">My profile</a></div></details>
+    <details class="nav-dropdown"><summary>More</summary><div class="nav-dropdown-menu"><a href="homepage.html#how-it-works">How it works</a><a href="homepage.html#methodology">Methodology</a><a href="soil-photo.html">Soil photo</a><a href="photo-review.html">Photo review</a><a href="soil-context.html">Soil context</a></div></details>
+  </nav><div class="header-actions"><a class="avatar" data-user-avatar href="profile.html" aria-label="Open your TanimTech profile">TT</a></div></div></header>
   <main class="page-shell py-10" data-recommendations-page>
     <p class="eyebrow">CROP PLANNING / RECOMMENDATIONS</p><h1 class="section-heading mt-3">Enter your field conditions first.</h1><p class="muted mt-3">Recommendations will appear here after four required inputs are provided.</p><div class="notice mt-8"><a class="button button-primary" href="conditions.html">Enter field conditions ↗</a><p class="muted mt-4 text-xs">Crop requirement bands come from the committed FAO ECOCROP subset. Weather values can be loaded from NASA POWER.</p></div>
   </main>
-  <footer class="site-footer"><div class="footer-inner"><a class="footer-brand" href="index.html">tanimtech.</a><p>Plan from measured conditions and traceable sources.</p><nav class="footer-links"><a href="index.html#guide">How to use</a><a href="index.html#methodology">Sources</a><a href="index.html#how-it-works">Help</a></nav></div><div class="footer-bottom"><p>© 2026 TanimTech · Philippine crop planning</p><p>Source-aware planning, not a yield guarantee.</p></div></footer>
-  <script src="js/site.js?v=10"></script>
+  <footer class="site-footer"><div class="footer-inner"><a class="footer-brand" href="homepage.html">tanimtech.</a><p>Plan from measured conditions and traceable sources.</p><nav class="footer-links"><a href="homepage.html#guide">How to use</a><a href="homepage.html#methodology">Sources</a><a href="homepage.html#how-it-works">Help</a></nav></div><div class="footer-bottom"><p>© 2026 TanimTech · Philippine crop planning</p><p>Source-aware planning, not a yield guarantee.</p></div></footer>
+  <script src="js/site.js?v=18"></script>
 </body>
 </html>

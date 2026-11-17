@@ -1,0 +1,102 @@
+{
+  "crops": [
+    {
+      "slug": "pechay",
+      "name": "Pechay",
+      "scientific": "Brassica chinensis",
+      "category": "Leafy and fruit vegetables",
+      "lifeForm": "Herb",
+      "summary": "Pechay requirement profile from FAO ECOCROP.",
+      "growingDays": [40, 90],
+      "bands": { "soilPh": [6, 7.5], "temperature": [12, 22], "rainfall": [800, 1600], "humidity": [0, 100] },
+      "floodNote": "Check local drainage and flood exposure; ECOCROP does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; ECOCROP does not provide a storm-resilience guarantee.",
+      "dataSource": "FAO ECOCROP via OpenCLIM export (EcoPortCode 547)",
+      "bestMonths": []
+    },
+    {
+      "slug": "kangkong",
+      "name": "Kangkong",
+      "scientific": "Ipomoea aquatica",
+      "category": "Leafy and fruit vegetables",
+      "lifeForm": "Vine",
+      "summary": "Kangkong requirement profile from FAO ECOCROP.",
+      "growingDays": [30, 70],
+      "bands": { "soilPh": [5, 7], "temperature": [15, 35], "rainfall": [2000, 2500], "humidity": [0, 100] },
+      "floodNote": "Check local drainage and flood exposure; ECOCROP does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; ECOCROP does not provide a storm-resilience guarantee.",
+      "dataSource": "FAO ECOCROP via OpenCLIM export (EcoPortCode 1264)",
+      "bestMonths": []
+    },
+    {
+      "slug": "mongo",
+      "name": "Mongo",
+      "scientific": "Vigna radiata",
+      "category": "Legumes",
+      "lifeForm": "Herb",
+      "summary": "Mongo requirement profile from FAO ECOCROP.",
+      "growingDays": [50, 120],
+      "bands": { "soilPh": [5.5, 6.2], "temperature": [21, 36], "rainfall": [650, 900], "humidity": [0, 100] },
+      "floodNote": "Check local drainage and flood exposure; ECOCROP does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; ECOCROP does not provide a storm-resilience guarantee.",
+      "dataSource": "FAO ECOCROP via OpenCLIM export (EcoPortCode 2150)",
+      "bestMonths": []
+    },
+    {
+      "slug": "sitaw",
+      "name": "Sitaw",
+      "scientific": "Vigna unguiculata ssp. sesquipedalis",
+      "category": "Legumes",
+      "lifeForm": "Vine",
+      "summary": "Sitaw requirement profile from FAO ECOCROP.",
+      "growingDays": [50, 150],
+      "bands": { "soilPh": [5.5, 7], "temperature": [20, 35], "rainfall": [1500, 2000], "humidity": [0, 100] },
+      "floodNote": "Check local drainage and flood exposure; ECOCROP does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; ECOCROP does not provide a storm-resilience guarantee.",
+      "dataSource": "FAO ECOCROP via OpenCLIM export (EcoPortCode 10834)",
+      "bestMonths": []
+    },
+    {
+      "slug": "talong",
+      "name": "Talong",
+      "scientific": "Solanum melongena",
+      "category": "Leafy and fruit vegetables",
+      "lifeForm": "Herb",
+      "summary": "Talong requirement profile from FAO ECOCROP.",
+      "growingDays": [70, 120],
+      "bands": { "soilPh": [5.5, 6.8], "temperature": [20, 35], "rainfall": [1200, 1600], "humidity": [0, 100] },
+      "floodNote": "Check local drainage and flood exposure; ECOCROP does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; ECOCROP does not provide a storm-resilience guarantee.",
+      "dataSource": "FAO ECOCROP via OpenCLIM export (EcoPortCode 1965)",
+      "bestMonths": []
+    },
+    {
+      "slug": "kamote",
+      "name": "Kamote",
+      "scientific": "Ipomoea batatas",
+      "category": "Root crops",
+      "lifeForm": "Vine",
+      "summary": "Kamote requirement profile from FAO ECOCROP.",
+      "growingDays": [80, 170],
+      "bands": { "soilPh": [5, 7], "temperature": [18, 28], "rainfall": [750, 2000], "humidity": [0, 100] },
+      "floodNote": "Check local drainage and flood exposure; ECOCROP does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; ECOCROP does not provide a storm-resilience guarantee.",
+      "dataSource": "FAO ECOCROP via OpenCLIM export (EcoPortCode 1265)",
+      "bestMonths": []
+    },
+    {
+      "slug": "mais",
+      "name": "Mais",
+      "scientific": "Zea mays",
+      "category": "Grains",
+      "lifeForm": "Herb",
+      "summary": "Mais requirement profile from FAO ECOCROP.",
+      "growingDays": [65, 365],
+      "bands": { "soilPh": [5, 7], "temperature": [18, 33], "rainfall": [600, 1200], "humidity": [0, 100] },
+      "floodNote": "Check local drainage and flood exposure; ECOCROP does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; ECOCROP does not provide a storm-resilience guarantee.",
+      "dataSource": "FAO ECOCROP via OpenCLIM export (EcoPortCode 2175)",
+      "bestMonths": []
+    }
+  ]
+}

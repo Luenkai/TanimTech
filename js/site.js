@@ -18,6 +18,53 @@
     toastTimer = window.setTimeout(() => toastRegion.replaceChildren(), 3600);
   };
 
+  const currentUserKey = "tanimtech-current-user";
+  const readCurrentUser = () => {
+    const stored = localStorage.getItem(currentUserKey);
+    if (!stored) return {};
+    try {
+      const user = JSON.parse(stored);
+      if (!user || typeof user !== "object" || Array.isArray(user)) return {};
+      return {
+        email: typeof user.email === "string" ? user.email : "",
+        username: typeof user.username === "string" ? user.username : "",
+      };
+    } catch (error) {
+      showToast("Saved account details could not be loaded.");
+      return {};
+    }
+  };
+  const updateUserAvatars = (identity = readCurrentUser()) => {
+    const display = identity.username || (identity.email || "").split("@")[0] || "";
+    const initials = display.split(/[\s._-]+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || display.slice(0, 2).toUpperCase();
+    document.querySelectorAll("[data-user-avatar]").forEach((avatar) => {
+      if (initials) {
+        avatar.textContent = initials;
+        avatar.title = display;
+        avatar.setAttribute("aria-label", `Open profile for ${display}`);
+      }
+    });
+  };
+  const saveCurrentUser = (user) => {
+    const identity = {
+      email: typeof user.email === "string" ? user.email : "",
+      username: typeof user.username === "string"
+        ? user.username
+        : typeof user.user_metadata?.username === "string" ? user.user_metadata.username : "",
+    };
+    localStorage.setItem(currentUserKey, JSON.stringify(identity));
+    updateUserAvatars(identity);
+    return identity;
+  };
+  updateUserAvatars();
+  const passwordChecks = {
+    length: (password) => password.length >= 8,
+    uppercase: (password) => /[A-Z]/.test(password),
+    lowercase: (password) => /[a-z]/.test(password),
+    number: (password) => /\d/.test(password),
+    symbol: (password) => /[^A-Za-z0-9\s]/.test(password),
+  };
+
   const readJsonResponse = async (response) => {
     const text = await response.text();
     try {
@@ -544,6 +591,61 @@
     });
   }
 
+  const soilButton = document.querySelector("[data-load-soil]");
+  if (soilButton) {
+    const soilStatus = document.querySelector("[data-soil-status]");
+    const soilResult = document.querySelector("[data-soil-result]");
+    const latInput = document.querySelector('[data-input-key="latitude"]');
+    const lonInput = document.querySelector('[data-input-key="longitude"]');
+    const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const setField = (key, value) => {
+      const input = document.querySelector(`[data-input-key="${key}"]`);
+      if (!input || value === null || value === undefined) return;
+      input.value = String(value);
+      state[key] = input.value;
+    };
+    ["soilType", "soilTexture"].forEach((key) => document.querySelector(`[data-input-key="${key}"]`)?.addEventListener("change", () => { state.soilTypeSource = "manual"; saveState(); }));
+    soilButton.addEventListener("click", async () => {
+      const latitude = Number(latInput?.value);
+      const longitude = Number(lonInput?.value);
+      if (latInput?.value === "" || lonInput?.value === "" || !Number.isFinite(latitude) || !Number.isFinite(longitude) || Math.abs(latitude) > 90 || Math.abs(longitude) > 180) {
+        showToast("Enter a valid latitude and longitude first.");
+        latInput?.focus();
+        return;
+      }
+      soilButton.disabled = true;
+      soilResult?.classList.add("hidden");
+      soilStatus.textContent = "Looking up soil at these coordinates (SoilGrids can take a few seconds)…";
+      try {
+        const response = await fetch(`/api/soil/lookup?lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}`);
+        const soil = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(soil.error || soil.errors?.join(" ") || "The soil lookup failed.");
+        setField("soilTexture", soil.appTexture);
+        setField("soilType", soil.appSoilType);
+        if (soil.organicMatterPct !== null) setField("organicMatter", soil.organicMatterPct);
+        state.soilTypeSource = "model-suggested";
+        saveState();
+        updateSnapshot();
+        const t = soil.texture;
+        soilStatus.textContent = `${soil.appTexture} soil (${t.usdaClass}) filled in below from ${soil.source.name}${soil.cached ? " (cached)" : ""}.`;
+        soilResult.innerHTML = `<b>${esc(t.usdaClass)}</b> · clay ${t.clayPct}% · silt ${t.siltPct}% · sand ${t.sandPct}%<p class="muted mt-2">Organic matter ≈ ${soil.organicMatterPct ?? "n/a"}% · ${esc(soil.depth)}</p>${soil.phEstimate !== null ? `<p class="mt-2">Modelled soil pH ≈ <b>${soil.phEstimate}</b> <button type="button" class="ml-2 font-bold text-forest" data-use-soil-ph="${soil.phEstimate}">Use as my pH estimate ↗</button></p><p class="muted mt-1">pH is not filled automatically: a measured value is better than a modelled one.</p>` : ""}<p class="muted mt-2">${esc(soil.caveats[0])}</p>`;
+        soilResult.classList.remove("hidden");
+        soilResult.querySelector("[data-use-soil-ph]")?.addEventListener("click", (event) => {
+          setField("soilPh", event.currentTarget.dataset.useSoilPh);
+          saveState();
+          updateSnapshot();
+          showToast("Soil pH set to the SoilGrids estimate. Replace it with a measured value when you have one.");
+        });
+        showToast(`Soil type found: ${soil.appTexture}.`);
+      } catch (error) {
+        soilStatus.textContent = error.message;
+        showToast(error.message);
+      } finally {
+        soilButton.disabled = false;
+      }
+    });
+  }
+
   document.querySelectorAll("[data-review-inputs]").forEach((link) => {
     link.addEventListener("click", (event) => {
       const firstInvalid = coreInputs.find((input) => !input.value || !input.validity.valid);
@@ -605,21 +707,14 @@
       plantCategory: state.plantCategory || "All categories", lifeForm: state.lifeForm || "No preference",
       soilTexture: state.soilTexture || "", drainage: state.drainage || "", moisture: state.moisture || "",
       salinity: state.salinity || "", organicMatter: inputValue("organicMatter"), soilNotes: state.soilNotes || "",
+      catalog: state.catalog || "extended",
+      soilTypeSource: state.soilTypeSource || "",
     };
     if ([conditions.soilPh, conditions.temperature, conditions.humidity, conditions.rainfall].some((value) => value === null)) {
       recommendationPage.innerHTML = '<p class="eyebrow">CROP PLANNING / RECOMMENDATIONS</p><h1 class="section-heading mt-3">Enter your field conditions first.</h1><p class="muted mt-3">Recommendations are not generated from placeholder values. Add your measured pH, temperature, humidity, and annual rainfall to continue.</p><div class="notice mt-8"><a class="button button-primary" href="conditions.html">Enter field conditions ↗</a></div>';
       return;
     }
     const cropImage = { pechay: "pechay.jpg", kangkong: "kangkong.jpg", mongo: "mongo.jpg", sitaw: "hero-farm.jpg", talong: "hero-farm.jpg", kamote: "hero-farm.jpg", mais: "hero-farm.jpg" };
-    const cropGuides = {
-      pechay: { title: "Pechay field guide", body: "A short-cycle leafy option. Check drainage carefully during wet months, and confirm pest pressure before scaling beyond a trial bed." },
-      kangkong: { title: "Kangkong field guide", body: "Warm conditions and humidity can suit kangkong, but water quality and the growing system are important checks before planting." },
-      mongo: { title: "Mongo field guide", body: "Mongo offers a legume alternative with a medium cycle. Avoid waterlogging near maturity and confirm the planting window locally." },
-      sitaw: { title: "Sitaw field guide", body: "A climbing legume that needs a trellis. Confirm support, drainage, and the preferred wet-season planting window." },
-      talong: { title: "Talong field guide", body: "A longer-cycle fruiting vegetable. Plan for pest monitoring and reliable drainage before committing a larger area." },
-      kamote: { title: "Kamote field guide", body: "A hardy root crop with a longer cycle. Check soil structure and harvest timing with a local agriculture adviser." },
-      mais: { title: "Mais field guide", body: "A staple grain planned around the rains. The cleaned Kaggle evidence is useful context, not a Philippine field guarantee." },
-    };
     const cropDefinitions = [
       { slug: "pechay", name: "Pechay", category: "Leafy and fruit vegetables", lifeForm: "Herb", days: [40, 90], bands: [[6, 7.5], [12, 22], [800, 1600], [0, 100]], summary: "FAO ECOCROP requirement profile for Chinese cabbage / pechay." },
       { slug: "kangkong", name: "Kangkong", category: "Leafy and fruit vegetables", lifeForm: "Vine", days: [30, 70], bands: [[5, 7], [15, 35], [2000, 2500], [0, 100]], summary: "FAO ECOCROP requirement profile for water spinach." },
@@ -656,18 +751,18 @@
     let currentResults = [];
     const formatBand = (band) => Array.isArray(band) ? `${band[0]}–${band[1]}` : "not available";
     const evidenceMarkup = (result) => result.dataEvidence?.available ? `<details class="mt-4"><summary class="text-xs font-bold" style="cursor:pointer">View cleaned profile evidence ↗</summary><div class="notice mt-3 text-xs"><p><b>Source</b><br>${escapeHtml(result.dataEvidence.source)}</p><p class="mt-2"><b>Soil profile</b><br>${escapeHtml(result.dataEvidence.soilProfile || "Available")}</p><p class="mt-2"><b>Yield profile</b><br>${escapeHtml(result.dataEvidence.yieldProfile || "Available")}</p></div></details>` : `<details class="mt-4"><summary class="text-xs font-bold" style="cursor:pointer">View data coverage note ↗</summary><div class="warning mt-3 text-xs">${escapeHtml(result.dataEvidence?.source || "No profile matched this crop.")} The fit uses the committed FAO ECOCROP requirement bands.</div></details>`;
-    const guideMarkup = (result) => `<button class="button mt-4" type="button" data-crop-guide="${escapeHtml(result.slug)}">Open crop guide ↗</button>`;
-    const renderGuideDialog = (slug) => { const guide = cropGuides[slug] || cropGuides.pechay; const existing = document.querySelector("[data-guide-dialog]"); existing?.remove(); const dialog = document.createElement("div"); dialog.setAttribute("data-guide-dialog", "true"); dialog.innerHTML = `<div style="position:fixed;inset:0;background:rgb(23 75 58 / 30%);z-index:100;display:grid;place-items:center;padding:20px"><section class="card" style="max-width:520px;padding:28px;box-shadow:0 18px 50px rgb(23 75 58 / 20%)" role="dialog" aria-modal="true"><p class="eyebrow">FIELD GUIDE / ${escapeHtml(slug)}</p><h2 class="serif mt-3 text-3xl">${escapeHtml(guide.title)}</h2><p class="muted mt-4 text-sm">${escapeHtml(guide.body)}</p><div class="notice mt-5 text-xs">Use the guide to frame the next field check. It does not replace local advice, soil testing, or a validated yield forecast.</div><button class="button button-primary mt-6" type="button" data-close-guide>Close guide</button></section></div>`; document.body.append(dialog); dialog.querySelector("[data-close-guide]").addEventListener("click", () => dialog.remove()); dialog.firstElementChild.addEventListener("click", (event) => { if (event.target === dialog.firstElementChild) dialog.remove(); }); };
+    const guideMarkup = (result) => `<a class="button mt-4" href="crop-guide.html?crop=${encodeURIComponent(result.slug)}">Open crop guide ↗</a>`;
     const renderRecommendations = (payload, mode = "API CONNECTED") => {
       currentResults = Array.isArray(payload.results) ? [...payload.results] : [];
       if (sortMode === "name") currentResults.sort((a, b) => a.name.localeCompare(b.name)); else currentResults.sort((a, b) => b.fit - a.fit);
       if (!currentResults.length) { recommendationPage.innerHTML = '<section class="warning mt-8"><strong>No crops matched the selected filters.</strong><p class="muted mt-2 text-xs">Return to your conditions and broaden the category or life-form filters.</p></section>'; return; }
       const first = currentResults[0];
       const evidenceCount = currentResults.filter((result) => result.dataEvidence?.available).length;
-      const cards = currentResults.slice(0, 3).map((result, index) => `<article class="card overflow-hidden"><img class="h-52 w-full object-cover" src="images/${escapeHtml(cropImage[result.slug] || "hero-farm.jpg")}" alt="${escapeHtml(result.name)}"><div class="p-6"><div class="flex items-center justify-between"><span class="badge" ${index ? 'style="background:#edf0e9"' : ""}>${index ? "ALTERNATIVE" : "CLOSEST FIT"}</span><small class="muted">${result.growingDays ? result.growingDays[0] : result.days[0]}–${result.growingDays ? result.growingDays[1] : result.days[1]} days</small></div><div class="mt-3 flex items-center justify-between"><h2 class="serif text-3xl">${escapeHtml(result.name)}</h2><span class="serif text-3xl">${result.fit}</span></div><p class="muted text-xs">Fit / 100 · not a probability of success</p><div class="score-line my-4"><span style="width:${result.fit}%"></span></div><p class="eyebrow">WHY IT APPEARS</p><p class="mt-2 text-xs">${escapeHtml(result.whyItAppears)}</p><p class="eyebrow mt-4">WHAT TO CHECK</p><p class="mt-2 text-xs">${escapeHtml(result.whatToCheck)}</p><span class="badge mt-4">${result.dataEvidence?.available ? "CLEANED KAGGLE PROFILE" : "ECOCROP REQUIREMENTS"}</span>${result.soilMatch?.status && result.soilMatch.status !== "unknown" ? `<p class="muted mt-3 text-xs">Soil reference: <b>${escapeHtml(result.soilMatch.status)}</b> for ${escapeHtml(result.soilMatch.label)} texture.</p>` : ""}${evidenceMarkup(result)}${guideMarkup(result)}</div></article>`).join("");
+      const shownCount = conditions.catalog === "extended" ? 6 : 3;
+      const cards = currentResults.slice(0, shownCount).map((result, index) => `<article class="card overflow-hidden"><img class="h-52 w-full object-cover" src="images/${escapeHtml(cropImage[result.slug] || "hero-farm.jpg")}" alt="${escapeHtml(result.name)}"><div class="p-6"><div class="flex items-center justify-between"><span class="badge" ${index ? 'style="background:#edf0e9"' : ""}>${index ? "ALTERNATIVE" : "CLOSEST FIT"}</span><small class="muted">${result.growingDays ? result.growingDays[0] : result.days[0]}–${result.growingDays ? result.growingDays[1] : result.days[1]} days</small></div><div class="mt-3 flex items-center justify-between"><h2 class="serif text-3xl">${escapeHtml(result.name)}</h2><span class="serif text-3xl">${result.fit}</span></div><p class="muted text-xs">Fit / 100 · not a probability of success</p><div class="score-line my-4"><span style="width:${result.fit}%"></span></div><p class="eyebrow">WHY IT APPEARS</p><p class="mt-2 text-xs">${escapeHtml(result.whyItAppears)}</p><p class="eyebrow mt-4">WHAT TO CHECK</p><p class="mt-2 text-xs">${escapeHtml(result.whatToCheck)}</p><span class="badge mt-4">${result.dataEvidence?.available ? "CLEANED KAGGLE PROFILE" : "ECOCROP REQUIREMENTS"}</span>${result.scientific && result.source === "extended" ? `<p class="muted mt-3 text-xs"><i>${escapeHtml(result.scientific)}</i> · ${escapeHtml(result.category)} · ${escapeHtml(result.lifeForm)}</p>` : ""}${result.soilMatch?.status && result.soilMatch.status !== "unknown" ? `<p class="muted mt-3 text-xs">Soil reference: <b>${escapeHtml(result.soilMatch.status)}</b> for ${escapeHtml(result.soilMatch.label)} texture.</p>` : ""}${evidenceMarkup(result)}${guideMarkup(result)}</div></article>`).join("");
       const breakdown = (first.breakdown || []).map((item) => `<div class="mini-row"><b>${escapeHtml(item.label)}<br><small class="muted font-normal">${item.value}</small></b><span>${formatBand(item.band)}<br><small class="muted">Reference band</small></span><span class="badge">${item.points} / ${item.maxPoints}</span></div>`).join("");
       const saved = localStorage.getItem("tanimtech-saved-shortlist") === "true";
-      recommendationPage.innerHTML = `<p class="eyebrow">CROP PLANNING / ${mode === "API CONNECTED" ? "API SHORTLIST" : "LOCAL CALCULATION"}</p><div class="flex flex-wrap items-end justify-between gap-5"><div><h1 class="section-heading mt-3">Crops worth a closer look.</h1><p class="muted mt-3">${mode === "API CONNECTED" ? "Live fit scores from the recommendation API." : "Fit scores calculated from your entries while the API is unavailable."}</p></div><a class="button button-primary" href="conditions.html">Edit conditions ↗</a></div><div class="notice mt-6 grid grid-cols-2 gap-3 text-xs sm:grid-cols-5"><span>pH ${conditions.soilPh}</span><span>${conditions.temperature} °C mean</span><span>${conditions.humidity}% RH</span><span>${conditions.rainfall} mm / year</span><span>${escapeHtml(conditions.planningMonth)} <span class="badge ml-2">${mode === "API CONNECTED" ? "API RESULTS" : "LOCAL RESULTS"}</span></span></div><div class="mt-6 flex flex-wrap items-center justify-between gap-4"><p class="muted text-xs">${currentResults.length} matches · ${evidenceCount} backed by cleaned Kaggle profiles · ${escapeHtml(conditions.region)}</p><div class="flex flex-wrap gap-3"><button class="field-control min-h-10 text-xs" type="button" data-sort-results>Sort: ${sortMode === "fit" ? "highest fit" : "crop name"} ↕</button><button class="button button-primary" type="button" data-scroll-compare>Compare top 3 ↗</button></div></div><div class="mt-6 grid gap-5 lg:grid-cols-3">${cards}</div><p class="muted mt-4 text-xs">${escapeHtml(payload.note || "Fit is a transparent screening score, not a yield prediction.")} Cleaned Kaggle profiles are evidence context; they do not turn fit into a forecast.</p><div id="compare" class="mt-10 grid items-start gap-6 lg:grid-cols-[2fr_1fr]"><section class="card p-7"><p class="eyebrow">EXPLAIN THE FIT / ${first.fit} OF 100</p><h2 class="serif mt-3">Why ${escapeHtml(first.name)} ranks first</h2><p class="muted mt-3">The recommendation engine keeps the four weighted core factors visible. Add-on context provides guidance and never adds score points.</p><div class="mt-5">${breakdown}</div><p class="muted mt-4 text-xs">${escapeHtml(first.dataEvidence?.source || "FAO ECOCROP requirement bands")}</p></section><aside class="card p-7"><p class="eyebrow">FIT ≠ CERTAINTY</p><h2 class="serif mt-3 text-3xl">What the score can’t tell you</h2><div class="mt-4"><div class="mini-row"><span class="muted">Input completeness</span><b>4 / 4 core values<br><small class="muted font-normal">Entered, not independently verified</small></b></div><div class="mini-row"><span class="muted">Field blind spots</span><b>Drainage · pests · seed quality<br><small class="muted font-normal">Not included in the score</small></b></div></div><div class="warning mt-5"><strong class="text-xs">⚠ Seasonal risk stays visible</strong><p class="muted mt-2 text-xs">A high fit score must not override current local advisories.</p></div></aside></div><section class="mt-8 flex flex-wrap items-center justify-between gap-6 rounded bg-forest px-8 py-7 text-white"><div><h2 class="serif text-2xl">Take the shortlist back to the field.</h2><p class="mt-2 text-sm text-white/75">Save this shortlist on your device, then verify drainage and local conditions before planting at scale.</p></div><button class="button" type="button" data-save-shortlist>${saved ? "Saved on this device ✓" : "Save this shortlist ↗"}</button></section>`;
+      recommendationPage.innerHTML = `<p class="eyebrow">CROP PLANNING / ${mode === "API CONNECTED" ? "API SHORTLIST" : "LOCAL CALCULATION"}</p><div class="flex flex-wrap items-end justify-between gap-5"><div><h1 class="section-heading mt-3">Crops worth a closer look.</h1><p class="muted mt-3">${mode === "API CONNECTED" ? "Live fit scores from the recommendation API." : "Fit scores calculated from your entries while the API is unavailable."}</p></div><a class="button button-primary" href="conditions.html">Edit conditions ↗</a></div><div class="notice mt-6 grid grid-cols-2 gap-3 text-xs sm:grid-cols-5"><span>pH ${conditions.soilPh}</span><span>${conditions.temperature} °C mean</span><span>${conditions.humidity}% RH</span><span>${conditions.rainfall} mm / year</span><span>${escapeHtml(conditions.planningMonth)} <span class="badge ml-2">${mode === "API CONNECTED" ? "API RESULTS" : "LOCAL RESULTS"}</span></span></div><div class="mt-6 flex flex-wrap items-center justify-between gap-4"><p class="muted text-xs">${currentResults.length} matches${conditions.catalog === "extended" ? " from the extended edible catalog" : ""} · ${evidenceCount} backed by cleaned Kaggle profiles · ${escapeHtml(conditions.region)}</p><div class="flex flex-wrap gap-3"><button class="field-control min-h-10 text-xs" type="button" data-sort-results>Sort: ${sortMode === "fit" ? "highest fit" : "crop name"} ↕</button><button class="button button-primary" type="button" data-scroll-compare>Compare top ${shownCount} ↗</button></div></div><div class="mt-6 grid gap-5 lg:grid-cols-3">${cards}</div><p class="muted mt-4 text-xs">${escapeHtml(payload.note || "Fit is a transparent screening score, not a yield prediction.")} Cleaned Kaggle profiles are evidence context; they do not turn fit into a forecast.</p><div id="compare" class="mt-10 grid items-start gap-6 lg:grid-cols-[2fr_1fr]"><section class="card p-7"><p class="eyebrow">EXPLAIN THE FIT / ${first.fit} OF 100</p><h2 class="serif mt-3">Why ${escapeHtml(first.name)} ranks first</h2><p class="muted mt-3">The recommendation engine keeps the four weighted core factors visible. Add-on context provides guidance and never adds score points.</p><div class="mt-5">${breakdown}</div><p class="muted mt-4 text-xs">${escapeHtml(first.dataEvidence?.source || "FAO ECOCROP requirement bands")}</p></section><aside class="card p-7"><p class="eyebrow">FIT ≠ CERTAINTY</p><h2 class="serif mt-3 text-3xl">What the score can’t tell you</h2><div class="mt-4"><div class="mini-row"><span class="muted">Input completeness</span><b>4 / 4 core values<br><small class="muted font-normal">Entered, not independently verified</small></b></div><div class="mini-row"><span class="muted">Field blind spots</span><b>Drainage · pests · seed quality<br><small class="muted font-normal">Not included in the score</small></b></div></div><div class="warning mt-5"><strong class="text-xs">⚠ Seasonal risk stays visible</strong><p class="muted mt-2 text-xs">A high fit score must not override current local advisories.</p></div></aside></div><section class="mt-8 flex flex-wrap items-center justify-between gap-6 rounded bg-forest px-8 py-7 text-white"><div><h2 class="serif text-2xl">Take the shortlist back to the field.</h2><p class="mt-2 text-sm text-white/75">Save this shortlist on your device, then verify drainage and local conditions before planting at scale.</p></div><button class="button" type="button" data-save-shortlist>${saved ? "Saved on this device ✓" : "Save this shortlist ↗"}</button></section>`;
       recommendationPage.querySelector("[data-sort-results]").addEventListener("click", () => { sortMode = sortMode === "fit" ? "name" : "fit"; renderRecommendations(payload, mode); });
       recommendationPage.querySelector("[data-scroll-compare]").addEventListener("click", () => document.querySelector("#compare")?.scrollIntoView({ behavior: "smooth", block: "start" }));
       recommendationPage.querySelector("[data-save-shortlist]").addEventListener("click", async (event) => {
@@ -687,7 +782,6 @@
           showToast(error.message);
         }
       });
-      recommendationPage.querySelectorAll("[data-crop-guide]").forEach((button) => button.addEventListener("click", () => renderGuideDialog(button.dataset.cropGuide)));
     };
     fetch("/api/recommendations", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(conditions) })
       .then((response) => response.ok ? response.json() : Promise.reject(new Error("Recommendation API unavailable")))
@@ -696,21 +790,174 @@
   }
 
   const loginPage = document.querySelector("[data-login-page]");
+  const accountStoreKey = "tanimtech-local-accounts";
+  const readLocalAccounts = () => {
+    const stored = localStorage.getItem(accountStoreKey);
+    if (!stored) return [];
+    const accounts = JSON.parse(stored);
+    if (!Array.isArray(accounts)) throw new Error("Saved account data is unreadable. Clear this browser's saved account data and try again.");
+    return accounts;
+  };
+  const bytesToHex = (bytes) => Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+  const hashPassword = async (password, saltHex) => {
+    if (!window.crypto?.subtle) throw new Error("Secure password storage is unavailable in this browser. Open TanimTech over HTTPS or localhost.");
+    const salt = new Uint8Array(saltHex.match(/.{2}/g).map((byte) => Number.parseInt(byte, 16)));
+    const key = await window.crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
+    const bits = await window.crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations: 120000, hash: "SHA-256" }, key, 256);
+    return bytesToHex(new Uint8Array(bits));
+  };
+  const showAuthMessage = (element, text) => {
+    if (element) element.textContent = text;
+  };
+  const supabaseConfigured = Boolean(window.tanimtechSupabaseConfigured);
   if (loginPage) {
-    loginPage.querySelector("[data-login-form]")?.addEventListener("submit", (event) => {
+    const message = loginPage.querySelector("[data-login-message]");
+    const demoNotice = loginPage.querySelector("[data-demo-account-notice]");
+    if (supabaseConfigured) {
+      if (demoNotice) demoNotice.hidden = true;
+      const identifierLabel = loginPage.querySelector("[data-login-identifier-label]");
+      if (identifierLabel) identifierLabel.textContent = "Gmail address";
+      if (!new URLSearchParams(window.location.search).has("registered")) {
+        showAuthMessage(message, "Use your Gmail address and Supabase password to sign in.");
+      }
+    }
+    if (new URLSearchParams(window.location.search).has("registered")) {
+      showAuthMessage(message, supabaseConfigured
+        ? "Account created. If email confirmation is enabled, confirm your Gmail address before signing in."
+        : "Account created. Sign in with your username or Gmail address.");
+    }
+    loginPage.querySelector("[data-login-form]")?.addEventListener("submit", async (event) => {
       event.preventDefault();
       const username = loginPage.querySelector("[data-login-username]")?.value.trim();
       const password = loginPage.querySelector("[data-login-password]")?.value;
-      const message = loginPage.querySelector("[data-login-message]");
-      if (username === "admin" && password === "TanimTech2026!") {
+      if (!supabaseConfigured && username === "admin" && password === "TanimTech2026!") {
         localStorage.setItem("tanimtech-login-session", "true");
-        const requested = new URLSearchParams(window.location.search).get("next") || "index.html";
-        const next = requested.startsWith("/") && !requested.startsWith("//") ? requested : "index.html";
+        saveCurrentUser({ username: "admin" });
+        const requested = new URLSearchParams(window.location.search).get("next") || "homepage.html";
+        const next = requested.startsWith("/") && !requested.startsWith("//") ? requested : "homepage.html";
         window.location.href = next;
         return;
       }
-      if (message) message.textContent = "That demo username or password is incorrect.";
-      showToast("Incorrect demo credentials.");
+      try {
+        const supabaseClient = await window.tanimtechGetSupabaseClient?.();
+        let signedInUser;
+        if (supabaseClient) {
+          if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(username || "")) {
+            throw new Error("Enter the Gmail address used when you signed up with Supabase.");
+          }
+          const { data, error } = await supabaseClient.auth.signInWithPassword({ email: username.toLowerCase(), password });
+          if (error) throw error;
+          signedInUser = data.user;
+        } else {
+          const account = readLocalAccounts().find((item) => item && typeof item.username === "string" && typeof item.email === "string" && (item.username.toLowerCase() === username?.toLowerCase() || item.email.toLowerCase() === username?.toLowerCase()));
+          if (!account || await hashPassword(password || "", account.salt) !== account.passwordHash) {
+            showAuthMessage(message, "That username or password is incorrect.");
+            showToast("Incorrect sign-in details.");
+            return;
+          }
+          signedInUser = account;
+        }
+        localStorage.setItem("tanimtech-login-session", "true");
+        saveCurrentUser({
+          email: signedInUser?.email || "",
+          username: signedInUser?.username || signedInUser?.user_metadata?.username || signedInUser?.email?.split("@")[0] || "",
+        });
+        const requested = new URLSearchParams(window.location.search).get("next") || "homepage.html";
+        const next = requested.startsWith("/") && !requested.startsWith("//") ? requested : "homepage.html";
+        window.location.href = next;
+      } catch (error) {
+        showAuthMessage(message, error.message || "Sign-in failed.");
+        showToast(error.message || "Sign-in failed.");
+      }
+    });
+  }
+
+  const signupPage = document.querySelector("[data-signup-page]");
+  if (signupPage) {
+    const form = signupPage.querySelector("[data-signup-form]");
+    const emailInput = signupPage.querySelector("[data-signup-email]");
+    const usernameInput = signupPage.querySelector("[data-signup-username]");
+    const passwordInput = signupPage.querySelector("[data-signup-password]");
+    const confirmInput = signupPage.querySelector("[data-signup-confirm]");
+    const message = signupPage.querySelector("[data-signup-message]");
+    const storageMessage = signupPage.querySelector("[data-account-storage-message]");
+    if (supabaseConfigured && storageMessage) {
+      const storageTitle = signupPage.querySelector("[data-account-storage-title]");
+      if (storageTitle) storageTitle.textContent = "Supabase account";
+      storageMessage.textContent = "Supabase Auth will manage this account. Email confirmation follows your Supabase Auth settings.";
+    }
+    const updatePasswordRules = () => {
+      const password = passwordInput?.value || "";
+      Object.entries(passwordChecks).forEach(([rule, check]) => {
+        const item = signupPage.querySelector(`[data-password-rule="${rule}"]`);
+        if (item) {
+          item.classList.toggle("text-forest", check(password));
+          item.classList.toggle("text-muted", !check(password));
+        }
+      });
+    };
+    passwordInput?.addEventListener("input", updatePasswordRules);
+    form?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const email = emailInput?.value.trim().toLowerCase() || "";
+      const username = usernameInput?.value.trim() || "";
+      const password = passwordInput?.value || "";
+      const confirmed = confirmInput?.value || "";
+      updatePasswordRules();
+      if (!/^[A-Z0-9._%+-]+@gmail\.com$/i.test(email)) {
+        showAuthMessage(message, "Enter a valid Gmail address ending in @gmail.com.");
+        return;
+      }
+      if (!/^[A-Za-z0-9_]{3,20}$/.test(username)) {
+        showAuthMessage(message, "Username must be 3–20 letters, numbers, or underscores.");
+        return;
+      }
+      if (!Object.values(passwordChecks).every((check) => check(password))) {
+        showAuthMessage(message, "Your password must meet every rule listed above.");
+        return;
+      }
+      if (password !== confirmed) {
+        showAuthMessage(message, "The passwords do not match.");
+        return;
+      }
+      try {
+        const supabaseClient = await window.tanimtechGetSupabaseClient?.();
+        if (supabaseClient) {
+          const { data, error } = await supabaseClient.auth.signUp({
+            email,
+            password,
+            options: { data: { username } },
+          });
+          if (error) throw error;
+          if (!data.user) throw new Error("Supabase did not return a user after signup.");
+          if (data.session) {
+            localStorage.setItem("tanimtech-login-session", "true");
+            saveCurrentUser({
+              email: data.user.email || "",
+              username: data.user.user_metadata?.username || data.user.email?.split("@")[0] || "",
+            });
+            window.location.href = "homepage.html";
+          } else {
+            window.location.href = "index.html?registered=1";
+          }
+          return;
+        }
+
+        const accounts = readLocalAccounts();
+        const duplicate = accounts.some((item) => item && typeof item.username === "string" && typeof item.email === "string" && (item.username.toLowerCase() === username.toLowerCase() || item.email.toLowerCase() === email));
+        if (duplicate) {
+          showAuthMessage(message, "That username or Gmail address is already registered in this browser.");
+          return;
+        }
+        const salt = bytesToHex(window.crypto.getRandomValues(new Uint8Array(16)));
+        const passwordHash = await hashPassword(password, salt);
+        accounts.push({ email, username, salt, passwordHash });
+        localStorage.setItem(accountStoreKey, JSON.stringify(accounts));
+        window.location.href = "index.html?registered=1";
+      } catch (error) {
+        showAuthMessage(message, error.message || "Could not create the account in this browser.");
+        showToast(error.message || "Could not create the account.");
+      }
     });
   }
 
@@ -724,6 +971,144 @@
     const nameInput = profilePage.querySelector("[data-profile-name]");
     const savedName = localStorage.getItem("tanimtech-profile-name") || "Field planner";
     if (nameInput) nameInput.value = savedName;
+    const accountForm = profilePage.querySelector("[data-account-form]");
+    const accountUsernameInput = profilePage.querySelector("[data-account-username]");
+    const accountEmailInput = profilePage.querySelector("[data-account-email]");
+    const accountPasswordInput = profilePage.querySelector("[data-account-password]");
+    const accountConfirmInput = profilePage.querySelector("[data-account-confirm]");
+    const accountMessage = profilePage.querySelector("[data-account-message]");
+    const accountSource = profilePage.querySelector("[data-account-source]");
+    let profileSupabaseClient = null;
+    let profileSupabaseUser = null;
+    let profileLocalAccount = null;
+    const fillAccountFields = (user) => {
+      if (accountUsernameInput) accountUsernameInput.value = user.username || user.user_metadata?.username || "";
+      if (accountEmailInput) accountEmailInput.value = user.email || "";
+    };
+    const loadAccountDetails = async () => {
+      const savedIdentity = readCurrentUser();
+      fillAccountFields(savedIdentity);
+      if (supabaseConfigured) {
+        profileSupabaseClient = await window.tanimtechGetSupabaseClient();
+        const { data, error } = await profileSupabaseClient.auth.getUser();
+        if (error) throw error;
+        if (!data.user) throw new Error("No signed-in Supabase user was found. Sign in again.");
+        profileSupabaseUser = data.user;
+        fillAccountFields({
+          email: data.user.email || "",
+          username: data.user.user_metadata?.username || data.user.email?.split("@")[0] || "",
+        });
+        saveCurrentUser({
+          email: data.user.email || "",
+          username: data.user.user_metadata?.username || data.user.email?.split("@")[0] || "",
+        });
+        if (accountSource) accountSource.textContent = "Supabase account. Email changes may require confirmation.";
+        return;
+      }
+
+      const accounts = readLocalAccounts();
+      profileLocalAccount = accounts.find((account) => account && (
+        (savedIdentity.email && account.email?.toLowerCase() === savedIdentity.email.toLowerCase())
+        || (savedIdentity.username && account.username?.toLowerCase() === savedIdentity.username.toLowerCase())
+      ));
+      if (!profileLocalAccount && accounts.length === 1 && !savedIdentity.username) profileLocalAccount = accounts[0];
+      if (profileLocalAccount) {
+        fillAccountFields(profileLocalAccount);
+        saveCurrentUser(profileLocalAccount);
+        if (accountSource) accountSource.textContent = "Local demo account. Changes stay in this browser.";
+        return;
+      }
+      if (savedIdentity.username === "admin" || (!savedIdentity.username && accounts.length === 0)) {
+        fillAccountFields({ username: "admin", email: "" });
+        saveCurrentUser({ username: "admin" });
+        [accountUsernameInput, accountEmailInput, accountPasswordInput, accountConfirmInput].forEach((input) => {
+          if (input) input.disabled = true;
+        });
+        const saveButton = accountForm?.querySelector("button[type=submit]");
+        if (saveButton) saveButton.disabled = true;
+        if (accountSource) accountSource.textContent = "Built-in demo admin account. Create a personal account to edit account details.";
+        return;
+      }
+      throw new Error("Could not match this session to a saved account. Sign in again to manage account details.");
+    };
+    loadAccountDetails().catch((error) => {
+      if (accountSource) accountSource.textContent = "Account details could not be loaded.";
+      showAuthMessage(accountMessage, error.message || "Account details could not be loaded.");
+    });
+    accountForm?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const username = accountUsernameInput?.value.trim() || "";
+      const email = accountEmailInput?.value.trim().toLowerCase() || "";
+      const password = accountPasswordInput?.value || "";
+      const confirmed = accountConfirmInput?.value || "";
+      if (!/^[A-Za-z0-9_]{3,20}$/.test(username)) {
+        showAuthMessage(accountMessage, "Username must be 3–20 letters, numbers, or underscores.");
+        return;
+      }
+      if (!/^[A-Z0-9._%+-]+@gmail\.com$/i.test(email)) {
+        showAuthMessage(accountMessage, "Enter a valid Gmail address ending in @gmail.com.");
+        return;
+      }
+      if (password && !Object.values(passwordChecks).every((check) => check(password))) {
+        showAuthMessage(accountMessage, "Your new password must meet all five password rules.");
+        return;
+      }
+      if (password !== confirmed) {
+        showAuthMessage(accountMessage, "The new passwords do not match.");
+        return;
+      }
+      try {
+        if (supabaseConfigured) {
+          if (!profileSupabaseClient || !profileSupabaseUser) throw new Error("Account details are still loading. Try again in a moment.");
+          const emailChanged = email !== (profileSupabaseUser.email || "").toLowerCase();
+          const updates = {
+            data: { ...(profileSupabaseUser.user_metadata || {}), username },
+          };
+          if (emailChanged) updates.email = email;
+          if (password) updates.password = password;
+          const { data, error } = await profileSupabaseClient.auth.updateUser(updates);
+          if (error) throw error;
+          if (!data.user) throw new Error("Supabase did not return updated account details.");
+          profileSupabaseUser = data.user;
+          fillAccountFields({
+            email: data.user.email || email,
+            username: data.user.user_metadata?.username || username,
+          });
+          saveCurrentUser({
+            email: data.user.email || email,
+            username: data.user.user_metadata?.username || username,
+          });
+          showAuthMessage(accountMessage, emailChanged
+            ? "Username updated. Check your new Gmail inbox to confirm the email change."
+            : "Account details updated.");
+        } else {
+          if (!profileLocalAccount) throw new Error("This demo account cannot be changed. Create a personal account to edit account details.");
+          const accounts = readLocalAccounts();
+          const account = accounts.find((item) => item.email?.toLowerCase() === profileLocalAccount.email.toLowerCase());
+          if (!account) throw new Error("Saved account was not found. Sign in again and retry.");
+          const duplicate = accounts.some((item) => item !== account && (
+            item.username?.toLowerCase() === username.toLowerCase() || item.email?.toLowerCase() === email
+          ));
+          if (duplicate) throw new Error("That username or Gmail address is already registered in this browser.");
+          if (password) {
+            account.salt = bytesToHex(window.crypto.getRandomValues(new Uint8Array(16)));
+            account.passwordHash = await hashPassword(password, account.salt);
+          }
+          account.username = username;
+          account.email = email;
+          localStorage.setItem(accountStoreKey, JSON.stringify(accounts));
+          profileLocalAccount = account;
+          saveCurrentUser(account);
+          showAuthMessage(accountMessage, "Account details updated in this browser.");
+        }
+        if (accountPasswordInput) accountPasswordInput.value = "";
+        if (accountConfirmInput) accountConfirmInput.value = "";
+        showToast("Account details saved.");
+      } catch (error) {
+        showAuthMessage(accountMessage, error.message || "Could not save account details.");
+        showToast(error.message || "Could not save account details.");
+      }
+    });
     const pdfSafe = (value) => String(value ?? "").replace(/[^\x20-\x7E]/g, "?").replace(/[\\()]/g, "\\$&");
     const wrapPdf = (value, width = 92) => { const words = String(value ?? "").split(/\s+/); const lines = []; let line = ""; words.forEach((word) => { if ((line + " " + word).trim().length > width) { if (line) lines.push(line); line = word; } else line = (line + " " + word).trim(); }); if (line) lines.push(line); return lines; };
     const downloadReport = (profiles, saved) => {
@@ -752,7 +1137,13 @@
       const recommendationCards = saved.length ? saved.slice(0, 6).map((item) => { const top = item.results?.[0]; return `<article class="card p-6"><div class="flex items-center justify-between gap-3"><span class="badge">SAVED SHORTLIST</span><small class="muted">${profileEscape((item.createdAt || "").slice(0, 10))}</small></div><h3 class="serif mt-4 text-2xl">${profileEscape(item.label)}</h3><p class="muted mt-2 text-xs">${top ? `Closest fit: ${profileEscape(top.name)} · ${top.fit}/100` : "No crop result saved"}</p><div class="mt-4 flex flex-wrap gap-2">${(item.results || []).slice(0, 3).map((result) => `<span class="badge">${profileEscape(result.name)}</span>`).join("")}</div></article>`; }).join("") : '<div class="notice text-xs">No saved recommendation shortlists yet. Generate a shortlist, then choose “Save this shortlist”.</div>';
       profileState.innerHTML = `<div class="flex flex-wrap items-start justify-between gap-5"><div><p class="eyebrow">LOCAL PROFILE</p><h2 class="serif mt-3 text-3xl">${profileEscape(nameInput?.value || savedName)}</h2><p class="muted mt-2 text-sm">This device</p></div><span class="flex flex-wrap items-center gap-3"><span class="badge">PRIVATE LOCAL SPACE</span><button class="button" type="button" data-export-report>Download PDF report</button><button class="button" type="button" data-local-logout>Sign out</button></span></div><p class="field-note mt-4">${profileEscape(note)}</p><div class="divider my-7"></div><p class="eyebrow">YOUR FARM PROFILES</p><h2 class="serif mt-3 text-3xl">Saved field conditions.</h2><div class="mt-5 grid gap-5 md:grid-cols-2">${profileCards}</div><div class="divider my-8"></div><p class="eyebrow">YOUR RECOMMENDATION HISTORY</p><h2 class="serif mt-3 text-3xl">Shortlists made for you.</h2><div class="mt-5 grid gap-5 md:grid-cols-2">${recommendationCards}</div><p class="field-note mt-6">Recommendations are screening results based on the inputs saved at the time. They are not forecasts or guarantees.</p>`;
       profileState.querySelector("[data-export-report]")?.addEventListener("click", () => downloadReport(profiles, saved));
-      profileState.querySelector("[data-local-logout]")?.addEventListener("click", () => window.tanimtechAuth?.signOut());
+      profileState.querySelector("[data-local-logout]")?.addEventListener("click", async () => {
+        try {
+          await window.tanimtechAuth?.signOut();
+        } catch (error) {
+          showToast(error.message || "Could not sign out.");
+        }
+      });
     };
     renderLocalProfile(localProfiles, localRecommendations);
     fetch("/api/auth/me").then(readJsonResponse).then(async (authState) => {

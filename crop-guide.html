@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crop guide — TanimTech</title>
+  <script src="js/access-gate.js?v=6"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={theme:{extend:{colors:{paper:'#f6f5ee',forest:'#174b3a',ink:'#274c3e',muted:'#788073',line:'#dce0d4',leaf:'#e9efdc',lime:'#d9e99b'}}}}</script>
+  <link rel="stylesheet" href="css/site.css?v=8">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="homepage.html"><span class="brand-mark">♧</span>tanimtech.</a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="homepage.html">Overview</a>
+        <details class="nav-dropdown"><summary class="current">Explore</summary><div class="nav-dropdown-menu"><a href="crop-guide.html" aria-current="page">Crop guide</a><a href="homepage.html#crops">Featured crops</a></div></details>
+        <details class="nav-dropdown"><summary>Plan</summary><div class="nav-dropdown-menu"><a href="conditions.html">Get recommendations</a><a href="recommendations.html">Compare crops</a><a href="homepage.html#calendar">Climate inputs</a><a href="profile.html">My profile</a></div></details>
+        <details class="nav-dropdown"><summary>More</summary><div class="nav-dropdown-menu"><a href="homepage.html#how-it-works">How it works</a><a href="homepage.html#methodology">Methodology</a><a href="soil-photo.html">Soil photo</a><a href="photo-review.html">Photo review</a><a href="soil-context.html">Soil context</a></div></details>
+      </nav>
+      <div class="header-actions"><a class="avatar" data-user-avatar href="profile.html" aria-label="Open your TanimTech profile">TT</a></div>
+    </div>
+  </header>
+
+  <main class="page-shell py-10" data-crop-guide-page>
+    <div class="flex flex-wrap items-end justify-between gap-6">
+      <div><p class="eyebrow">FIELD GUIDE / DATASET</p><h1 class="section-heading mt-3">Explore a crop.</h1><p class="muted mt-3 max-w-2xl">Choose a crop to view its profile and growing-condition ranges from the crop dataset.</p></div>
+      <label class="block w-full max-w-sm text-xs font-bold" for="crop-select">SELECT A CROP
+        <select id="crop-select" class="field-control mt-2 w-full" data-crop-select disabled><option value="">Loading crop data…</option></select>
+      </label>
+    </div>
+    <p class="muted mt-5 text-xs" data-crop-guide-status role="status" aria-live="polite">Loading crop profiles…</p>
+    <div class="warning mt-5 hidden" data-crop-guide-error role="alert">
+      <p data-crop-guide-error-message></p>
+      <button class="button mt-4" type="button" data-crop-guide-retry>Try again</button>
+    </div>
+
+    <section class="mt-7 grid hidden items-start gap-6 lg:grid-cols-[1fr_1.2fr]" data-crop-guide-content>
+      <article class="card overflow-hidden">
+        <img class="h-72 w-full object-cover" data-crop-guide-image alt="">
+        <p class="muted px-5 py-3 text-xs" data-crop-guide-image-note></p>
+        <div class="p-6"><p class="eyebrow" data-crop-category></p><h2 class="serif mt-2 text-4xl" data-crop-name></h2><p class="muted mt-1 text-sm italic" data-crop-scientific></p><p class="mt-4 text-sm leading-6" data-crop-summary></p></div>
+      </article>
+      <div class="grid gap-6">
+        <section class="card p-6">
+          <p class="eyebrow">AT A GLANCE</p>
+          <div class="mt-3">
+            <div class="mini-row"><span>Life form</span><b data-crop-life-form></b></div>
+            <div class="mini-row"><span>Growing period</span><b data-crop-days></b></div>
+            <div class="mini-row"><span>Best planting months</span><b data-crop-best-months></b></div>
+          </div>
+        </section>
+        <section class="card p-6">
+          <p class="eyebrow">GROWING CONDITION RANGES</p>
+          <div class="mt-3">
+            <div class="mini-row"><span>Soil pH</span><b data-crop-ph></b></div>
+            <div class="mini-row"><span>Temperature</span><b data-crop-temperature></b></div>
+            <div class="mini-row"><span>Annual rainfall</span><b data-crop-rainfall></b></div>
+            <div class="mini-row"><span>Relative humidity</span><b data-crop-humidity></b></div>
+          </div>
+          <p class="muted mt-4 text-xs">Reference ranges only; actual results depend on cultivar, site, and management.</p>
+        </section>
+        <section class="card p-6">
+          <p class="eyebrow">FIELD CHECKS</p>
+          <div class="mt-3">
+            <div class="mini-row"><span>Flood note</span><b data-crop-flood-note></b></div>
+            <div class="mini-row"><span>Typhoon note</span><b data-crop-typhoon-note></b></div>
+          </div>
+          <p class="muted mt-4 text-xs">Verify local planting advice before making farm decisions.</p>
+        </section>
+        <p class="muted text-xs">Dataset source: <span data-crop-source></span></p>
+      </div>
+    </section>
+    <div class="mt-8 flex flex-wrap gap-3"><a class="button" href="homepage.html#crops">Back to crops</a><a class="button button-primary" href="conditions.html">Check your field conditions ↗</a></div>
+  </main>
+
+  <footer class="site-footer"><div class="footer-inner"><a class="footer-brand" href="homepage.html">tanimtech.</a><p>Thoughtful planting starts with understanding your land.</p><nav class="footer-links"><a href="homepage.html#methodology">Methodology</a><a href="homepage.html#methodology">Data &amp; limitations</a><a href="homepage.html#how-it-works">Help</a></nav></div><div class="footer-bottom"><p>© 2026 TanimTech · Philippine crop planning concept</p><p>Reference data only. Confirm local guidance before planting.</p></div></footer>
+  <script src="js/crop-guide.js?v=2"></script>
+  <script src="js/site.js?v=18"></script>
+</body>
+</html>

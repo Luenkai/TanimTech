@@ -13,8 +13,10 @@ OPTIONS = {
     "soilTypeSource": ["manual", "user-confirmed", "model-suggested"],
     "season": ["Dry season", "Wet season", "Unknown"],
     "plantCategory": ["All categories", "Leafy and fruit vegetables", "Legumes", "Grains", "Root crops",
-                      "Fruit trees", "Plantation crops", "Edible trees and herbs"],
-    "lifeForm": ["No preference", "Herb", "Vine", "Tree"],
+                      "Fruit trees", "Plantation crops", "Edible trees and herbs", "Fruits & nuts", "Vegetables"],
+    "lifeForm": ["No preference", "Herb", "Vine", "Tree", "Shrub"],
+    # core = the 7 curated crops; extended = core + the ~700-plant edible ECOCROP catalog
+    "catalog": ["core", "extended"],
 }
 SOIL_DETAILS = {
     "soilTexture": {"min": 0, "max": 100, "label": "Soil texture confidence"},

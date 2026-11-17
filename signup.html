@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create account — TanimTech</title>
+  <script src="js/access-gate.js?v=6"></script>
+  <script src="js/supabase-config.js?v=1"></script>
+  <script src="https://cdn.tailwindcss.com"></script><script>tailwind.config={theme:{extend:{colors:{paper:'#f6f5ee',forest:'#174b3a',ink:'#274c3e',muted:'#788073',line:'#dce0d4',leaf:'#e9efdc',lime:'#d9e99b'}}}}</script>
+  <link rel="stylesheet" href="css/site.css?v=8">
+</head>
+<body>
+  <main class="page-shell grid min-h-screen items-center py-12" data-signup-page>
+    <section class="mx-auto w-full max-w-xl">
+      <a class="brand" href="index.html"><span class="brand-mark">♧</span>tanimtech.</a>
+      <div class="card mt-8 p-7 sm:p-10">
+        <p class="eyebrow">FIELD PLANNING / CREATE ACCOUNT</p>
+        <h1 class="section-heading mt-3">Create your field workspace.</h1>
+        <p class="muted mt-4">Use a Gmail address and create a username and password to get started.</p>
+        <form class="mt-7" data-signup-form>
+          <label class="block"><span class="field-label">Gmail address</span><span class="field-control"><input data-signup-email type="email" autocomplete="email" required placeholder="you@gmail.com"></span></label>
+          <p class="field-note mt-2">Use an address ending in @gmail.com.</p>
+          <label class="mt-5 block"><span class="field-label">Username</span><span class="field-control"><input data-signup-username type="text" autocomplete="username" minlength="3" maxlength="20" required placeholder="Choose a username"></span></label>
+          <p class="field-note mt-2">3–20 characters: letters, numbers, and underscores only.</p>
+          <label class="mt-5 block"><span class="field-label">Password</span><span class="field-control"><input data-signup-password type="password" autocomplete="new-password" minlength="8" required placeholder="Create a strong password"></span></label>
+          <ul class="muted mt-3 grid gap-1 text-xs" data-password-rules aria-live="polite">
+            <li data-password-rule="length">At least 8 characters</li>
+            <li data-password-rule="uppercase">One uppercase letter</li>
+            <li data-password-rule="lowercase">One lowercase letter</li>
+            <li data-password-rule="number">One number</li>
+            <li data-password-rule="symbol">One symbol</li>
+          </ul>
+          <label class="mt-5 block"><span class="field-label">Confirm password</span><span class="field-control"><input data-signup-confirm type="password" autocomplete="new-password" required placeholder="Enter your password again"></span></label>
+          <button class="button button-primary mt-6 w-full" type="submit">Create account <span>↗</span></button>
+          <p class="field-note mt-3" data-signup-message aria-live="polite">All fields are required.</p>
+        </form>
+        <div class="notice mt-6 text-xs"><b data-account-storage-title>Demo account notice</b><p class="muted mt-2" data-account-storage-message>This account is stored only in this browser and will not sync across devices. Do not use a password you use elsewhere. This demo is not suitable for protecting private production data.</p></div>
+      </div>
+      <p class="muted mt-5 text-center text-sm">Already have an account? <a class="font-bold text-forest underline" href="index.html">Sign in</a></p>
+    </section>
+  </main>
+  <script src="js/site.js?v=18"></script>
+</body>
+</html>

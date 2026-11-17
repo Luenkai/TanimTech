@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" role="img" aria-labelledby="title">
+  <title id="title">Sitaw vine with long bean pods</title>
+  <rect width="800" height="480" fill="#edf1e4"/>
+  <path d="M0 390c170-56 358-45 800-8v98H0z" fill="#dbe8c5"/>
+  <path d="M294 392V86m206 306V86m-206 42h206" fill="none" stroke="#806c4d" stroke-width="12" stroke-linecap="round"/>
+  <path d="M391 382c-56-67 30-92-10-149s49-72 7-132 29-34 34-82m-10 349c62-54-18-88 30-136s-21-76 25-132" fill="none" stroke="#417b4b" stroke-width="9" stroke-linecap="round"/>
+  <g fill="#72a85c">
+    <path d="M368 113c-48-50-90-12-47 21 24 18 42 13 47-21zm66 47c48-52 90-14 47 20-23 19-42 14-47-20zm-43 80c-52-43-88 0-42 27 25 14 43 7 42-27zm47 66c47-49 90-9 45 23-25 17-43 10-45-23z"/>
+  </g>
+  <g fill="none" stroke="#9bc96a" stroke-linecap="round" stroke-width="12">
+    <path d="M364 167c-73 23-105 91-107 177"/>
+    <path d="M448 224c72 22 99 79 92 148"/>
+    <path d="M390 296c-35 22-46 57-43 94"/>
+  </g>
+  <g fill="#a5cb6e">
+    <ellipse cx="255" cy="347" rx="8" ry="17" transform="rotate(7 255 347)"/>
+    <ellipse cx="541" cy="337" rx="8" ry="17" transform="rotate(-8 541 337)"/>
+    <ellipse cx="348" cy="378" rx="8" ry="16"/>
+  </g>
+</svg>

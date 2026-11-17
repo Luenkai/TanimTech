@@ -25,8 +25,13 @@ def profile_for(texture):
     return PROFILES.get(str(texture or "").strip().lower())
 
 
-def soil_matches(crop_slug, context):
-    """Return a non-scoring soil suitability signal for transparent ranking."""
+def soil_matches(crop_slug, context, crop=None):
+    """Return a non-scoring soil suitability signal for transparent ranking.
+    Core crops use the curated soil_profiles.json; extended-catalog plants use their ECOCROP
+    texture/drainage requirements (crop record passed in)."""
+    if crop is not None and "soil_texture" in crop:
+        from .plant_catalog import soil_match
+        return soil_match(crop, context)
     texture = str(context.get("soilTexture") or context.get("soilType") or "").strip().lower()
     profile = profile_for(texture)
     if not profile:

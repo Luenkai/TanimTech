@@ -1,141 +1,33 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TanimTech — Thoughtful planting starts with your land</title>
-  <script src="js/access-gate.js?v=1"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>tailwind.config={theme:{extend:{colors:{paper:'#f6f5ee',forest:'#174b3a',ink:'#274c3e',muted:'#788073',line:'#dce0d4',leaf:'#e9efdc',lime:'#d9e99b'}}}}</script>
-  <link rel="stylesheet" href="css/site.css?v=5">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in — TanimTech</title>
+  <script src="js/access-gate.js?v=6"></script>
+  <script src="js/supabase-config.js?v=1"></script>
+  <script src="https://cdn.tailwindcss.com"></script><script>tailwind.config={theme:{extend:{colors:{paper:'#f6f5ee',forest:'#174b3a',ink:'#274c3e',muted:'#788073',line:'#dce0d4',leaf:'#e9efdc',lime:'#d9e99b'}}}}</script>
+  <link rel="stylesheet" href="css/site.css?v=9">
 </head>
 <body>
-  <header class="site-header">
-    <div class="header-inner">
+  <main class="page-shell grid min-h-screen items-center py-12 login-page" data-login-page>
+    <section class="mx-auto w-full max-w-xl">
       <a class="brand" href="index.html"><span class="brand-mark">♧</span>tanimtech.</a>
-      <nav class="main-nav" aria-label="Main navigation">
-        <a href="#how-it-works">How it works</a><a href="#guide">How to use</a><a href="#crops">Explore crops</a><a href="#methodology">Sources</a>
-      </nav>
-      <a class="button button-primary" href="conditions.html">Plan your planting <span>↗</span></a>
-    </div>
-  </header>
-
-  <main>
-    <section class="page-shell grid items-center gap-12 py-16 lg:grid-cols-2 lg:pt-16 lg:pb-12">
-      <div>
-        <p class="eyebrow mb-7">GROUNDED IN YOUR LAND · MADE FOR THE PHILIPPINES</p>
-        <h1 class="serif max-w-2xl text-5xl leading-[1.03] tracking-tight text-ink sm:text-6xl lg:text-7xl">The right crop<br>starts with your<br>soil.</h1>
-        <p class="muted mt-7 max-w-xl text-base leading-7">Turn a few soil and climate details into a thoughtful crop shortlist. Understand what fits, what’s missing, and what to check before you plant.</p>
-        <div class="mt-7 flex flex-wrap gap-3">
-          <a class="button button-primary" href="conditions.html">Find crops for my farm <span>↗</span></a>
-          <a class="button" href="#crops">Explore the field guide <span>↗</span></a>
-        </div>
-        <p class="muted mt-5 text-xs">♧ &nbsp;Local crop names. Clear reasoning. No promises of yield.</p>
+      <div class="card mt-8 p-7 sm:p-10">
+        <p class="eyebrow">FIELD PLANNING / SIGN IN</p>
+        <h1 class="section-heading mt-3">Start with your own field workspace.</h1>
+        <p class="muted mt-4">Sign in to continue to TanimTech and keep your crop recommendations and farm profile history on this device.</p>
+        <form class="mt-7" data-login-form>
+          <label class="block"><span class="field-label" data-login-identifier-label>Gmail address or demo username</span><span class="field-control"><input data-login-username type="text" autocomplete="username" required placeholder="you@gmail.com"></span></label>
+          <label class="mt-5 block"><span class="field-label">Password</span><span class="field-control"><input data-login-password type="password" autocomplete="current-password" required placeholder="Enter password"></span></label>
+          <button class="button button-primary mt-6 w-full" type="submit">Continue to TanimTech <span>↗</span></button>
+          <p class="field-note mt-3" data-login-message aria-live="polite">Use the demo account below or sign in with a local demo account.</p>
+        </form>
+        <p class="muted mt-5 text-center text-sm">New to TanimTech? <a class="font-bold text-forest underline" href="signup.html">Create an account</a></p>
+        <div class="notice mt-7 text-xs" data-demo-account-notice><b>Demo admin account</b><p class="muted mt-2">Username: <code>admin</code><br>Password: <code>TanimTech2026!</code></p><p class="muted mt-3">This is a client-side demo gate for testing. It is not suitable for protecting private production data.</p></div>
       </div>
-      <div class="relative">
-        <img class="h-[390px] w-full rounded-lg object-cover lg:h-[535px]" src="images/hero-farm.jpg" alt="">
-        <div class="absolute bottom-7 left-7 max-w-sm rounded bg-white p-6 shadow-sm">
-          <p class="eyebrow">FIELD NOTE / START WITH YOUR DATA <span class="badge ml-3">NO DEFAULTS</span></p>
-          <h2 class="serif mt-2 text-3xl">Your field, your measurements.</h2>
-          <p class="muted mt-1 text-xs">Use a soil test and a representative climate location. Load climate values from NASA POWER.</p>
-          <div class="mt-4 flex gap-8 text-sm font-bold"><span>pH · required</span><span>Climate · load</span><span>Sources · visible</span></div>
-        </div>
-      </div>
-    </section>
-
-    <div class="border-y border-line">
-      <div class="page-shell grid grid-cols-1 gap-4 py-5 text-sm sm:grid-cols-3">
-        <p>☷ &nbsp;Start with four core inputs</p><p>♧ &nbsp;Explore 7 crop categories</p><p>✣ &nbsp;See the reasons, not just a rank</p>
-      </div>
-    </div>
-
-    <section id="how-it-works" class="page-shell py-20">
-      <div class="grid gap-8 md:grid-cols-3">
-        <div class="md:col-span-2"><p class="eyebrow">A SIMPLE WAY TO START</p><h2 class="section-title mt-3">From field details to better questions.</h2></div>
-        <p class="muted self-end">A planning companion, not a substitute for your own experience or a local agriculture adviser.</p>
-      </div>
-      <div class="mt-10 grid gap-8 border-t border-line pt-7 md:grid-cols-3">
-        <article><p class="eyebrow">01 / FIELD TO DECISION</p><h3 class="serif mt-3 text-2xl">Know your conditions</h3><p class="muted mt-3">Enter soil pH, temperature, humidity, and rainfall. Add your province and season when you know them.</p></article>
-        <article><p class="eyebrow">02 / FIELD TO DECISION</p><h3 class="serif mt-3 text-2xl">Build a shortlist</h3><p class="muted mt-3">Review a transparent screening score against FAO ECOCROP requirement bands, with favorable factors and limitations side by side.</p></article>
-        <article><p class="eyebrow">03 / FIELD TO DECISION</p><h3 class="serif mt-3 text-2xl">Plan with context</h3><p class="muted mt-3">Compare crops, check a seasonal window, and save a farm profile to revisit as your information improves.</p></article>
-      </div>
-    </section>
-
-    <section id="guide" class="page-shell py-20">
-      <div class="grid gap-8 md:grid-cols-3"><div class="md:col-span-2"><p class="eyebrow">HOW TO USE TANIMTECH</p><h2 class="section-title mt-4">A short path from measurement to shortlist.</h2></div><p class="muted self-end">Use the system as a transparent screening tool, then validate the shortlist in your field.</p></div>
-      <div class="mt-9 grid gap-5 md:grid-cols-4">
-        <article class="card p-6"><span class="badge">01</span><h3 class="serif mt-4 text-2xl">Measure pH</h3><p class="muted mt-3 text-sm">Use a representative soil test. Do not guess this value.</p></article>
-        <article class="card p-6"><span class="badge">02</span><h3 class="serif mt-4 text-2xl">Load climate</h3><p class="muted mt-3 text-sm">Add latitude and longitude, select a month, and load NASA POWER climate values.</p></article>
-        <article class="card p-6"><span class="badge">03</span><h3 class="serif mt-4 text-2xl">Review fit</h3><p class="muted mt-3 text-sm">Compare pH, temperature, and annual rainfall with FAO ECOCROP requirements.</p></article>
-        <article class="card p-6"><span class="badge">04</span><h3 class="serif mt-4 text-2xl">Check the field</h3><p class="muted mt-3 text-sm">Inspect drainage, pests, seed quality, and local advisories before planting.</p></article>
-      </div>
-      <div class="notice mt-8 grid gap-5 md:grid-cols-3 text-sm"><div><b>FAO ECOCROP</b><p class="muted mt-2 text-xs">Crop ecological requirement bands and cycle ranges, published through the OpenCLIM export.</p></div><div><b>NASA POWER</b><p class="muted mt-2 text-xs">Location-based climate climatology for temperature, humidity, and precipitation.</p></div><div><b>DA-PhilRice / PSA</b><p class="muted mt-2 text-xs">Use Philippine soil and production sources for local verification beyond this screening layer.</p></div></div>
-    </section>
-
-    <section id="crops" class="bg-leaf py-20">
-      <div class="page-shell">
-        <div class="flex flex-wrap items-end justify-between gap-6">
-          <div><p class="eyebrow">FAMILIAR CROPS. MORE INFORMED CHOICES.</p><h2 class="section-title mt-3">A field guide for what grows here.</h2></div>
-          <a class="button" href="recommendations.html" data-dev-feature="The full 31-crop field guide">Explore all 31 crops <span>↗</span></a>
-        </div>
-        <div class="mt-9 grid gap-5 md:grid-cols-3">
-          <article class="overflow-hidden rounded-md bg-white"><img class="h-56 w-full object-cover" src="images/pechay.jpg" alt=""><div class="p-6"><p class="eyebrow">LEAFY AND FRUIT VEGETABLES</p><h3 class="serif mt-2 text-3xl">Pechay</h3><p class="muted mt-2">A short-cycle leafy option for a closer look.</p><p class="muted mt-3 text-xs">40–90 days · FAO ECOCROP range</p><a class="mt-4 inline-block text-xs font-bold text-forest" href="pechay.html">Open crop guide ↗</a></div></article>
-          <article class="overflow-hidden rounded-md bg-white"><img class="h-56 w-full object-cover" src="images/mongo.jpg" alt=""><div class="p-6"><p class="eyebrow">LEGUMES</p><h3 class="serif mt-2 text-3xl">Mongo</h3><p class="muted mt-2">A different growing rhythm for your shortlist.</p><p class="muted mt-3 text-xs">50–120 days · FAO ECOCROP range</p><a class="mt-4 inline-block text-xs font-bold text-forest" href="recommendations.html" data-dev-feature="The Mongo crop guide">Open crop guide ↗</a></div></article>
-          <article class="overflow-hidden rounded-md bg-white"><img class="h-56 w-full object-cover" src="images/kangkong.jpg" alt=""><div class="p-6"><p class="eyebrow">LEAFY AND FRUIT VEGETABLES</p><h3 class="serif mt-2 text-3xl">Kangkong</h3><p class="muted mt-2">Familiar greens, with water conditions to check.</p><p class="muted mt-3 text-xs">30–70 days · FAO ECOCROP range</p><a class="mt-4 inline-block text-xs font-bold text-forest" href="recommendations.html" data-dev-feature="The Kangkong crop guide">Open crop guide ↗</a></div></article>
-        </div>
-        <p class="muted mt-6 text-xs">Also explore grains, root crops, fruit trees, plantation crops, and edible trees and herbs.</p>
-      </div>
-    </section>
-
-    <section class="page-shell grid items-center gap-12 py-20 lg:grid-cols-2">
-      <div><p class="eyebrow">REASONING YOU CAN READ</p><h2 class="section-title mt-4">A good fit isn’t the same as a sure thing.</h2><p class="muted mt-6">A crop may align with the conditions you enter and still face pests, poor drainage, or a heavy downpour. We keep fit and certainty separate.</p><p class="muted mt-5">Every shortlist shows the favorable conditions, the trade-offs, and the missing information that deserves a field check.</p><a class="button mt-6" href="recommendations.html">See how recommendations work <span>↗</span></a></div>
-      <article class="card p-7">
-        <p class="eyebrow">BEFORE A SCORE IS SHOWN</p><h3 class="serif mt-5 text-3xl">Your evidence stays visible.</h3>
-        <p class="muted mt-4">TanimTech will not invent pH, weather, or location values. Enter a measured pH and load climate normals for a representative coordinate.</p>
-        <div class="mt-5 mini-row"><span class="muted">Scored</span><b>pH · temperature · annual rainfall<br><small class="muted font-normal">Requirement bands from FAO ECOCROP</small></b></div>
-        <div class="mini-row"><span class="muted">Context</span><b>Relative humidity · soil type · season<br><small class="muted font-normal">Humidity is shown but not scored</small></b></div>
-        <div class="mini-row"><span class="muted">Still needed</span><b>Drainage · pests · seed quality<br><small class="muted font-normal">Check these before planting at scale</small></b></div>
-      </article>
-    </section>
-
-    <section id="calendar" class="border-y border-line py-20">
-      <div class="page-shell grid gap-12 lg:grid-cols-[.8fr_1.7fr]">
-        <div><p class="eyebrow">REAL CLIMATE INPUTS</p><h2 class="section-title mt-4">Use a representative location.</h2><p class="muted mt-5">The conditions workflow can retrieve temperature, relative humidity, and precipitation from NASA POWER. Rainfall is converted to an annual total because FAO ECOCROP records its rainfall requirement that way.</p><a href="conditions.html" class="button mt-6">Load field climate ↗</a></div>
-        <div class="notice"><p class="eyebrow">SOURCE / NASA POWER</p><h3 class="serif mt-3 text-3xl">25-year climatology</h3><p class="muted mt-3 text-sm">The lookup uses the NASA POWER Climatology API with MERRA2/POWER data for January 2001–December 2025. Select a month for temperature and humidity; the annual precipitation total is used for crop screening.</p><div class="mt-5 grid gap-3 text-xs sm:grid-cols-3"><span class="badge">T2M · °C</span><span class="badge">RH2M · %</span><span class="badge">PRECTOTCORR · mm/day</span></div><a class="mt-5 inline-block text-xs font-bold text-forest" href="https://power.larc.nasa.gov/docs/services/api/" target="_blank" rel="noreferrer">Read NASA POWER API docs ↗</a></div>
-      </div>
-    </section>
-
-    <section id="methodology" class="page-shell py-20">
-      <div class="grid gap-8 md:grid-cols-3"><div class="md:col-span-2"><p class="eyebrow">KNOW WHAT GOES INTO A RECOMMENDATION</p><h2 class="section-title mt-4">Useful starts with honest limits.</h2></div><p class="muted self-end">Core conditions start the assessment. Optional context adds perspective. Planned factors are clearly unavailable.</p></div>
-      <div class="mt-9 grid gap-5 md:grid-cols-3">
-        <article class="card p-6"><span class="badge">Core</span><h3 class="serif mt-4 text-2xl">4 input fields</h3><p class="muted mt-3">Soil pH, temperature, and annual rainfall are scored; NASA POWER humidity is collected as context.</p></article>
-        <article class="card p-6"><span class="badge">Add-on</span><h3 class="serif mt-4 text-2xl">Context fields</h3><p class="muted mt-3">Soil type, season, location, and source metadata help explain the shortlist.</p></article>
-        <article class="card p-6"><span class="badge">Future · unavailable</span><h3 class="serif mt-4 text-2xl">Field checks still needed</h3><p class="muted mt-3">Drainage, pests, market demand, and other field realities are not assessed or available as inputs.</p></article>
-      </div>
-      <a class="mt-6 inline-block text-xs font-bold text-forest" href="#methodology" data-dev-feature="The full methodology and factor coverage">Read the full methodology &amp; factor coverage ↗</a>
-    </section>
-
-    <section class="bg-forest py-16 text-white">
-      <div class="page-shell grid items-center gap-12 md:grid-cols-2">
-        <img class="h-72 w-full rounded object-cover" src="images/farmer-harvest.jpg" alt="">
-        <div><p class="eyebrow text-lime">MADE TO SUPPORT YOUR JUDGMENT</p><h2 class="serif mt-4 text-4xl leading-tight">Your experience belongs in the decision.</h2><p class="mt-5 text-sm text-white/75">You know where water sits after rain and which bed gets the morning sun. TanimTech helps organize the conditions you can describe, not replace the knowledge you already have.</p><p class="mt-5 text-sm text-lime">Bring your shortlist to your local agriculture office before planting at scale.</p></div>
-      </div>
-    </section>
-
-    <section class="page-shell grid gap-10 py-20 md:grid-cols-[.7fr_1.3fr]">
-      <div><p class="eyebrow">BEFORE YOU BEGIN</p><h2 class="section-title mt-4">A few things worth knowing.</h2><p class="muted mt-4">Clarity before confidence.</p></div>
-      <div>
-        <article class="border-b border-line pb-5"><h3 class="text-sm font-bold">Is this a prediction of my harvest?</h3><p class="muted mt-2">No. Fit describes alignment with entered conditions against FAO ECOCROP requirement bands. It is not a yield prediction or a probability of success.</p></article>
-        <article class="border-b border-line py-5"><h3 class="text-sm font-bold">Do I need sensors or laboratory equipment?</h3><p class="muted mt-2">No connected sensors are needed. Use a soil test and representative climate values where possible. If you do not know a core value, gather it first rather than guess.</p></article>
-        <article class="pt-5"><h3 class="text-sm font-bold">Is the platform connected to ECOCROP?</h3><p class="muted mt-2">Yes. The committed crop subset uses FAO ECOCROP records exported through OpenCLIM. Its thresholds are expert estimates, not validated field or trial results.</p></article>
-      </div>
-    </section>
-
-    <section class="bg-lime py-14">
-      <div class="page-shell flex flex-wrap items-center justify-between gap-6"><div><p class="eyebrow">START SMALL. PLAN THOUGHTFULLY.</p><h2 class="section-title mt-3">What could your land grow next?</h2><p class="muted mt-3">Start with measurements from your own field.</p></div><a class="button button-primary" href="conditions.html">Build my crop shortlist <span>↗</span></a></div>
+      <p class="muted mt-5 text-center text-xs">Source-aware crop planning for your field · screening, not a yield guarantee.</p>
     </section>
   </main>
-  <footer class="site-footer"><div class="footer-inner"><a class="footer-brand" href="index.html">tanimtech.</a><p>Thoughtful planting starts with understanding your land.</p><nav class="footer-links"><a href="#methodology">Methodology</a><a href="#methodology">Data &amp; limitations</a><a href="#how-it-works">Help</a></nav></div><div class="footer-bottom"><p>© 2026 TanimTech · Philippine crop planning concept</p><p>Source-aware screening, not a forecast, diagnosis, or yield guarantee.</p></div></footer>
-  <script src="js/site.js?v=10"></script>
+  <script src="js/site.js?v=18"></script>
 </body>
 </html>
