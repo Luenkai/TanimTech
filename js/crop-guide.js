@@ -38,20 +38,30 @@
     errorPanel.classList.remove("hidden");
     content.classList.add("hidden");
   };
-  const asGuideCrop = (plant) => ({
-    slug: plant.id || plant.slug,
-    name: plant.name,
-    scientific: plant.scientific,
-    category: plant.category || plant.edibleGroup,
-    lifeForm: plant.lifeForm,
-    summary: plant.summary || `${plant.name} edible-plant profile from the FAO ECOCROP catalog.`,
-    growingDays: plant.growingDays,
-    bands: plant.bands,
-    bestMonths: plant.bestMonths || [],
-    floodNote: plant.notes?.flood || "Check local drainage and flood exposure before planting.",
-    typhoonNote: plant.notes?.typhoon || "Check local storm advisories and provide support where needed.",
-    dataSource: plant.dataSource || "FAO ECOCROP edible-plant catalog",
-  });
+  const stripMarkup = (value) => String(value || "").replace(/<[^>]*>/g, "").trim();
+  const range = (low, high) => (low === null || low === undefined || high === null || high === undefined ? null : [low, high]);
+  const asGuideCrop = (plant) => {
+    const isApiShape = Array.isArray(plant.bands);
+    return {
+      slug: plant.id || plant.slug,
+      name: stripMarkup(plant.name),
+      scientific: stripMarkup(plant.scientific),
+      category: plant.category || plant.edibleGroup || plant.edible_group,
+      lifeForm: plant.lifeForm || plant.life_form,
+      summary: stripMarkup(plant.summary) || `${stripMarkup(plant.name)} edible-plant profile from the FAO ECOCROP catalog.`,
+      growingDays: isApiShape ? plant.growingDays : range(plant.days_min, plant.days_max),
+      bands: isApiShape ? plant.bands : {
+        soilPh: range(plant.ph_min, plant.ph_max),
+        temperature: range(plant.temp_min, plant.temp_max),
+        rainfall: range(plant.rain_min, plant.rain_max),
+        humidity: range(plant.humidity_min, plant.humidity_max),
+      },
+      bestMonths: plant.bestMonths || plant.best_months || [],
+      floodNote: plant.notes?.flood || plant.flood_note || "Check local drainage and flood exposure before planting.",
+      typhoonNote: plant.notes?.typhoon || plant.typhoon_note || "Check local storm advisories and provide support where needed.",
+      dataSource: plant.dataSource || plant.data_source || "FAO ECOCROP edible-plant catalog",
+    };
+  };
   const renderCrop = (crop) => {
     if (!crop) {
       showError("That crop was not found. Choose one of the available crops from the list.");
@@ -107,13 +117,22 @@
       try {
         await loadPlantCatalog();
       } catch (apiError) {
-        const response = await fetch("js/crop-guide-data.json");
-        if (!response.ok) throw new Error(`Local crop data returned HTTP ${response.status}.`);
-        const payload = await response.json();
-        if (!Array.isArray(payload.crops) || !payload.crops.length) throw apiError;
-        crops = payload.crops;
-        cropDataSource = "seven-crop local fallback";
-        status.textContent = `The full edible catalog is unavailable (${apiError.message}). Showing the seven-crop fallback.`;
+        try {
+          const response = await fetch("js/edible-catalog.json");
+          if (!response.ok) throw new Error(`Bundled plant catalog returned HTTP ${response.status}.`);
+          const payload = await response.json();
+          if (!Array.isArray(payload.plants) || !payload.plants.length) throw new Error("Bundled plant catalog has no profiles.");
+          crops = payload.plants.map(asGuideCrop);
+          cropDataSource = "bundled ECOCROP catalog";
+        } catch (catalogError) {
+          const response = await fetch("js/crop-guide-data.json");
+          if (!response.ok) throw new Error(`Local crop data returned HTTP ${response.status}.`);
+          const payload = await response.json();
+          if (!Array.isArray(payload.crops) || !payload.crops.length) throw apiError;
+          crops = payload.crops;
+          cropDataSource = "seven-crop local fallback";
+          status.textContent = `The plant API and bundled catalog are unavailable (${catalogError.message}). Showing the seven-crop fallback.`;
+        }
       }
       select.replaceChildren(new Option("Choose a crop", ""));
       crops.forEach((crop) => select.add(new Option(crop.name, crop.slug)));
