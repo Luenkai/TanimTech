@@ -1,4 +1,124 @@
 (() => {
+  const languageKey = "tanimtech-language";
+  const translations = {
+    "Overview": "Pangkalahatang-ideya",
+    "Explore": "Tuklasin",
+    "Plan": "Magplano",
+    "More": "Higit pa",
+    "Crop guide": "Gabay sa pananim",
+    "Featured crops": "Mga tampok na pananim",
+    "Get recommendations": "Kumuha ng rekomendasyon",
+    "Compare crops": "Ihambing ang mga pananim",
+    "Climate inputs": "Datos ng klima",
+    "My profile": "Aking profile",
+    "How it works": "Paano ito gumagana",
+    "Methodology": "Pamamaraan",
+    "Soil photo": "Larawan ng lupa",
+    "Photo review": "Pagsusuri ng larawan",
+    "Soil context": "Konteksto ng lupa",
+    "Choose analysis": "Pumili ng pagsusuri",
+    "Choose an analysis method": "Pumili ng paraan ng pagsusuri",
+    "Browse crop profiles": "Tingnan ang mga profile ng pananim",
+    "Start with your field. Find possible crops.": "Magsimula sa iyong bukid. Humanap ng posibleng pananim.",
+    "Choose your analysis method.": "Pumili ng paraan ng pagsusuri.",
+    "Use a soil photo": "Gumamit ng larawan ng lupa",
+    "Enter field measurements": "Ilagay ang sukat ng bukid",
+    "Open camera option": "Buksan ang camera",
+    "Enter field conditions": "Ilagay ang kondisyon ng bukid",
+    "Explore the available crop guides.": "Tingnan ang mga gabay sa pananim.",
+    "View crop guides": "Tingnan ang mga gabay",
+    "Choose a method": "Pumili ng paraan",
+    "Review possible matches": "Suriin ang mga posibleng tugma",
+    "Check locally": "Suriin sa iyong lugar",
+    "Possible fit is not a promise.": "Ang posibleng tugma ay hindi garantiya.",
+    "Use measurements from your field.": "Gamitin ang mga sukat mula sa iyong bukid.",
+    "Required inputs": "Mga kailangang ilagay",
+    "Soil pH": "pH ng lupa",
+    "Mean temperature": "Karaniwang temperatura",
+    "Relative humidity": "Relatibong halumigmig",
+    "Annual rainfall": "Taunang ulan",
+    "Clear entries": "Burahin ang mga inilagay",
+    "Load real climate normals": "I-load ang tunay na datos ng klima",
+    "Add what you know": "Idagdag ang iyong nalalaman",
+    "Soil type": "Uri ng lupa",
+    "Season": "Panahon ng pagtatanim",
+    "Planning month": "Buwan ng pagpaplano",
+    "Soil texture": "Tekstura ng lupa",
+    "Drainage": "Daloy ng tubig",
+    "Moisture at sampling": "Halumigmig sa pagkuha ng sample",
+    "Organic matter": "Organikong materyal",
+    "Soil notes": "Mga tala tungkol sa lupa",
+    "Save field profile": "I-save ang profile ng bukid",
+    "Review crop recommendations": "Suriin ang rekomendasyon sa pananim",
+    "A closer look at your soil.": "Masusing tingnan ang iyong lupa.",
+    "Start with one clear soil close-up": "Magsimula sa malinaw na malapitan na larawan ng lupa",
+    "Take a photo": "Kumuha ng larawan",
+    "Upload a photo": "Mag-upload ng larawan",
+    "Open camera": "Buksan ang camera",
+    "Choose file": "Pumili ng file",
+    "Remove": "Alisin",
+    "Analyze soil with model": "Suriin ang lupa gamit ang modelo",
+    "Know your soil? Choose it manually.": "Alam mo ang uri ng lupa? Piliin ito nang mano-mano.",
+    "Unknown": "Hindi alam",
+    "Clay": "Luwad",
+    "Loam": "Loam",
+    "Sandy": "Mabuhangin",
+    "Silty": "Maalikabok",
+    "Peaty": "Mala-peat / organiko",
+    "Enter your field conditions first.": "Ilagay muna ang kondisyon ng iyong bukid.",
+    "Language": "Wika",
+    "English": "English",
+    "Tagalog": "Tagalog",
+  };
+  const originalText = new WeakMap();
+  const originalAttributes = new WeakMap();
+  const translatePage = (language) => {
+    const useTagalog = language === "tl";
+    document.documentElement.lang = useTagalog ? "tl" : "en";
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) {
+      if (node.parentElement?.closest("script,style,select")) continue;
+      if (!originalText.has(node)) originalText.set(node, node.nodeValue);
+      const source = originalText.get(node);
+      const key = source.trim();
+      if (!key) continue;
+      const value = useTagalog ? translations[key] : key;
+      if (value && value !== key) node.nodeValue = source.replace(key, value);
+      else if (!useTagalog) node.nodeValue = source;
+    }
+    document.querySelectorAll("[placeholder],[aria-label],[title]").forEach((element) => {
+      if (!originalAttributes.has(element)) originalAttributes.set(element, {
+        placeholder: element.getAttribute("placeholder"),
+        "aria-label": element.getAttribute("aria-label"),
+        title: element.getAttribute("title"),
+      });
+      const source = originalAttributes.get(element);
+      ["placeholder", "aria-label", "title"].forEach((attribute) => {
+        const text = source[attribute];
+        if (!text) return;
+        element.setAttribute(attribute, useTagalog ? (translations[text] || text) : text);
+      });
+    });
+  };
+  const addLanguageSelector = () => {
+    const actions = document.querySelector(".header-actions") || document.querySelector(".login-page section") || document.querySelector("[data-signup-page] section");
+    if (!actions || actions.querySelector("[data-language-select]")) return;
+    const label = document.createElement("label");
+    label.className = "language-switcher";
+    label.innerHTML = `<span class="sr-only">Language</span><select data-language-select aria-label="Language"><option value="en">English</option><option value="tl">Tagalog</option></select>`;
+    actions.prepend(label);
+    if (!actions.classList.contains("header-actions")) label.classList.add("login-language-switcher");
+    const select = label.querySelector("select");
+    const saved = localStorage.getItem(languageKey) || "en";
+    select.value = saved;
+    select.addEventListener("change", () => {
+      localStorage.setItem(languageKey, select.value);
+      translatePage(select.value);
+    });
+    translatePage(saved);
+  };
+  addLanguageSelector();
   const storageKey = "tanimtech-field-inputs";
   const toastRegion = document.createElement("div");
   toastRegion.className = "toast-region";
