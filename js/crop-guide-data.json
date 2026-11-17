@@ -7,8 +7,28 @@
       "category": "Leafy and fruit vegetables",
       "lifeForm": "Herb",
       "summary": "Pechay requirement profile from FAO ECOCROP.",
-      "growingDays": [40, 90],
-      "bands": { "soilPh": [6, 7.5], "temperature": [12, 22], "rainfall": [800, 1600], "humidity": [0, 100] },
+      "growingDays": [
+        40,
+        90
+      ],
+      "bands": {
+        "soilPh": [
+          6,
+          7.5
+        ],
+        "temperature": [
+          12,
+          22
+        ],
+        "rainfall": [
+          800,
+          1600
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
       "floodNote": "Check local drainage and flood exposure; ECOCROP does not replace a field assessment.",
       "typhoonNote": "Check local storm advisories and crop support needs; ECOCROP does not provide a storm-resilience guarantee.",
       "dataSource": "FAO ECOCROP via OpenCLIM export (EcoPortCode 547)",
@@ -21,8 +41,28 @@
       "category": "Leafy and fruit vegetables",
       "lifeForm": "Vine",
       "summary": "Kangkong requirement profile from FAO ECOCROP.",
-      "growingDays": [30, 70],
-      "bands": { "soilPh": [5, 7], "temperature": [15, 35], "rainfall": [2000, 2500], "humidity": [0, 100] },
+      "growingDays": [
+        30,
+        70
+      ],
+      "bands": {
+        "soilPh": [
+          5,
+          7
+        ],
+        "temperature": [
+          15,
+          35
+        ],
+        "rainfall": [
+          2000,
+          2500
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
       "floodNote": "Check local drainage and flood exposure; ECOCROP does not replace a field assessment.",
       "typhoonNote": "Check local storm advisories and crop support needs; ECOCROP does not provide a storm-resilience guarantee.",
       "dataSource": "FAO ECOCROP via OpenCLIM export (EcoPortCode 1264)",
@@ -35,8 +75,28 @@
       "category": "Legumes",
       "lifeForm": "Herb",
       "summary": "Mongo requirement profile from FAO ECOCROP.",
-      "growingDays": [50, 120],
-      "bands": { "soilPh": [5.5, 6.2], "temperature": [21, 36], "rainfall": [650, 900], "humidity": [0, 100] },
+      "growingDays": [
+        50,
+        120
+      ],
+      "bands": {
+        "soilPh": [
+          5.5,
+          6.2
+        ],
+        "temperature": [
+          21,
+          36
+        ],
+        "rainfall": [
+          650,
+          900
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
       "floodNote": "Check local drainage and flood exposure; ECOCROP does not replace a field assessment.",
       "typhoonNote": "Check local storm advisories and crop support needs; ECOCROP does not provide a storm-resilience guarantee.",
       "dataSource": "FAO ECOCROP via OpenCLIM export (EcoPortCode 2150)",
@@ -49,8 +109,28 @@
       "category": "Legumes",
       "lifeForm": "Vine",
       "summary": "Sitaw requirement profile from FAO ECOCROP.",
-      "growingDays": [50, 150],
-      "bands": { "soilPh": [5.5, 7], "temperature": [20, 35], "rainfall": [1500, 2000], "humidity": [0, 100] },
+      "growingDays": [
+        50,
+        150
+      ],
+      "bands": {
+        "soilPh": [
+          5.5,
+          7
+        ],
+        "temperature": [
+          20,
+          35
+        ],
+        "rainfall": [
+          1500,
+          2000
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
       "floodNote": "Check local drainage and flood exposure; ECOCROP does not replace a field assessment.",
       "typhoonNote": "Check local storm advisories and crop support needs; ECOCROP does not provide a storm-resilience guarantee.",
       "dataSource": "FAO ECOCROP via OpenCLIM export (EcoPortCode 10834)",
@@ -63,8 +143,28 @@
       "category": "Leafy and fruit vegetables",
       "lifeForm": "Herb",
       "summary": "Talong requirement profile from FAO ECOCROP.",
-      "growingDays": [70, 120],
-      "bands": { "soilPh": [5.5, 6.8], "temperature": [20, 35], "rainfall": [1200, 1600], "humidity": [0, 100] },
+      "growingDays": [
+        70,
+        120
+      ],
+      "bands": {
+        "soilPh": [
+          5.5,
+          6.8
+        ],
+        "temperature": [
+          20,
+          35
+        ],
+        "rainfall": [
+          1200,
+          1600
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
       "floodNote": "Check local drainage and flood exposure; ECOCROP does not replace a field assessment.",
       "typhoonNote": "Check local storm advisories and crop support needs; ECOCROP does not provide a storm-resilience guarantee.",
       "dataSource": "FAO ECOCROP via OpenCLIM export (EcoPortCode 1965)",
@@ -77,8 +177,28 @@
       "category": "Root crops",
       "lifeForm": "Vine",
       "summary": "Kamote requirement profile from FAO ECOCROP.",
-      "growingDays": [80, 170],
-      "bands": { "soilPh": [5, 7], "temperature": [18, 28], "rainfall": [750, 2000], "humidity": [0, 100] },
+      "growingDays": [
+        80,
+        170
+      ],
+      "bands": {
+        "soilPh": [
+          5,
+          7
+        ],
+        "temperature": [
+          18,
+          28
+        ],
+        "rainfall": [
+          750,
+          2000
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
       "floodNote": "Check local drainage and flood exposure; ECOCROP does not replace a field assessment.",
       "typhoonNote": "Check local storm advisories and crop support needs; ECOCROP does not provide a storm-resilience guarantee.",
       "dataSource": "FAO ECOCROP via OpenCLIM export (EcoPortCode 1265)",
@@ -91,11 +211,847 @@
       "category": "Grains",
       "lifeForm": "Herb",
       "summary": "Mais requirement profile from FAO ECOCROP.",
-      "growingDays": [65, 365],
-      "bands": { "soilPh": [5, 7], "temperature": [18, 33], "rainfall": [600, 1200], "humidity": [0, 100] },
+      "growingDays": [
+        65,
+        365
+      ],
+      "bands": {
+        "soilPh": [
+          5,
+          7
+        ],
+        "temperature": [
+          18,
+          33
+        ],
+        "rainfall": [
+          600,
+          1200
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
       "floodNote": "Check local drainage and flood exposure; ECOCROP does not replace a field assessment.",
       "typhoonNote": "Check local storm advisories and crop support needs; ECOCROP does not provide a storm-resilience guarantee.",
       "dataSource": "FAO ECOCROP via OpenCLIM export (EcoPortCode 2175)",
+      "bestMonths": []
+    },
+    {
+      "slug": "palay",
+      "name": "Palay",
+      "scientific": "Oryza sativa",
+      "category": "Grains",
+      "lifeForm": "Herb",
+      "summary": "Palay requirement profile for Philippine crop planning.",
+      "growingDays": [
+        110,
+        150
+      ],
+      "bands": {
+        "soilPh": [
+          5.0,
+          7.0
+        ],
+        "temperature": [
+          20,
+          35
+        ],
+        "rainfall": [
+          1000,
+          2500
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 2263)",
+      "bestMonths": []
+    },
+    {
+      "slug": "kamatis",
+      "name": "Kamatis",
+      "scientific": "Solanum lycopersicum",
+      "category": "Leafy and fruit vegetables",
+      "lifeForm": "Herb",
+      "summary": "Kamatis requirement profile for Philippine crop planning.",
+      "growingDays": [
+        60,
+        100
+      ],
+      "bands": {
+        "soilPh": [
+          5.5,
+          7.5
+        ],
+        "temperature": [
+          18,
+          30
+        ],
+        "rainfall": [
+          600,
+          1500
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 1964)",
+      "bestMonths": []
+    },
+    {
+      "slug": "sibuyas",
+      "name": "Sibuyas",
+      "scientific": "Allium cepa",
+      "category": "Bulbs and spices",
+      "lifeForm": "Herb",
+      "summary": "Sibuyas requirement profile for Philippine crop planning.",
+      "growingDays": [
+        90,
+        180
+      ],
+      "bands": {
+        "soilPh": [
+          6.0,
+          7.5
+        ],
+        "temperature": [
+          13,
+          24
+        ],
+        "rainfall": [
+          350,
+          700
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 91)",
+      "bestMonths": []
+    },
+    {
+      "slug": "bawang",
+      "name": "Bawang",
+      "scientific": "Allium sativum",
+      "category": "Bulbs and spices",
+      "lifeForm": "Herb",
+      "summary": "Bawang requirement profile for Philippine crop planning.",
+      "growingDays": [
+        90,
+        180
+      ],
+      "bands": {
+        "soilPh": [
+          6.0,
+          7.5
+        ],
+        "temperature": [
+          12,
+          24
+        ],
+        "rainfall": [
+          350,
+          700
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 90)",
+      "bestMonths": []
+    },
+    {
+      "slug": "repolyo",
+      "name": "Repolyo",
+      "scientific": "Brassica oleracea var. capitata",
+      "category": "Leafy and fruit vegetables",
+      "lifeForm": "Herb",
+      "summary": "Repolyo requirement profile for Philippine crop planning.",
+      "growingDays": [
+        70,
+        120
+      ],
+      "bands": {
+        "soilPh": [
+          6.0,
+          7.5
+        ],
+        "temperature": [
+          15,
+          24
+        ],
+        "rainfall": [
+          500,
+          1000
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 546)",
+      "bestMonths": []
+    },
+    {
+      "slug": "karot",
+      "name": "Karot",
+      "scientific": "Daucus carota",
+      "category": "Root crops",
+      "lifeForm": "Herb",
+      "summary": "Karot requirement profile for Philippine crop planning.",
+      "growingDays": [
+        70,
+        120
+      ],
+      "bands": {
+        "soilPh": [
+          5.5,
+          7.0
+        ],
+        "temperature": [
+          15,
+          21
+        ],
+        "rainfall": [
+          450,
+          900
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 577)",
+      "bestMonths": []
+    },
+    {
+      "slug": "labanos",
+      "name": "Labanos",
+      "scientific": "Raphanus sativus",
+      "category": "Root crops",
+      "lifeForm": "Herb",
+      "summary": "Labanos requirement profile for Philippine crop planning.",
+      "growingDays": [
+        25,
+        60
+      ],
+      "bands": {
+        "soilPh": [
+          5.5,
+          7.0
+        ],
+        "temperature": [
+          10,
+          25
+        ],
+        "rainfall": [
+          450,
+          1000
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 2273)",
+      "bestMonths": []
+    },
+    {
+      "slug": "pipino",
+      "name": "Pipino",
+      "scientific": "Cucumis sativus",
+      "category": "Leafy and fruit vegetables",
+      "lifeForm": "Vine",
+      "summary": "Pipino requirement profile for Philippine crop planning.",
+      "growingDays": [
+        50,
+        90
+      ],
+      "bands": {
+        "soilPh": [
+          5.5,
+          7.5
+        ],
+        "temperature": [
+          18,
+          30
+        ],
+        "rainfall": [
+          800,
+          1500
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 733)",
+      "bestMonths": []
+    },
+    {
+      "slug": "kalabasa",
+      "name": "Kalabasa",
+      "scientific": "Cucurbita moschata",
+      "category": "Leafy and fruit vegetables",
+      "lifeForm": "Vine",
+      "summary": "Kalabasa requirement profile for Philippine crop planning.",
+      "growingDays": [
+        90,
+        150
+      ],
+      "bands": {
+        "soilPh": [
+          5.5,
+          7.5
+        ],
+        "temperature": [
+          18,
+          30
+        ],
+        "rainfall": [
+          600,
+          1500
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 786)",
+      "bestMonths": []
+    },
+    {
+      "slug": "ampalaya",
+      "name": "Ampalaya",
+      "scientific": "Momordica charantia",
+      "category": "Leafy and fruit vegetables",
+      "lifeForm": "Vine",
+      "summary": "Ampalaya requirement profile for Philippine crop planning.",
+      "growingDays": [
+        60,
+        120
+      ],
+      "bands": {
+        "soilPh": [
+          5.5,
+          7.0
+        ],
+        "temperature": [
+          20,
+          30
+        ],
+        "rainfall": [
+          700,
+          1500
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 1648)",
+      "bestMonths": []
+    },
+    {
+      "slug": "okra",
+      "name": "Okra",
+      "scientific": "Abelmoschus esculentus",
+      "category": "Leafy and fruit vegetables",
+      "lifeForm": "Herb",
+      "summary": "Okra requirement profile for Philippine crop planning.",
+      "growingDays": [
+        55,
+        100
+      ],
+      "bands": {
+        "soilPh": [
+          6.0,
+          7.5
+        ],
+        "temperature": [
+          20,
+          35
+        ],
+        "rainfall": [
+          700,
+          1500
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 16)",
+      "bestMonths": []
+    },
+    {
+      "slug": "sili",
+      "name": "Sili",
+      "scientific": "Capsicum annuum",
+      "category": "Leafy and fruit vegetables",
+      "lifeForm": "Herb",
+      "summary": "Sili requirement profile for Philippine crop planning.",
+      "growingDays": [
+        80,
+        150
+      ],
+      "bands": {
+        "soilPh": [
+          5.5,
+          7.0
+        ],
+        "temperature": [
+          18,
+          30
+        ],
+        "rainfall": [
+          600,
+          1200
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 588)",
+      "bestMonths": []
+    },
+    {
+      "slug": "sayote",
+      "name": "Sayote",
+      "scientific": "Sechium edule",
+      "category": "Leafy and fruit vegetables",
+      "lifeForm": "Vine",
+      "summary": "Sayote requirement profile for Philippine crop planning.",
+      "growingDays": [
+        120,
+        180
+      ],
+      "bands": {
+        "soilPh": [
+          5.5,
+          7.5
+        ],
+        "temperature": [
+          18,
+          28
+        ],
+        "rainfall": [
+          1000,
+          2000
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 2390)",
+      "bestMonths": []
+    },
+    {
+      "slug": "mani",
+      "name": "Mani",
+      "scientific": "Arachis hypogaea",
+      "category": "Legumes",
+      "lifeForm": "Herb",
+      "summary": "Mani requirement profile for Philippine crop planning.",
+      "growingDays": [
+        90,
+        150
+      ],
+      "bands": {
+        "soilPh": [
+          5.5,
+          7.0
+        ],
+        "temperature": [
+          20,
+          30
+        ],
+        "rainfall": [
+          500,
+          1000
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 138)",
+      "bestMonths": []
+    },
+    {
+      "slug": "soya",
+      "name": "Soya",
+      "scientific": "Glycine max",
+      "category": "Legumes",
+      "lifeForm": "Herb",
+      "summary": "Soya requirement profile for Philippine crop planning.",
+      "growingDays": [
+        90,
+        150
+      ],
+      "bands": {
+        "soilPh": [
+          6.0,
+          7.5
+        ],
+        "temperature": [
+          20,
+          30
+        ],
+        "rainfall": [
+          600,
+          1500
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 1022)",
+      "bestMonths": []
+    },
+    {
+      "slug": "kadyos",
+      "name": "Kadyos",
+      "scientific": "Cajanus cajan",
+      "category": "Legumes",
+      "lifeForm": "Shrub",
+      "summary": "Kadyos requirement profile for Philippine crop planning.",
+      "growingDays": [
+        120,
+        240
+      ],
+      "bands": {
+        "soilPh": [
+          5.0,
+          8.0
+        ],
+        "temperature": [
+          18,
+          35
+        ],
+        "rainfall": [
+          600,
+          1500
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 479)",
+      "bestMonths": []
+    },
+    {
+      "slug": "gabi",
+      "name": "Gabi",
+      "scientific": "Colocasia esculenta",
+      "category": "Root crops",
+      "lifeForm": "Herb",
+      "summary": "Gabi requirement profile for Philippine crop planning.",
+      "growingDays": [
+        180,
+        300
+      ],
+      "bands": {
+        "soilPh": [
+          5.5,
+          7.0
+        ],
+        "temperature": [
+          21,
+          30
+        ],
+        "rainfall": [
+          1500,
+          3000
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 630)",
+      "bestMonths": []
+    },
+    {
+      "slug": "kamoteng-kahoy",
+      "name": "Kamoteng kahoy",
+      "scientific": "Manihot esculenta",
+      "category": "Root crops",
+      "lifeForm": "Shrub",
+      "summary": "Kamoteng kahoy requirement profile for Philippine crop planning.",
+      "growingDays": [
+        240,
+        365
+      ],
+      "bands": {
+        "soilPh": [
+          5.0,
+          7.5
+        ],
+        "temperature": [
+          20,
+          30
+        ],
+        "rainfall": [
+          800,
+          1500
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 1492)",
+      "bestMonths": []
+    },
+    {
+      "slug": "luya",
+      "name": "Luya",
+      "scientific": "Zingiber officinale",
+      "category": "Root crops",
+      "lifeForm": "Herb",
+      "summary": "Luya requirement profile for Philippine crop planning.",
+      "growingDays": [
+        240,
+        300
+      ],
+      "bands": {
+        "soilPh": [
+          5.5,
+          6.5
+        ],
+        "temperature": [
+          20,
+          30
+        ],
+        "rainfall": [
+          1500,
+          3000
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 1005)",
+      "bestMonths": []
+    },
+    {
+      "slug": "luyang-dilaw",
+      "name": "Luyang dilaw",
+      "scientific": "Curcuma longa",
+      "category": "Root crops",
+      "lifeForm": "Herb",
+      "summary": "Luyang dilaw requirement profile for Philippine crop planning.",
+      "growingDays": [
+        240,
+        365
+      ],
+      "bands": {
+        "soilPh": [
+          5.5,
+          7.5
+        ],
+        "temperature": [
+          20,
+          30
+        ],
+        "rainfall": [
+          1500,
+          3000
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 820)",
+      "bestMonths": []
+    },
+    {
+      "slug": "saging",
+      "name": "Saging",
+      "scientific": "Musa acuminata",
+      "category": "Fruit trees",
+      "lifeForm": "Herb",
+      "summary": "Saging requirement profile for Philippine crop planning.",
+      "growingDays": [
+        240,
+        365
+      ],
+      "bands": {
+        "soilPh": [
+          5.5,
+          7.5
+        ],
+        "temperature": [
+          20,
+          35
+        ],
+        "rainfall": [
+          1500,
+          3000
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 1748)",
+      "bestMonths": []
+    },
+    {
+      "slug": "pinya",
+      "name": "Pinya",
+      "scientific": "Ananas comosus",
+      "category": "Fruit trees",
+      "lifeForm": "Herb",
+      "summary": "Pinya requirement profile for Philippine crop planning.",
+      "growingDays": [
+        365,
+        540
+      ],
+      "bands": {
+        "soilPh": [
+          4.5,
+          6.5
+        ],
+        "temperature": [
+          20,
+          30
+        ],
+        "rainfall": [
+          1000,
+          2000
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 118)",
+      "bestMonths": []
+    },
+    {
+      "slug": "mangga",
+      "name": "Mangga",
+      "scientific": "Mangifera indica",
+      "category": "Fruit trees",
+      "lifeForm": "Tree",
+      "summary": "Mangga requirement profile for Philippine crop planning.",
+      "growingDays": [
+        365,
+        730
+      ],
+      "bands": {
+        "soilPh": [
+          5.5,
+          7.5
+        ],
+        "temperature": [
+          24,
+          32
+        ],
+        "rainfall": [
+          1000,
+          2500
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 1510)",
+      "bestMonths": []
+    },
+    {
+      "slug": "papaya",
+      "name": "Papaya",
+      "scientific": "Carica papaya",
+      "category": "Fruit trees",
+      "lifeForm": "Tree",
+      "summary": "Papaya requirement profile for Philippine crop planning.",
+      "growingDays": [
+        240,
+        365
+      ],
+      "bands": {
+        "soilPh": [
+          5.5,
+          7.0
+        ],
+        "temperature": [
+          21,
+          33
+        ],
+        "rainfall": [
+          1500,
+          2500
+        ],
+        "humidity": [
+          0,
+          100
+        ]
+      },
+      "floodNote": "Check local drainage and flood exposure; this screening profile does not replace a field assessment.",
+      "typhoonNote": "Check local storm advisories and crop support needs; provide support where needed.",
+      "dataSource": "FAO ECOCROP reference profile (EcoPortCode 516)",
       "bestMonths": []
     }
   ]

@@ -10,7 +10,7 @@ from unittest import mock
 os.environ["TANIM_STORE_FILE"] = os.path.join(tempfile.mkdtemp(), "store.json")
 
 from tanimtech import create_app  # noqa: E402
-from tanimtech.soil_analysis import SoilAnalysisError, _vision_request  # noqa: E402
+from tanimtech.soil_analysis import SoilAnalysisError, _vision_request, analyze_image  # noqa: E402
 
 
 class FakeResponse(io.BytesIO):
@@ -84,6 +84,15 @@ class SoilAnalysisTests(unittest.TestCase):
             )
         self.assertEqual(response.status_code, 502)
         self.assertEqual(response.json["error"], "The model does not exist.")
+
+    def test_analysis_returns_canonical_soil_type_and_crop_matches(self):
+        raw = {"suggestedTexture": "loam", "confidence": "medium", "observations": [], "limitations": [], "recommendedChecks": []}
+        with mock.patch("tanimtech.soil_analysis._vision_request", return_value=raw):
+            result = analyze_image(b"image-data", "image/jpeg")
+        self.assertEqual(result["suggestedSoilType"], "Loam")
+        self.assertEqual(result["soilProfileName"], "Loam")
+        self.assertGreaterEqual(len(result["recommendedCrops"]), 10)
+        self.assertIn("pechay", {crop["slug"] for crop in result["recommendedCrops"]})
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ import urllib.request
 
 
 DATA_FILE = os.path.join(os.path.dirname(__file__), "..", "data", "soil_profiles.json")
+CROP_FILE = os.path.join(os.path.dirname(__file__), "..", "data_pipeline", "clean", "crops_clean.json")
 MAX_IMAGE_BYTES = 10 * 1024 * 1024
 DEFAULT_VISION_MODEL = "gpt-5-mini"
 ALLOWED_TEXTURES = {"clay", "loam", "sandy", "silty", "peaty", "unknown"}
@@ -31,6 +32,11 @@ def load_dataset():
 
 DATASET = load_dataset()
 PROFILES = {p["slug"]: p for p in DATASET.get("profiles", [])}
+try:
+    with open(CROP_FILE, encoding="utf-8") as fh:
+        PH_CROPS = json.load(fh)
+except (OSError, ValueError):
+    PH_CROPS = []
 
 
 def profile_for(texture):
@@ -50,6 +56,37 @@ def soil_matches(crop_slug, context, crop=None):
         return {"status": "unknown", "points": None, "label": "No soil profile"}
     status = profile.get("cropSuitability", {}).get(crop_slug, "unknown")
     return {"status": status, "points": {"good": 100, "caution": 60, "poor": 20}.get(status), "label": profile["name"]}
+
+
+def recommended_crops(texture, limit=12):
+    """Return crop-list entries suited to the detected soil texture.
+
+    This is advisory context and stays separate from the climate fit score. The
+    existing curated mappings remain authoritative; added Philippine crops use
+    transparent texture/category guidance until crop-specific evidence is added.
+    """
+    profile = profile_for(texture)
+    if not profile:
+        return []
+    explicit = profile.get("cropSuitability", {})
+    category_rules = {
+        "loam": {"default": "good"},
+        "clay": {"Root crops": "caution", "Fruit trees": "caution", "default": "good"},
+        "silty": {"Root crops": "caution", "Legumes": "caution", "default": "good"},
+        "sandy": {"Leafy and fruit vegetables": "caution", "Grains": "caution", "default": "good"},
+        "peaty": {"Grains": "poor", "Fruit trees": "caution", "Bulbs and spices": "caution", "default": "caution"},
+    }.get(texture, {"default": "unknown"})
+    ranked = []
+    for crop in PH_CROPS:
+        status = explicit.get(crop["slug"])
+        if status is None:
+            status = category_rules.get(crop.get("category"), category_rules["default"])
+        if status in {"good", "caution"}:
+            ranked.append({"slug": crop["slug"], "name": crop["name"], "category": crop["category"], "status": status, "curated": crop["slug"] in explicit})
+    ranked.sort(key=lambda item: (0 if item["curated"] else 1, {"good": 0, "caution": 1}[item["status"]], item["name"]))
+    for item in ranked:
+        item.pop("curated", None)
+    return ranked[:limit]
 
 
 def _response_text(response):
@@ -166,10 +203,12 @@ def analyze_image(image_bytes, mime_type, details=None):
     profile = profile_for(texture)
     return {
         "suggestedTexture": texture,
-        "suggestedSoilType": profile["name"] if profile else "Unknown",
+        "suggestedSoilType": texture.title() if profile else "Unknown",
+        "soilProfileName": profile["name"] if profile else "Unknown",
         "confidence": raw.get("confidence", "low"),
         "observations": [str(x) for x in raw.get("observations", [])][:6],
         "limitations": [str(x) for x in raw.get("limitations", [])][:6] or ["A photo cannot measure pH, nutrients, salinity, or drainage."],
         "recommendedChecks": [str(x) for x in raw.get("recommendedChecks", [])][:6],
         "datasetProfile": profile,
+        "recommendedCrops": recommended_crops(texture),
     }
