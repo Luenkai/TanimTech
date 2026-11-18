@@ -1,9 +1,8 @@
 """Optional linear-regression model for crop outcomes.
 
-This module is intentionally not imported by the existing Flask routes. It is a
-safe extension point for experiments once real, labeled farm-outcome data is
-available. It uses ordinary least-squares linear regression implemented with
-Python's standard library, so no ML package is required.
+This module is intentionally separate from the existing recommendation logic.
+It uses scikit-learn's LinearRegression once real, labeled farm-outcome data is
+available.
 """
 
 from __future__ import annotations
@@ -13,6 +12,8 @@ import pickle
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
+
+from sklearn.linear_model import LinearRegression
 
 
 FEATURE_COLUMNS = (
@@ -78,34 +79,27 @@ class CropOutcomeDataset:
 
 
 class CropOutcomeRanker:
-    """Train and use an ordinary least-squares linear-regression model.
+    """Train and use scikit-learn's ordinary least-squares regression model.
 
     The target is a normalized observed outcome score from 0 to 1. The model
-    adds an intercept, solves the normal equations, and clips predictions to
-    that target range. It does not invent labels or alter the existing
-    rule-based recommendation engine.
+    fits an intercept and clips predictions to that target range. It does not
+    invent labels or alter the existing rule-based recommendation engine.
     """
 
     def __init__(self) -> None:
-        self.coefficients: tuple[float, ...] | None = None
+        self.model = LinearRegression()
         self.is_fitted = False
 
     def fit(self, dataset: CropOutcomeDataset) -> "CropOutcomeRanker":
-        matrix = [[1.0, *row] for row in dataset.features]
-        transpose = list(zip(*matrix))
-        gram = [[sum(a * b for a, b in zip(column_a, column_b)) for column_b in transpose] for column_a in transpose]
-        target_vector = [sum(a * y for a, y in zip(column, dataset.targets)) for column in transpose]
-        try:
-            self.coefficients = tuple(_solve_linear_system(gram, target_vector))
-        except ValueError as exc:
-            raise DatasetError("training data has dependent or duplicate features; linear regression cannot be solved") from exc
+        self.model.fit(list(dataset.features), list(dataset.targets))
         self.is_fitted = True
         return self
 
     def predict(self, rows: Sequence[Mapping[str, Any]]) -> list[float]:
-        if not self.is_fitted or self.coefficients is None:
+        if not self.is_fitted:
             raise RuntimeError("fit the ranker before calling predict")
-        return [max(0.0, min(1.0, _dot(self.coefficients, [1.0, *_feature_row(row)]))) for row in rows]
+        predictions = self.model.predict([_feature_row(row) for row in rows])
+        return [max(0.0, min(1.0, float(value))) for value in predictions]
 
     def rank(self, candidates: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
         """Return candidates sorted by predicted outcome, highest first."""
@@ -117,14 +111,14 @@ class CropOutcomeRanker:
         if not self.is_fitted:
             raise RuntimeError("fit the ranker before saving it")
         with Path(path).open("wb") as handle:
-            pickle.dump({"coefficients": self.coefficients}, handle)
+            pickle.dump({"model": self.model}, handle)
 
     @classmethod
     def load(cls, path: str | Path) -> "CropOutcomeRanker":
         with Path(path).open("rb") as handle:
             payload = pickle.load(handle)
         ranker = cls()
-        ranker.coefficients = tuple(payload["coefficients"])
+        ranker.model = payload["model"]
         ranker.is_fitted = True
         return ranker
 
@@ -137,26 +131,3 @@ def _feature_row(row: Mapping[str, Any]) -> list[float]:
         return [float(row[column]) for column in FEATURE_COLUMNS]
     except (TypeError, ValueError) as exc:
         raise DatasetError("prediction row contains a non-numeric value") from exc
-
-
-def _dot(left: Sequence[float], right: Sequence[float]) -> float:
-    return sum(a * b for a, b in zip(left, right))
-
-
-def _solve_linear_system(matrix: list[list[float]], vector: list[float]) -> list[float]:
-    """Solve a square system with Gaussian elimination and partial pivoting."""
-    n = len(vector)
-    augmented = [row[:] + [vector[index]] for index, row in enumerate(matrix)]
-    for column in range(n):
-        pivot = max(range(column, n), key=lambda index: abs(augmented[index][column]))
-        if abs(augmented[pivot][column]) < 1e-12:
-            raise ValueError("singular matrix")
-        augmented[column], augmented[pivot] = augmented[pivot], augmented[column]
-        divisor = augmented[column][column]
-        augmented[column] = [value / divisor for value in augmented[column]]
-        for row in range(n):
-            if row == column:
-                continue
-            factor = augmented[row][column]
-            augmented[row] = [a - factor * b for a, b in zip(augmented[row], augmented[column])]
-    return [augmented[index][-1] for index in range(n)]

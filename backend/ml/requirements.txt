@@ -1,0 +1,2 @@
+# Optional dependency for backend/tanimtech/ml_crop_ranker.py
+scikit-learn>=1.4
