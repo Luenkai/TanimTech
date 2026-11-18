@@ -4,6 +4,7 @@ from .. import auth
 from .. import store
 from ..planting_calendar import seasonal_calendar, climate_calendar
 from ..scoring import recommend
+from ..crop_suitability import ranking_status
 from ..validate import validate_conditions, validate_monthly_climate
 
 bp = Blueprint("profiles", __name__)
@@ -104,7 +105,7 @@ def profile_recommendations(pid):
     if not p:
         return _missing()
     ctx = _ctx(p, plantCategory=request.args.get("plantCategory"), lifeForm=request.args.get("lifeForm"))
-    return jsonify({"profile": p, "results": recommend(store.crops.all(), p, ctx)})
+    return jsonify({"profile": p, "results": recommend(store.crops.all(), p, ctx), "rankingModel": ranking_status()})
 
 
 @bp.get("/<int:pid>/calendar")
@@ -128,6 +129,7 @@ def profile_overview(pid):
     top = results[0]["slug"] if results else None
     return jsonify({
         "profile": p,
+        "rankingModel": ranking_status(),
         "snapshot": {k: p[k] for k in ("soilPh", "temperature", "humidity", "rainfall")},
         "topCrops": results[:3],
         "calendarForTopCrop": next((r for r in _calendar_for(p)["rows"] if r["slug"] == top), None),

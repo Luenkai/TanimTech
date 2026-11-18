@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Manual soil information — TanimTech</title>
+  <script src="js/access-gate.js?v=6"></script>
+  <script src="https://cdn.tailwindcss.com"></script><script>tailwind.config={theme:{extend:{colors:{paper:'#f6f5ee',forest:'#174b3a',ink:'#274c3e',muted:'#788073',line:'#dce0d4',leaf:'#e9efdc',lime:'#d9e99b'}}}}</script>
+  <link rel="stylesheet" href="css/site.css?v=8">
+</head>
+<body>
+  <header class="site-header"><div class="header-inner"><a class="brand" href="homepage.html"><span class="brand-mark">♧</span>tanimtech.</a><nav class="main-nav" aria-label="Main navigation">
+    <a href="homepage.html">Overview</a>
+    <details class="nav-dropdown"><summary>Explore</summary><div class="nav-dropdown-menu"><a href="crop-guide.html">Crop guide</a><a href="homepage.html#crops">Featured crops</a></div></details>
+    <details class="nav-dropdown"><summary>Plan</summary><div class="nav-dropdown-menu"><a href="conditions.html">Get recommendations</a><a href="recommendations.html">Compare crops</a><a href="homepage.html#calendar">Climate inputs</a><a href="profile.html">My profile</a></div></details>
+    <details class="nav-dropdown"><summary class="current">More</summary><div class="nav-dropdown-menu"><a href="homepage.html#how-it-works">How it works</a><a href="homepage.html#methodology">Methodology</a><a href="soil-photo.html">Soil photo</a><a href="soil-manual.html" aria-current="page">Manual soil info</a><a href="photo-review.html">Photo review</a><a href="soil-context.html">Soil context</a></div></details>
+  </nav><div class="header-actions"><a class="avatar" data-user-avatar href="profile.html" aria-label="Open your TanimTech profile">TT</a></div></div></header>
+  <main class="page-shell py-10">
+    <a class="text-xs font-bold text-forest" href="soil-photo.html">← Back to soil photo options</a>
+    <p class="eyebrow mt-6">CROP PLANNING / MANUAL SOIL INFORMATION</p>
+    <h1 class="section-heading mt-3">Enter what you know about your soil.</h1>
+    <p class="muted mt-3">This form is separate from the photo and texture-matching workflow. No image or external service is needed. Leave details blank if you do not know them, and use test results for measurements.</p>
+    <div class="mt-8 grid items-start gap-8 lg:grid-cols-[2.1fr_1fr]">
+      <section class="card p-7">
+        <p class="eyebrow">YOUR SOIL DETAILS</p>
+        <h2 class="serif mt-3 text-3xl">Known or measured information</h2>
+        <div class="mt-6 grid gap-x-6 gap-y-5 sm:grid-cols-2">
+          <label><span class="field-label">Soil texture</span><span class="field-control"><select data-context-input data-input-key="soilTexture" aria-label="Soil texture"><option value="" selected>Not entered</option><option>Clay</option><option>Loam</option><option>Sandy</option><option>Silty</option><option>Peaty</option><option>Unknown</option></select><span aria-hidden="true">⌄</span></span></label>
+          <label><span class="field-label">Measured soil pH</span><span class="field-control"><input data-context-input data-input-key="soilPh" type="number" min="0" max="14" step="0.1" inputmode="decimal" placeholder="e.g. 6.2" aria-label="Measured soil pH"><small>pH</small></span><span class="field-note">Optional. Use a soil-test result; do not estimate from appearance.</span></label>
+          <label><span class="field-label">Drainage</span><span class="field-control"><select data-context-input data-input-key="drainage" aria-label="Drainage"><option value="" selected>Not entered</option><option>Poor</option><option>Moderate</option><option>Well-drained</option><option>Rapid</option><option>Unknown</option></select><span aria-hidden="true">⌄</span></span></label>
+          <label><span class="field-label">Moisture at sampling</span><span class="field-control"><select data-context-input data-input-key="moisture" aria-label="Moisture at sampling"><option value="" selected>Not entered</option><option>Dry</option><option>Moist</option><option>Waterlogged</option><option>Unknown</option></select><span aria-hidden="true">⌄</span></span></label>
+          <label><span class="field-label">Salinity concern</span><span class="field-control"><select data-context-input data-input-key="salinity" aria-label="Salinity concern"><option value="" selected>Not entered</option><option>Low</option><option>Moderate</option><option>High</option><option>Unknown</option></select><span aria-hidden="true">⌄</span></span></label>
+          <label><span class="field-label">Organic matter</span><span class="field-control"><input data-context-input data-input-key="organicMatter" type="number" min="0" max="100" step="0.1" inputmode="decimal" placeholder="e.g. 3.5" aria-label="Organic matter"><small>%</small></span><span class="field-note">Use a lab result if available.</span></label>
+          <label class="sm:col-span-2"><span class="field-label">Soil notes</span><span class="field-control"><input data-context-input data-input-key="soilNotes" type="text" maxlength="300" placeholder="e.g. puddles after heavy rain" aria-label="Soil notes"></span></label>
+        </div>
+        <div class="mt-6 flex flex-wrap gap-3"><button class="button button-primary" type="button" data-save-soil-details>Save soil details</button><a class="button" href="conditions.html">Continue to field conditions ↗</a></div>
+        <p class="field-note mt-3">Values save on this device and carry over to field conditions. Crop recommendations still need climate inputs.</p>
+      </section>
+      <aside class="space-y-5">
+        <section class="warning"><h2 class="font-bold">Use measured values when available</h2><p class="muted mt-2 text-xs">A soil photo cannot reliably measure pH, nutrients, salinity, drainage, or organic matter. Leave uncertain details blank rather than guessing.</p></section>
+        <section class="card p-7"><p class="eyebrow">SOIL PHOTO</p><h2 class="serif mt-3 text-2xl">Want to keep a photo with your soil notes?</h2><p class="muted mt-3 text-xs">Photos stay on this device. Select a texture yourself to view local crop matches; the photo is not classified.</p><a class="button mt-4" href="soil-photo.html">Open soil photo page ↗</a></section>
+      </aside>
+    </div>
+  </main>
+  <footer class="site-footer"><div class="footer-inner"><a class="footer-brand" href="homepage.html">tanimtech.</a><p>Plan from measured conditions and traceable sources.</p><nav class="footer-links"><a href="homepage.html#guide">How to use</a><a href="homepage.html#methodology">Sources</a><a href="homepage.html#how-it-works">Help</a></nav></div><div class="footer-bottom"><p>© 2026 TanimTech · Philippine crop planning</p><p>Source-aware planning, not a yield guarantee.</p></div></footer>
+  <script src="js/site.js?v=32"></script>
+</body>
+</html>

@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, request
 from .. import store
 from ..crop_shape import shape_crop
 from ..scoring import recommend
+from ..crop_suitability import ranking_status
 from ..validate import validate_conditions, CORE
 
 bp = Blueprint("compare", __name__)
@@ -33,5 +34,6 @@ def compare():
         fits = {r["slug"]: r for r in recommend(found, core, context)}
     return jsonify({
         "crops": [{**shape_crop(c), "fit": fits[c["slug"]] if fits else None} for c in found],
+        "rankingModel": ranking_status() if fits is not None else None,
         "note": "Neither crop is automatically a better choice. Fit is a demo score, not a probability of success.",
     })

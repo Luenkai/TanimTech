@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 .venv/
+.cache/
 storage/store.json
 data_pipeline/raw/kaggle_crop_soil/
 data_pipeline/raw/kaggle_yield/

@@ -84,4 +84,4 @@ Yield values are preserved as published and are also compared with `production /
 - Rows flagged `needs_review = 1` in crops_clean.csv have no real humidity source. Fill them by hand or reduce the humidity weight.
 - Annual/12 rainfall is a rough conversion, and the thresholds in `config.py` are demo values.
 - The cleaning was tested on small invented tables that imitate the file layouts, not on your real downloads.
-- The Kaggle cleaner is covered by unit tests and preserves source limitations in `kaggle_clean_report.json`.
+- The Kaggle cleaner is covered by unit tests and preserves source limitations in `kaggle_clean_report.json`. Reconciled, complete yield rows are also used by the provisional ML recommendation advisory; the model filters to rows within 10% of `production / area` and keeps the India/non-farm-level limitations visible in the API response.

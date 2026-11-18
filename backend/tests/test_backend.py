@@ -43,13 +43,10 @@ class BackendTests(unittest.TestCase):
         self.assertEqual(self.c.get("/api/crops/pechay").json["bands"]["soilPh"], [6, 7.5])
         self.assertEqual(self.c.get("/api/crops/nope").status_code, 404)
 
-    def test_static_crop_guide_data_matches_cleaned_dataset(self):
-        response = self.c.get("/js/crop-guide-data.json")
-        try:
-            self.assertEqual(response.status_code, 200)
-            public_crops = {crop["slug"]: crop for crop in response.json["crops"]}
-        finally:
-            response.close()
+    def test_crop_api_matches_cleaned_dataset(self):
+        response = self.c.get("/api/crops")
+        self.assertEqual(response.status_code, 200)
+        public_crops = {crop["slug"]: crop for crop in response.json["crops"]}
         source_path = os.path.join(os.path.dirname(__file__), "..", "data_pipeline", "clean", "crops_clean.json")
         with open(source_path, encoding="utf-8") as source_file:
             source_crops = json.load(source_file)
@@ -74,6 +71,30 @@ class BackendTests(unittest.TestCase):
         self.assertTrue(all(0 <= x["fit"] <= 100 for x in res))
         self.assertEqual(sum(b["maxPoints"] for b in res[0]["breakdown"]), 100)
         self.assertIn("dataEvidence", res[0])
+
+    def test_validated_ml_advisory_is_separate_from_fit(self):
+        response = self.c.post("/api/recommendations", json={**SAMPLE, "catalog": "extended"})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json
+        model = payload["rankingModel"]
+        self.assertTrue(model["active"], model)
+        self.assertLess(model["validation"]["modelMse"], model["validation"]["ruleBaselineMse"])
+
+        results = {result["slug"]: result for result in payload["results"]}
+        maize = results["mais"]
+        self.assertIn("mlSuitability", maize)
+        self.assertEqual(maize["rankingMethod"], "rule-plus-ml-advisory")
+        expected_rank = 0.8 * maize["fit"] + 0.2 * maize["mlSuitability"]
+        self.assertLessEqual(abs(maize["rankScore"] - expected_rank), 0.5)
+        self.assertEqual(results["pechay"]["rankingMethod"], "rule-based")
+        self.assertEqual(results["pechay"]["rankScore"], results["pechay"]["fit"])
+        first = payload["results"][0]
+        expected_label = (
+            "BEST MODEL-ASSISTED MATCH"
+            if first["rankingMethod"] == "rule-plus-ml-advisory"
+            else "CLOSEST FIT"
+        )
+        self.assertEqual(first["label"], expected_label)
 
     def test_soil_dataset_and_optional_details(self):
         dataset = self.c.get("/api/soil/dataset")
