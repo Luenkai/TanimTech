@@ -1,8 +1,9 @@
-"""Optional supervised ML ranker for crop outcomes.
+"""Optional linear-regression model for crop outcomes.
 
 This module is intentionally not imported by the existing Flask routes. It is a
-safe extension point for experiments once a real, labeled farm-outcome dataset
-is available. Choose either LightGBM or XGBoost at construction time.
+safe extension point for experiments once real, labeled farm-outcome data is
+available. It uses ordinary least-squares linear regression implemented with
+Python's standard library, so no ML package is required.
 """
 
 from __future__ import annotations
@@ -77,54 +78,34 @@ class CropOutcomeDataset:
 
 
 class CropOutcomeRanker:
-    """Train and use a LightGBM or XGBoost crop-outcome model.
+    """Train and use an ordinary least-squares linear-regression model.
 
-    The target is a normalized observed outcome score from 0 to 1. This class
-    does not invent labels, create synthetic outcomes, or alter TanimTech's
-    existing rule-based recommendation engine.
+    The target is a normalized observed outcome score from 0 to 1. The model
+    adds an intercept, solves the normal equations, and clips predictions to
+    that target range. It does not invent labels or alter the existing
+    rule-based recommendation engine.
     """
 
-    def __init__(self, backend: str = "lightgbm", **model_options: Any) -> None:
-        backend = backend.lower().strip()
-        if backend not in {"lightgbm", "xgboost"}:
-            raise ValueError("backend must be 'lightgbm' or 'xgboost'")
-        self.backend = backend
-        self.model_options = model_options
-        self.model = self._build_model()
+    def __init__(self) -> None:
+        self.coefficients: tuple[float, ...] | None = None
         self.is_fitted = False
 
-    def _build_model(self) -> Any:
-        options = {
-            "n_estimators": 200,
-            "learning_rate": 0.05,
-            "max_depth": 6,
-            "random_state": 42,
-        }
-        options.update(self.model_options)
-        if self.backend == "lightgbm":
-            try:
-                from lightgbm import LGBMRegressor
-            except ImportError as exc:
-                raise ImportError("Install optional ML dependencies with: pip install lightgbm") from exc
-            options.setdefault("verbosity", -1)
-            return LGBMRegressor(objective="regression", **options)
-        try:
-            from xgboost import XGBRegressor
-        except ImportError as exc:
-            raise ImportError("Install optional ML dependencies with: pip install xgboost") from exc
-        options.setdefault("verbosity", 0)
-        return XGBRegressor(objective="reg:squarederror", **options)
-
     def fit(self, dataset: CropOutcomeDataset) -> "CropOutcomeRanker":
-        self.model.fit(list(dataset.features), list(dataset.targets))
+        matrix = [[1.0, *row] for row in dataset.features]
+        transpose = list(zip(*matrix))
+        gram = [[sum(a * b for a, b in zip(column_a, column_b)) for column_b in transpose] for column_a in transpose]
+        target_vector = [sum(a * y for a, y in zip(column, dataset.targets)) for column in transpose]
+        try:
+            self.coefficients = tuple(_solve_linear_system(gram, target_vector))
+        except ValueError as exc:
+            raise DatasetError("training data has dependent or duplicate features; linear regression cannot be solved") from exc
         self.is_fitted = True
         return self
 
     def predict(self, rows: Sequence[Mapping[str, Any]]) -> list[float]:
-        if not self.is_fitted:
+        if not self.is_fitted or self.coefficients is None:
             raise RuntimeError("fit the ranker before calling predict")
-        matrix = [_feature_row(row) for row in rows]
-        return [max(0.0, min(1.0, float(value))) for value in self.model.predict(matrix)]
+        return [max(0.0, min(1.0, _dot(self.coefficients, [1.0, *_feature_row(row)]))) for row in rows]
 
     def rank(self, candidates: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
         """Return candidates sorted by predicted outcome, highest first."""
@@ -136,16 +117,14 @@ class CropOutcomeRanker:
         if not self.is_fitted:
             raise RuntimeError("fit the ranker before saving it")
         with Path(path).open("wb") as handle:
-            pickle.dump({"backend": self.backend, "model_options": self.model_options, "model": self.model}, handle)
+            pickle.dump({"coefficients": self.coefficients}, handle)
 
     @classmethod
     def load(cls, path: str | Path) -> "CropOutcomeRanker":
         with Path(path).open("rb") as handle:
             payload = pickle.load(handle)
-        ranker = cls.__new__(cls)
-        ranker.backend = payload["backend"]
-        ranker.model_options = payload.get("model_options", {})
-        ranker.model = payload["model"]
+        ranker = cls()
+        ranker.coefficients = tuple(payload["coefficients"])
         ranker.is_fitted = True
         return ranker
 
@@ -158,3 +137,26 @@ def _feature_row(row: Mapping[str, Any]) -> list[float]:
         return [float(row[column]) for column in FEATURE_COLUMNS]
     except (TypeError, ValueError) as exc:
         raise DatasetError("prediction row contains a non-numeric value") from exc
+
+
+def _dot(left: Sequence[float], right: Sequence[float]) -> float:
+    return sum(a * b for a, b in zip(left, right))
+
+
+def _solve_linear_system(matrix: list[list[float]], vector: list[float]) -> list[float]:
+    """Solve a square system with Gaussian elimination and partial pivoting."""
+    n = len(vector)
+    augmented = [row[:] + [vector[index]] for index, row in enumerate(matrix)]
+    for column in range(n):
+        pivot = max(range(column, n), key=lambda index: abs(augmented[index][column]))
+        if abs(augmented[pivot][column]) < 1e-12:
+            raise ValueError("singular matrix")
+        augmented[column], augmented[pivot] = augmented[pivot], augmented[column]
+        divisor = augmented[column][column]
+        augmented[column] = [value / divisor for value in augmented[column]]
+        for row in range(n):
+            if row == column:
+                continue
+            factor = augmented[row][column]
+            augmented[row] = [a - factor * b for a, b in zip(augmented[row], augmented[column])]
+    return [augmented[index][-1] for index in range(n)]

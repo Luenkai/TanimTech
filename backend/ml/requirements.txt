@@ -1,3 +1,0 @@
-# Optional dependencies for backend/tanimtech/ml_crop_ranker.py
-lightgbm>=4.0
-xgboost>=2.0
