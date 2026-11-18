@@ -1,13 +1,13 @@
-# Optional crop-outcome machine learning
+# Crop-outcome machine learning
 
-`backend/tanimtech/ml_crop_ranker.py` is a standalone supervised **ordinary linear-regression** module using scikit-learn's `LinearRegression`. It is connected only to the isolated ML endpoint, so the current rule-based recommendation behavior remains unchanged.
+`backend/tanimtech/ml_crop_ranker.py` is the supervised **ordinary linear-regression** module used by the ML endpoint. It uses scikit-learn's `LinearRegression` and is included as a required backend dependency. The existing rule-based recommendation behavior remains unchanged.
 
 The model requires real labeled farm outcomes. It does not generate synthetic labels and should not be trained from the 719-plant reference catalog alone. The catalog describes crop requirements, but it does not contain observed survival, harvest, or farmer-success outcomes.
 
-Install the optional ML dependency with:
+Install all backend dependencies, including scikit-learn, with:
 
 ```bash
-pip install -r backend/ml/requirements.txt
+pip install -r backend/requirements.txt
 ```
 
 Training CSV columns:
@@ -35,7 +35,7 @@ ranked = ranker.rank([
 ])
 ```
 
-This module is advisory only. It should eventually be combined with the existing transparent crop-fit score, not used to replace it or make unsupported soil-chemistry or yield guarantees. The isolated endpoint below does not change the existing recommendation API.
+This module is advisory only. It is available through the ML endpoint, but it should not replace the existing transparent crop-fit score or make unsupported soil-chemistry or yield guarantees. The ML endpoint does not change the existing recommendation API.
 
 The implementation imports:
 
@@ -43,7 +43,7 @@ The implementation imports:
 from sklearn.linear_model import LinearRegression
 ```
 
-## Optional API endpoint
+## ML API endpoint
 
 This branch exposes the model separately at `POST /api/ml/recommendations`. It accepts the labeled rows and candidate rows in one JSON request, then trains and ranks for that request:
 

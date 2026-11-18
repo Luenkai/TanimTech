@@ -1,4 +1,4 @@
-"""Optional linear-regression crop-outcome endpoint."""
+"""Linear-regression crop-outcome endpoint."""
 
 from flask import Blueprint, jsonify, request
 
@@ -9,7 +9,7 @@ bp = Blueprint("ml", __name__)
 
 @bp.post("/recommendations")
 def ml_recommendations():
-    """Train an advisory linear model from labeled rows and rank candidates.
+    """Train the linear model from labeled rows and rank candidates.
 
     This is deliberately separate from /api/recommendations. Production use
     should validate and authorize training data before exposing this endpoint.
