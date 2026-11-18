@@ -62,6 +62,8 @@ def analyze():
     uploaded = request.files.get("image")
     if not uploaded or not uploaded.filename:
         return jsonify({"error": "Choose a soil image first."}), 400
+    if request.form.get("consent") != "true":
+        return jsonify({"error": "Confirm consent before requesting an optional soil image review."}), 400
     mime_type = uploaded.mimetype or ""
     if mime_type not in {"image/jpeg", "image/png", "image/webp"}:
         return jsonify({"error": "Upload a JPG, PNG, or WebP soil image."}), 400

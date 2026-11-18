@@ -53,6 +53,15 @@ img { display: block; max-width: 100%; }
 .login-language-switcher { justify-content: flex-end; margin-bottom: 12px; }
 .workspace-pill, .badge { display: inline-flex; align-items: center; border-radius: 3px; background: var(--lime); color: var(--forest); padding: 5px 10px; font-size: 12px; font-weight: 700; line-height: 1.25; text-transform: uppercase; letter-spacing: .025em; }
 .avatar { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; color: white; background: var(--forest); font-size: 12px; }
+.profile-actions-menu { position: relative; }
+.profile-menu-trigger { border: 0; padding: 0; transition: background-color .16s ease; }
+.profile-menu-trigger:hover { background: var(--ink); }
+.profile-menu-trigger svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-width: 1.8; }
+.profile-actions-panel { position: absolute; z-index: 80; top: calc(100% + 12px); right: 0; width: min(260px, calc(100vw - 32px)); padding: 7px; border: 1px solid var(--line); border-radius: 5px; background: var(--paper-white); box-shadow: 0 12px 30px rgb(23 75 58 / 12%); }
+.profile-actions-panel[hidden] { display: none !important; }
+.profile-actions-panel a, .profile-actions-panel button { display: flex; width: 100%; min-height: 44px; align-items: center; border: 0; border-radius: 3px; background: transparent; padding: 10px 11px; color: var(--ink); text-align: left; font-size: 14px; }
+.profile-actions-panel a:hover, .profile-actions-panel button:hover { background: var(--leaf); color: var(--forest); }
+.profile-actions-panel button:last-child { margin-top: 5px; border-top: 1px solid var(--line); }
 .page-shell { max-width: 1440px; margin: auto; padding: 0 64px; }
 .page-shell .grid > *, .page-shell .flex > * { min-width: 0; }
 .eyebrow { color: var(--forest); font-size: 12px; line-height: 1.4; font-weight: 700; letter-spacing: .055em; text-transform: uppercase; }
@@ -65,6 +74,7 @@ img { display: block; max-width: 100%; }
 .login-page .text-sm { font-size: 14px; line-height: 1.5; }
 .login-page .text-xs, .login-page .field-note { font-size: 12px; line-height: 1.45; }
 .card { border: 1px solid var(--line); border-radius: 8px; background: var(--paper-white); }
+.profile-page > section { scroll-margin-top: 28px; }
 .button { display: inline-flex; justify-content: center; align-items: center; gap: 12px; min-height: 48px; border: 1px solid var(--line); border-radius: 4px; background: var(--paper-white); padding: 0 18px; color: var(--forest); font-size: 14px; font-weight: 700; white-space: nowrap; }
 .button-primary { border-color: var(--forest); background: var(--forest); color: white; }
 .button:hover { filter: brightness(.97); }

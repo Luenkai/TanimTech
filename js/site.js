@@ -161,9 +161,11 @@
     const initials = display.split(/[\s._-]+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || display.slice(0, 2).toUpperCase();
     document.querySelectorAll("[data-user-avatar]").forEach((avatar) => {
       if (initials) {
-        avatar.textContent = initials;
+        const initialsNode = avatar.querySelector("[data-avatar-initials]");
+        if (initialsNode) initialsNode.textContent = initials;
+        else if (!avatar.matches("[data-profile-menu-trigger]")) avatar.textContent = initials;
         avatar.title = display;
-        avatar.setAttribute("aria-label", `Open profile for ${display}`);
+        avatar.setAttribute("aria-label", avatar.matches("[data-profile-menu-trigger]") ? `Open profile actions for ${display}` : `Open profile for ${display}`);
       }
     });
   };
@@ -532,6 +534,7 @@
     try {
       const form = new FormData();
       form.append("image", currentPhoto.blob, currentPhoto.name || "soil-photo.jpg");
+      form.append("consent", consentCheckbox.checked ? "true" : "false");
       const soilDetails = Object.fromEntries(["soilTexture", "drainage", "moisture", "salinity", "organicMatter", "soilNotes"].map((key) => [key, state[key] || ""]));
       form.append("details", JSON.stringify(soilDetails));
       const response = await fetch(apiUrl("/api/soil/analyze"), { method: "POST", body: form });
@@ -1137,10 +1140,39 @@
   const profilePage = document.querySelector("[data-profile-page]");
   if (profilePage) {
     const profileState = profilePage.querySelector("[data-profile-state]");
+    const profileMenu = document.querySelector("[data-profile-actions]");
+    const profileMenuTrigger = profileMenu?.querySelector("[data-profile-menu-trigger]");
+    const profileMenuPanel = profileMenu?.querySelector(".profile-actions-panel");
+    const setProfileMenuOpen = (isOpen) => {
+      if (!profileMenuTrigger || !profileMenuPanel) return;
+      profileMenuTrigger.setAttribute("aria-expanded", String(isOpen));
+      profileMenuPanel.hidden = !isOpen;
+    };
+    profileMenuTrigger?.addEventListener("click", () => setProfileMenuOpen(profileMenuTrigger.getAttribute("aria-expanded") !== "true"));
+    profileMenuPanel?.querySelectorAll("[data-profile-menu-close]").forEach((link) => link.addEventListener("click", () => {
+      setProfileMenuOpen(false);
+      const destination = document.querySelector(link.getAttribute("href"));
+      if (destination) window.setTimeout(() => destination.focus({ preventScroll: true }), 0);
+    }));
+    profileMenu?.addEventListener("focusout", (event) => {
+      if (!profileMenu.contains(event.relatedTarget)) setProfileMenuOpen(false);
+    });
+    document.addEventListener("click", (event) => {
+      if (profileMenu && !profileMenu.contains(event.target)) setProfileMenuOpen(false);
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && profileMenuTrigger?.getAttribute("aria-expanded") === "true") {
+        setProfileMenuOpen(false);
+        profileMenuTrigger.focus();
+      }
+    });
     const profileEscape = (value) => String(value ?? "").replace(/[&<>\"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character]));
     const readLocal = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); } catch { return fallback; } };
-    const localProfiles = readLocal("tanimtech-local-profiles", []);
-    const localRecommendations = readLocal("tanimtech-saved-recommendations", []);
+    const asList = (value) => Array.isArray(value) ? value : [];
+    const localProfiles = asList(readLocal("tanimtech-local-profiles", []));
+    const localRecommendations = asList(readLocal("tanimtech-saved-recommendations", []));
+    let displayedProfiles = localProfiles;
+    let displayedRecommendations = localRecommendations;
     const nameInput = profilePage.querySelector("[data-profile-name]");
     const savedName = localStorage.getItem("tanimtech-profile-name") || "Field planner";
     if (nameInput) nameInput.value = savedName;
@@ -1298,25 +1330,36 @@
       pages.forEach((pageLines) => { const pageId = objects.length; objects.push(""); const contentId = objects.length; objects.push(""); pageIds.push(pageId); objects[pageId] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 3 0 R >> >> /Contents ${contentId} 0 R >>`; const commands = ["BT", "/F1 11 Tf", "50 760 Td", "14 TL", ...pageLines.map((line, lineIndex) => `${lineIndex ? "T* " : ""}(${pdfSafe(line)}) Tj`), "ET"].join("\n"); objects[contentId] = `<< /Length ${commands.length} >>\nstream\n${commands}\nendstream`; });
       objects[2] = `<< /Type /Pages /Kids [${pageIds.map((id) => `${id} 0 R`).join(" ")}] /Count ${pageIds.length} >>`;
       let pdf = "%PDF-1.4\n"; const offsets = [0]; objects.slice(1).forEach((object, index) => { offsets.push(pdf.length); pdf += `${index + 1} 0 obj\n${object}\nendobj\n`; }); const xref = pdf.length; pdf += `xref\n0 ${objects.length}\n0000000000 65535 f \n${offsets.slice(1).map((offset) => `${String(offset).padStart(10, "0")} 00000 n `).join("\n")}\ntrailer\n<< /Size ${objects.length} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
-      const blob = new Blob([pdf], { type: "application/pdf" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = `${(nameInput?.value || "tanimtech-profile").toLowerCase().replace(/[^a-z0-9]+/g, "-")}-report.pdf`; link.click(); URL.revokeObjectURL(url); showToast("PDF report downloaded.");
+      const blob = new Blob([pdf], { type: "application/pdf" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = `${(nameInput?.value || "tanimtech-profile").toLowerCase().replace(/[^a-z0-9]+/g, "-")}-report.pdf`; link.click(); window.setTimeout(() => URL.revokeObjectURL(url), 1000); showToast("PDF report downloaded.");
     };
+    profileMenu?.querySelector("[data-profile-menu-export]")?.addEventListener("click", () => {
+      setProfileMenuOpen(false);
+      profileMenuTrigger?.focus();
+      downloadReport(displayedProfiles, displayedRecommendations);
+    });
+    profileMenu?.querySelector("[data-profile-menu-signout]")?.addEventListener("click", async () => {
+      setProfileMenuOpen(false);
+      try {
+        await window.tanimtechAuth?.signOut();
+      } catch (error) {
+        showToast(error.message || "Could not sign out.");
+      }
+    });
     profilePage.querySelector("[data-save-profile-name]")?.addEventListener("click", () => {
       const name = nameInput?.value.trim() || "Field planner";
       localStorage.setItem("tanimtech-profile-name", name);
+      const heading = profileState.querySelector("[data-profile-heading]");
+      if (heading) heading.textContent = name;
       showToast("Profile name saved on this device.");
     });
     const renderLocalProfile = (profiles, saved, note = "Saved locally. Clearing browser storage removes this profile and its history.") => {
+      displayedProfiles = asList(profiles);
+      displayedRecommendations = asList(saved);
+      profiles = displayedProfiles;
+      saved = displayedRecommendations;
       const profileCards = profiles.length ? profiles.map((item) => `<article class="card p-6"><div class="flex items-center justify-between gap-3"><span class="badge">FIELD PROFILE</span><small class="muted">${profileEscape((item.updatedAt || item.createdAt || "").slice(0, 10))}</small></div><h3 class="serif mt-4 text-2xl">${profileEscape(item.name)}</h3><p class="muted mt-2 text-xs">pH ${profileEscape(item.soilPh)} · ${profileEscape(item.temperature)} °C · ${profileEscape(item.rainfall)} mm/year</p></article>`).join("") : '<div class="notice text-xs">No saved farm profiles yet. Save field conditions from the conditions page to see them here.</div>';
       const recommendationCards = saved.length ? saved.slice(0, 6).map((item) => { const top = item.results?.[0]; return `<article class="card p-6"><div class="flex items-center justify-between gap-3"><span class="badge">SAVED SHORTLIST</span><small class="muted">${profileEscape((item.createdAt || "").slice(0, 10))}</small></div><h3 class="serif mt-4 text-2xl">${profileEscape(item.label)}</h3><p class="muted mt-2 text-xs">${top ? `Closest fit: ${profileEscape(top.name)} · ${top.fit}/100` : "No crop result saved"}</p><div class="mt-4 flex flex-wrap gap-2">${(item.results || []).slice(0, 3).map((result) => `<span class="badge">${profileEscape(result.name)}</span>`).join("")}</div></article>`; }).join("") : '<div class="notice text-xs">No saved recommendation shortlists yet. Generate a shortlist, then choose “Save this shortlist”.</div>';
-      profileState.innerHTML = `<div class="flex flex-wrap items-start justify-between gap-5"><div><p class="eyebrow">LOCAL PROFILE</p><h2 class="serif mt-3 text-3xl">${profileEscape(nameInput?.value || savedName)}</h2><p class="muted mt-2 text-sm">This device</p></div><span class="flex flex-wrap items-center gap-3"><span class="badge">PRIVATE LOCAL SPACE</span><button class="button" type="button" data-export-report>Download PDF report</button><button class="button" type="button" data-local-logout>Sign out</button></span></div><p class="field-note mt-4">${profileEscape(note)}</p><div class="divider my-7"></div><p class="eyebrow">YOUR FARM PROFILES</p><h2 class="serif mt-3 text-3xl">Saved field conditions.</h2><div class="mt-5 grid gap-5 md:grid-cols-2">${profileCards}</div><div class="divider my-8"></div><p class="eyebrow">YOUR RECOMMENDATION HISTORY</p><h2 class="serif mt-3 text-3xl">Shortlists made for you.</h2><div class="mt-5 grid gap-5 md:grid-cols-2">${recommendationCards}</div><p class="field-note mt-6">Recommendations are screening results based on the inputs saved at the time. They are not forecasts or guarantees.</p>`;
-      profileState.querySelector("[data-export-report]")?.addEventListener("click", () => downloadReport(profiles, saved));
-      profileState.querySelector("[data-local-logout]")?.addEventListener("click", async () => {
-        try {
-          await window.tanimtechAuth?.signOut();
-        } catch (error) {
-          showToast(error.message || "Could not sign out.");
-        }
-      });
+      profileState.innerHTML = `<div class="flex flex-wrap items-start justify-between gap-5"><div><p class="eyebrow">LOCAL PROFILE</p><h2 class="serif mt-3 text-3xl" data-profile-heading>${profileEscape(nameInput?.value || savedName)}</h2><p class="muted mt-2 text-sm">This device</p></div><span class="badge">PRIVATE LOCAL SPACE</span></div><p class="field-note mt-4">${profileEscape(note)}</p><div class="divider my-7"></div><p class="eyebrow">YOUR FARM PROFILES</p><h2 class="serif mt-3 text-3xl">Saved field conditions.</h2><div class="mt-5 grid gap-5 md:grid-cols-2">${profileCards}</div><div class="divider my-8"></div><p class="eyebrow">YOUR RECOMMENDATION HISTORY</p><h2 class="serif mt-3 text-3xl">Shortlists made for you.</h2><div class="mt-5 grid gap-5 md:grid-cols-2">${recommendationCards}</div><p class="field-note mt-6">Recommendations are screening results based on the inputs saved at the time. They are not forecasts or guarantees.</p>`;
     };
     renderLocalProfile(localProfiles, localRecommendations);
     fetch("/api/auth/me").then(readJsonResponse).then(async (authState) => {

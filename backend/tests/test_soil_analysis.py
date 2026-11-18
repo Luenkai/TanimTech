@@ -64,7 +64,7 @@ class SoilAnalysisTests(unittest.TestCase):
         with mock.patch("tanimtech.routes.soil.analyze_image", return_value=expected) as analyze:
             response = client.post(
                 "/api/soil/analyze",
-                data={"image": (io.BytesIO(b"image-data"), "soil.jpg", "image/jpeg"), "details": '{"soilTexture":"loam"}'},
+                data={"image": (io.BytesIO(b"image-data"), "soil.jpg", "image/jpeg"), "consent": "true", "details": '{"soilTexture":"loam"}'},
                 content_type="multipart/form-data",
             )
         self.assertEqual(response.status_code, 200)
@@ -79,11 +79,23 @@ class SoilAnalysisTests(unittest.TestCase):
         ):
             response = client.post(
                 "/api/soil/analyze",
-                data={"image": (io.BytesIO(b"image-data"), "soil.jpg", "image/jpeg")},
+                data={"image": (io.BytesIO(b"image-data"), "soil.jpg", "image/jpeg"), "consent": "true"},
                 content_type="multipart/form-data",
             )
         self.assertEqual(response.status_code, 502)
         self.assertEqual(response.json["error"], "The model does not exist.")
+
+    def test_analyze_endpoint_rejects_upload_without_explicit_consent(self):
+        client = create_app().test_client()
+        with mock.patch("tanimtech.routes.soil.analyze_image") as analyze:
+            response = client.post(
+                "/api/soil/analyze",
+                data={"image": (io.BytesIO(b"image-data"), "soil.jpg", "image/jpeg")},
+                content_type="multipart/form-data",
+            )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("consent", response.json["error"].lower())
+        analyze.assert_not_called()
 
     def test_analysis_returns_canonical_soil_type_and_crop_matches(self):
         raw = {"suggestedTexture": "loam", "confidence": "medium", "observations": [], "limitations": [], "recommendedChecks": []}
