@@ -9,13 +9,13 @@ CORE = {
 }
 OPTIONS = {
     "elevation": ["Lowland", "Upland", "Unknown"],
-    "soilType": ["Clay", "Loam", "Sandy", "Unknown"],
+    "soilType": ["Clay", "Loam", "Sandy", "Silty", "Peaty", "Unknown"],
     "soilTypeSource": ["manual", "user-confirmed", "model-suggested"],
     "season": ["Dry season", "Wet season", "Unknown"],
     "plantCategory": ["All categories", "Leafy and fruit vegetables", "Legumes", "Grains", "Root crops",
                       "Fruit trees", "Plantation crops", "Edible trees and herbs", "Fruits & nuts", "Vegetables"],
     "lifeForm": ["No preference", "Herb", "Vine", "Tree", "Shrub"],
-    # core = the 7 curated crops; extended = core + the ~700-plant edible ECOCROP catalog
+    # core = the 31 Philippine-facing crops; extended = core + the ~700-plant edible ECOCROP catalog
     "catalog": ["core", "extended"],
 }
 SOIL_DETAILS = {

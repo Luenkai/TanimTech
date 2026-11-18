@@ -3,13 +3,17 @@
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Review the details — TanimTech</title>
-  <script src="js/access-gate.js?v=1"></script>
+  <script src="js/access-gate.js?v=6"></script>
   <script src="https://cdn.tailwindcss.com"></script><script>tailwind.config={theme:{extend:{colors:{paper:'#f6f5ee',forest:'#174b3a',ink:'#274c3e',muted:'#788073',line:'#dce0d4',leaf:'#e9efdc',lime:'#d9e99b'}}}}</script>
-  <link rel="stylesheet" href="css/site.css?v=4">
+  <link rel="stylesheet" href="css/site.css?v=8">
 </head>
 <body>
-  <header class="site-header"><div class="header-inner"><a class="brand" href="index.html"><span class="brand-mark">♧</span>tanimtech.</a><nav class="main-nav"><a href="index.html#crops">Explore crops</a><a href="plants.html">Plant explorer</a><a href="index.html#calendar">Planting calendar</a><a href="index.html#methodology">Methodology</a></nav><div class="header-actions"><span class="workspace-pill">DEMO WORKSPACE</span><a class="avatar" href="profile.html" aria-label="Open your TanimTech profile">MR</a></div></div></header>
-  <div class="subnav"><nav class="subnav-links"><a href="index.html">Overview</a><a class="active" href="conditions.html">Get recommendations</a><a href="conditions.html" data-dev-feature="Farm profiles">My farm profiles</a><a href="recommendations.html">Compare crops</a></nav><span>Malinao demo farm &nbsp;/&nbsp; Laguna</span></div>
+  <header class="site-header"><div class="header-inner"><a class="brand" href="homepage.html"><span class="brand-mark">♧</span>tanimtech.</a><nav class="main-nav" aria-label="Main navigation">
+    <a href="homepage.html">Overview</a>
+    <details class="nav-dropdown"><summary>Explore</summary><div class="nav-dropdown-menu"><a href="crop-guide.html">Crop guide</a><a href="homepage.html#crops">Featured crops</a></div></details>
+    <details class="nav-dropdown"><summary>Plan</summary><div class="nav-dropdown-menu"><a href="conditions.html">Get recommendations</a><a href="recommendations.html">Compare crops</a><a href="homepage.html#calendar">Climate inputs</a><a href="profile.html">My profile</a></div></details>
+    <details class="nav-dropdown"><summary class="current">More</summary><div class="nav-dropdown-menu"><a href="homepage.html#how-it-works">How it works</a><a href="homepage.html#methodology">Methodology</a><a href="soil-photo.html">Soil photo</a><a href="photo-review.html" aria-current="page">Photo review</a><a href="soil-context.html">Soil context</a></div></details>
+  </nav><div class="header-actions"><a class="avatar" data-user-avatar href="profile.html" aria-label="Open your TanimTech profile">MR</a></div></div></header>
   <main class="page-shell py-10">
     <a class="text-xs font-bold text-forest" href="soil-photo.html">← Back to your conditions</a>
     <p class="eyebrow mt-6">CROP PLANNING / OPTIONAL SOIL PHOTO</p><h1 class="section-heading mt-3">Review the details, not just the photo.</h1><p class="muted mt-3">Check that your sample is visible before a tentative assessment. You can cancel, replace it or continue without a photo.</p>
@@ -18,14 +22,14 @@
       <section class="card p-7">
         <div class="flex flex-wrap items-start justify-between gap-4"><div><p class="eyebrow">02 / PHOTO REVIEW</p><h2 class="serif mt-3 text-3xl">Is this a useful close-up?</h2></div><span class="badge">EXAMPLE REVIEW STATE</span></div>
         <div class="mt-5 grid gap-6 md:grid-cols-[.9fr_1.1fr]">
-          <div><div class="photo-placeholder h-64" data-photo-review-placeholder><span class="text-2xl">▧</span><strong class="mt-2 text-xs">No photo selected</strong><span class="muted mt-1 text-xs">Return to capture or upload a soil photo</span></div><img class="photo-preview hidden" data-photo-review-image alt="Your selected soil photo"><p class="mt-3 text-xs font-bold" data-photo-review-name>No photo selected</p><p class="muted text-xs" data-photo-review-details>Photos remain on this device and are not uploaded or analyzed.</p><div class="mt-3 flex flex-wrap gap-4 text-xs font-bold"><a href="soil-photo.html">Retake / replace</a><button type="button" data-remove-photo>Remove photo</button></div></div>
-          <div><h3 class="font-bold">Before you continue</h3><p class="muted mt-1 text-xs">Use this checklist to review your own photo. It is not automated image analysis.</p><ul class="mt-4 space-y-3 text-xs"><li>□ &nbsp; Soil fills most of the frame</li><li>□ &nbsp; Natural light; no strong shadow</li><li>□ &nbsp; Grains and clumps look in focus</li><li>□ &nbsp; No faces or identifying details</li></ul><p class="muted mt-4 border-t border-line pt-4 text-xs">Your photo stays on this device. No image is uploaded, classified or sent for analysis.</p></div>
+          <div><div class="photo-placeholder h-64" data-photo-review-placeholder><span class="text-2xl">▧</span><strong class="mt-2 text-xs">No photo selected</strong><span class="muted mt-1 text-xs">Return to capture or upload a soil photo</span></div><img class="photo-preview hidden" data-photo-review-image alt="Your selected soil photo"><p class="mt-3 text-xs font-bold" data-photo-review-name>No photo selected</p><p class="muted text-xs" data-photo-review-details>Preview stays on this device; model review is a separate opt-in action on the capture page.</p><div class="mt-3 flex flex-wrap gap-4 text-xs font-bold"><a href="soil-photo.html">Retake / replace</a><button type="button" data-remove-photo>Remove photo</button></div></div>
+          <div><h3 class="font-bold">Before you continue</h3><p class="muted mt-1 text-xs">Use this checklist to review your own photo. To request model review, return to the capture page, check consent and choose Analyze soil with model.</p><ul class="mt-4 space-y-3 text-xs"><li>□ &nbsp; Soil fills most of the frame</li><li>□ &nbsp; Natural light; no strong shadow</li><li>□ &nbsp; Grains and clumps look in focus</li><li>□ &nbsp; No faces or identifying details</li></ul><p class="muted mt-4 border-t border-line pt-4 text-xs">This page is a local preview. The image is sent for analysis only after separate, explicit consent on the capture page.</p></div>
         </div>
         <div class="divider my-6"></div>
         <div class="flex flex-wrap justify-between gap-4"><a class="text-xs font-bold" href="soil-photo.html">← Back to capture / upload</a><a class="text-xs font-bold text-forest" href="soil-context.html">Choose soil manually → Inputs</a></div>
       </section>
       <aside class="space-y-5">
-        <section class="notice"><span class="badge">LOCAL PREVIEW</span><h2 class="serif mt-4 text-3xl">Review your soil photo</h2><p class="muted mt-3 text-xs">Check that your sample is in focus and free of identifying details. Image analysis is under development; this page does not determine soil type.</p><a class="button mt-4" href="soil-photo.html">Replace photo <span>↗</span></a></section>
+        <section class="notice"><span class="badge">LOCAL PREVIEW</span><h2 class="serif mt-4 text-3xl">Review your soil photo</h2><p class="muted mt-3 text-xs">Check that your sample is in focus and free of identifying details. This page previews the image locally; optional model review is available from the capture page after you consent.</p><a class="button mt-4" href="soil-photo.html">Replace photo <span>↗</span></a></section>
         <section class="notice"><p class="text-xs font-bold">ⓘ &nbsp;You can skip this step</p><p class="muted mt-2 text-xs">Photo assessment is optional. Cancel or skip to return to your conditions; your manual Core inputs should remain unchanged.</p></section>
         <a class="inline-block text-xs font-bold text-forest" href="conditions.html">Skip photo &amp; return to inputs →</a>
       </aside>
@@ -39,9 +43,9 @@
         <article class="card p-6"><div class="flex justify-between"><h3 class="font-bold">⌁ &nbsp;Local photo unavailable</h3><span class="badge">DEMO</span></div><p class="muted mt-3">The selected photo could not be kept in this browser. Choose it again, or continue without a photo. Core inputs remain available.</p><div class="mt-4 flex flex-wrap gap-4 text-xs font-bold"><a class="button" href="soil-photo.html">Choose another photo ↗</a><a href="conditions.html">Continue without photo</a></div></article>
       </div>
     </section>
-    <div class="warning mt-8"><strong class="text-xs">⚠ &nbsp;A visible trait is not a laboratory measurement.</strong><p class="muted mt-2 text-xs">A photo alone cannot reliably determine texture, pH, nutrients, drainage, organic matter or chemistry. This design is not connected to an AI model or upload service; all assessment and recovery states are illustrative.</p></div>
+    <div class="warning mt-8"><strong class="text-xs">⚠ &nbsp;A visible trait is not a laboratory measurement.</strong><p class="muted mt-2 text-xs">A photo alone cannot reliably determine texture, pH, nutrients, drainage, organic matter or chemistry. The capture page can request a tentative model suggestion after explicit consent; the checklist and recovery states here are illustrative.</p></div>
   </main>
-  <footer class="site-footer"><div class="footer-inner"><a class="footer-brand" href="index.html">tanimtech.</a><p>Thoughtful planting starts with understanding your land.</p><nav class="footer-links"><a href="index.html#methodology">Methodology</a><a href="index.html#methodology">Data &amp; limitations</a><a href="index.html#how-it-works">Help</a></nav></div><div class="footer-bottom"><p>© 2026 TanimTech · Philippine crop planning concept</p><p>Demo data only. Not a forecast, diagnosis, or yield guarantee.</p></div></footer>
-  <script src="js/site.js?v=10"></script>
+  <footer class="site-footer"><div class="footer-inner"><a class="footer-brand" href="homepage.html">tanimtech.</a><p>Thoughtful planting starts with understanding your land.</p><nav class="footer-links"><a href="homepage.html#methodology">Methodology</a><a href="homepage.html#methodology">Data &amp; limitations</a><a href="homepage.html#how-it-works">Help</a></nav></div><div class="footer-bottom"><p>© 2026 TanimTech · Philippine crop planning concept</p><p>Demo data only. Not a forecast, diagnosis, or yield guarantee.</p></div></footer>
+  <script src="js/site.js?v=20"></script>
 </body>
 </html>

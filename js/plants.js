@@ -11,13 +11,32 @@
   const LIMIT = 24;
   let pageNo = 1;
   let lastTotals = { eco: 0, trefle: null };
+  let philippineCatalog = null;
+  const localGroups = {
+    "fruit-tree": ["Fruit trees"], "fruit": ["Fruit trees"], "vegetable": ["Leafy and fruit vegetables", "Bulbs and spices"],
+    "root": ["Root crops"], "legume": ["Legumes"], "grain": ["Grains"],
+  };
+  const localShape = (crop) => ({
+    id: crop.slug, source: "philippines", name: crop.name, scientific: crop.scientific,
+    commonNames: [crop.name], category: crop.category, lifeForm: crop.lifeForm, edible: true,
+    growingDays: crop.growingDays, bands: crop.bands, dataSource: crop.dataSource,
+    summary: crop.summary, notes: { flood: crop.floodNote, typhoon: crop.typhoonNote },
+  });
+  const loadPhilippineCatalog = async () => {
+    if (philippineCatalog) return philippineCatalog;
+    const response = await fetch("js/philippine-edible-catalog.json");
+    if (!response.ok) throw new Error(`Philippine crop dataset returned HTTP ${response.status}.`);
+    const payload = await response.json();
+    philippineCatalog = (payload.crops || []).map(localShape);
+    return philippineCatalog;
+  };
 
   const band = (b) => Array.isArray(b) && b[0] != null ? `${b[0]}–${b[1]}` : "n/a";
   const card = (p) => {
     const bands = p.bands ? `<div class="mini-row"><span class="muted">Soil pH</span><b>${band(p.bands.soilPh)}</b></div><div class="mini-row"><span class="muted">Temp °C</span><b>${band(p.bands.temperature)}</b></div><div class="mini-row"><span class="muted">Rain mm/yr</span><b>${band(p.bands.rainfall)}</b></div>` : "";
     const image = p.imageUrl ? `<img class="h-40 w-full object-cover" loading="lazy" alt="${esc(p.name)}" src="${esc(p.imageUrl)}">` : "";
     const days = p.growingDays && p.growingDays[0] ? `<small class="muted">${p.growingDays[0]}–${p.growingDays[1]} day cycle</small>` : "";
-    const scorable = p.source === "trefle" ? (p.ecocropId ? '<span class="badge">SCORABLE · ECOCROP MATCH</span>' : '<span class="badge" style="background:#edf0e9">REFERENCE ONLY</span>') : '<span class="badge">ECOCROP</span>';
+    const scorable = p.source === "trefle" ? (p.ecocropId ? '<span class="badge">SCORABLE · ECOCROP MATCH</span>' : '<span class="badge" style="background:#edf0e9">REFERENCE ONLY</span>') : p.source === "philippines" ? '<span class="badge">PHILIPPINE DATASET</span>' : '<span class="badge">ECOCROP</span>';
     return `<article class="card overflow-hidden">${image}<div class="p-5"><div class="flex items-center justify-between gap-2">${p.source === "trefle" ? '<span class="badge" style="background:#edf0e9">TREFLE</span>' : scorable}${days}</div><h2 class="serif mt-3 text-2xl">${esc(p.name)}</h2><p class="muted text-xs"><i>${esc(p.scientific)}</i>${p.category ? " · " + esc(p.category) : ""}${p.lifeForm ? " · " + esc(p.lifeForm) : ""}</p>${bands ? `<div class="mt-3">${bands}</div>` : ""}<div class="mt-3 flex flex-wrap items-center gap-2">${p.source === "trefle" ? scorable : ""}</div><button class="button mt-4" type="button" data-plant-detail="${esc(p.id)}">Details ↗</button></div></article>`;
   };
 
@@ -33,9 +52,15 @@
     dialog.firstElementChild.addEventListener("click", (event) => { if (event.target === dialog.firstElementChild) close(); });
     const body = dialog.querySelector("[data-dialog-body]");
     try {
-      const response = await fetch(`/api/plants/${encodeURIComponent(id)}`);
+      const local = philippineCatalog?.find((item) => item.id === id);
+      const response = local ? await fetch(`/api/crops/${encodeURIComponent(id)}`) : await fetch(`/api/plants/${encodeURIComponent(id)}`);
       const p = await response.json();
       if (!response.ok) throw new Error(p.error || "Could not load this plant.");
+      if (local) {
+        p.source = "philippines";
+        p.commonNames = [p.name];
+        p.edibleParts = [];
+      }
       const eco = p.source === "trefle" ? p.ecocrop : p;
       const names = (p.commonNames || []).slice(0, 10).map(esc).join(", ");
       const trefleLimits = p.toleranceLimits ? detailRows([["Tolerance: soil pH", band(p.toleranceLimits.soilPh)], ["Tolerance: temperature °C", band(p.toleranceLimits.temperature)], ["Tolerance: rainfall mm/yr", band(p.toleranceLimits.rainfall)]]) : "";
@@ -57,15 +82,24 @@
     els.request.textContent = `GET ${url}`;
     els.results.innerHTML = '<p class="muted text-sm">Loading…</p>';
     try {
-      const response = await fetch(url);
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "The plant search failed.");
+      let data;
+      if (els.source.value === "philippines") {
+        let found = await loadPhilippineCatalog();
+        const query = els.q.value.trim().toLowerCase();
+        const categories = localGroups[els.group.value];
+        found = found.filter((item) => (!query || [item.name, item.scientific, item.category].join(" ").toLowerCase().includes(query)) && (!categories || categories.includes(item.category)) && (!els.life.value || item.lifeForm === els.life.value));
+        data = { plants: found.slice((pageNo - 1) * LIMIT, pageNo * LIMIT), count: found.length, trefle: null };
+      } else {
+        const response = await fetch(url);
+        data = await response.json();
+        if (!response.ok) throw new Error(data.error || "The plant search failed.");
+      }
       const eco = data.plants || [];
       const trefle = data.trefle?.items || [];
       lastTotals = { eco: data.count ?? 0, trefle: data.trefle?.total ?? null };
       els.results.innerHTML = eco.length || trefle.length ? [...eco, ...trefle].map(card).join("") : '<p class="muted text-sm">No edible plants matched. Try another name (English, Filipino or scientific) or clear the filters.</p>';
       const parts = [];
-      if (data.plants) parts.push(`${data.count} in the ECOCROP catalog`);
+      if (data.plants) parts.push(`${data.count} in the ${els.source.value === "philippines" ? "Philippine crop" : "ECOCROP"} catalog`);
       if (data.trefle?.configured && !data.trefle.error) parts.push(`${data.trefle.total ?? trefle.length} on Trefle`);
       els.count.textContent = parts.join(" · ");
       if (data.trefle?.error) els.count.textContent += ` · Trefle: ${data.trefle.error}`;
@@ -91,8 +125,8 @@
     els.toggle.textContent = els.request.classList.contains("hidden") ? "Show API request ↗" : "Hide API request";
   });
 
-  fetch("/api/plants/status").then((r) => r.json()).then((s) => {
-    els.status.innerHTML = `<b>Data sources</b> · ECOCROP catalog: ${s.ecocrop.available ? `${s.ecocrop.count} edible plants (always available)` : "not installed"} · Trefle live API: ${s.trefle.configured ? "connected" : `not configured. ${esc(s.trefle.setup)}`}`;
-  }).catch(() => { els.status.textContent = "The plant API is not reachable. Start the backend (python app.py) to use the explorer."; });
+  fetch("js/philippine-edible-catalog.json").then((r) => r.json()).then((dataset) => {
+    els.status.innerHTML = `<b>Data source</b> · Philippine edible crop dataset: ${dataset.count} profiles · vegetables, fruits, roots, legumes, grains and spices`;
+  }).catch(() => { els.status.textContent = "The Philippine crop dataset is not available. Refresh the page and try again."; });
   run();
 })();
