@@ -41,7 +41,7 @@ The original data only had 7 crops. Two additions remove that limit:
   52 legumes, 47 grains — with the same pH / temperature / rainfall bands the fit score uses, plus soil texture and drainage needs.
   Built from the full FAO ECOCROP file by `python -m data_pipeline.build_edible_catalog` (downloads it; `--file` for a local copy).
 - *Trefle* (live, optional): more species, photos, edible parts. Needs a free token from https://trefle.io.
-  Set it on the server, never in the browser: `export TREFLE_TOKEN=...` (Windows: `set TREFLE_TOKEN=...`), then restart.
+  Set it on the server, never in the browser: `export TREFLE_TOKEN=...` (Windows: `set TREFLE_TOKEN=...`), then restart. The crop guide reads the bundled ECOCROP catalog through `/api/plants/search?source=ecocrop`, so it can show all 719 records even when Trefle is not configured.
   Trefle plants are scored only when they match an ECOCROP record, because Trefle's growth fields are sparse and are tolerance limits, not optimum bands.
 
 `GET /api/plants/search?q=mango&group=fruit-tree&source=auto|ecocrop|trefle&lifeForm=Tree&maxDays=400&page=1&limit=24`
