@@ -1,8 +1,8 @@
 (() => {
   // Use the project URL and publishable key; never put a service_role key in the browser.
   window.TANIMTECH_SUPABASE_CONFIG = window.TANIMTECH_SUPABASE_CONFIG || {
-    url: "",
-    publishableKey: "",
+    url: "https://azuicvyurinufaqwbkwl.supabase.co",
+    publishableKey: "sb_publishable_05DQgJBbic0iFwFwwlju3g_PdBV-gZA",
   };
 
   const config = window.TANIMTECH_SUPABASE_CONFIG;

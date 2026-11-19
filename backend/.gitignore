@@ -5,3 +5,6 @@ __pycache__/
 storage/store.json
 data_pipeline/raw/kaggle_crop_soil/
 data_pipeline/raw/kaggle_yield/
+.env
+.env.*
+!.env.example
