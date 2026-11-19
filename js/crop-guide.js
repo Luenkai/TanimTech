@@ -7,17 +7,11 @@
   const errorMessage = page.querySelector("[data-crop-guide-error-message]");
   const content = page.querySelector("[data-crop-guide-content]");
   const image = page.querySelector("[data-crop-guide-image]");
-  const imageNote = page.querySelector("[data-crop-guide-image-note]");
-  const cropImages = {
-    pechay: { file: "pechay-detail.jpg", label: "Crop photo" },
-    kangkong: { file: "kangkong.jpg", label: "Crop photo" },
-    mongo: { file: "mongo.jpg", label: "Crop photo" },
-    sitaw: { file: "sitaw-guide.svg", label: "Crop illustration" },
-    talong: { file: "talong-guide.svg", label: "Crop illustration" },
-    kamote: { file: "kamote-guide.svg", label: "Crop illustration" },
-    mais: { file: "mais-guide.svg", label: "Crop illustration" },
-  };
+  const imageCreator = page.querySelector("[data-crop-guide-image-creator]");
+  const imageLicense = page.querySelector("[data-crop-guide-image-license]");
+  const imageSource = page.querySelector("[data-crop-guide-image-source]");
   let crops = [];
+  let cropImages = {};
   let cropDataSource = "API";
   const setText = (selector, value) => {
     const element = page.querySelector(selector);
@@ -67,6 +61,11 @@
       showError("That crop was not found. Choose one of the available crops from the list.");
       return;
     }
+    const cropImage = cropImages[crop.slug];
+    if (!cropImage) {
+      showError(`No photo credit is configured for ${crop.name}.`);
+      return;
+    }
     setText("[data-crop-category]", crop.category);
     setText("[data-crop-name]", crop.name);
     setText("[data-crop-scientific]", crop.scientific);
@@ -81,11 +80,14 @@
     setText("[data-crop-flood-note]", crop.floodNote);
     setText("[data-crop-typhoon-note]", crop.typhoonNote);
     setText("[data-crop-source]", crop.dataSource);
-    const cropImage = cropImages[crop.slug];
-    image.src = `images/${cropImage?.file || "hero-farm.jpg"}`;
-    image.alt = cropImage ? `${crop.name} ${cropImage.label.toLowerCase()}` : `Field overview; crop-specific image unavailable for ${crop.name}`;
-    imageNote.textContent = cropImage?.label || "Field overview · crop-specific image unavailable";
     select.value = crop.slug;
+    image.dataset.cropSlug = crop.slug;
+    image.alt = `Photograph of ${crop.name} (${crop.scientific})`;
+    imageCreator.textContent = `Photo: ${cropImage.creator}`;
+    imageLicense.textContent = cropImage.license;
+    imageLicense.href = cropImage.licenseUrl;
+    imageSource.href = cropImage.sourceUrl;
+    image.src = cropImage.src;
     errorPanel.classList.add("hidden");
     content.classList.remove("hidden");
     status.textContent = `${crop.name} · ${crops.length} Philippine edible crop profiles · ${cropDataSource}`;
@@ -114,11 +116,19 @@
     status.textContent = "Loading Philippine edible crop profiles…";
     errorPanel.classList.add("hidden");
     try {
-      const response = await fetch("js/philippine-edible-catalog.json");
+      const [response, imageCreditsResponse] = await Promise.all([
+        fetch("js/philippine-edible-catalog.json"),
+        fetch("js/crop-image-credits.json?v=1"),
+      ]);
       if (!response.ok) throw new Error(`Philippine crop dataset returned HTTP ${response.status}.`);
+      if (!imageCreditsResponse.ok) throw new Error(`Crop image credits returned HTTP ${imageCreditsResponse.status}.`);
       const payload = await response.json();
       if (!Array.isArray(payload.crops) || !payload.crops.length) throw new Error("The Philippine crop dataset has no profiles.");
+      const imageCredits = await imageCreditsResponse.json();
+      const missingImageCredits = payload.crops.find((crop) => !imageCredits[crop.slug]?.src || !imageCredits[crop.slug]?.creator || !imageCredits[crop.slug]?.licenseUrl || !imageCredits[crop.slug]?.sourceUrl);
+      if (missingImageCredits) throw new Error(`The photo or attribution for ${missingImageCredits.name} is incomplete.`);
       crops = payload.crops;
+      cropImages = imageCredits;
       cropDataSource = "Philippine edible crop dataset";
       select.replaceChildren(new Option("Choose a crop", ""));
       crops.forEach((crop) => select.add(new Option(crop.name, crop.slug)));
@@ -135,6 +145,10 @@
       showError(error.message || "Crop data could not be loaded from the API or local dataset.");
     }
   };
+  image.addEventListener("error", () => {
+    const failedCrop = crops.find((crop) => crop.slug === image.dataset.cropSlug);
+    if (failedCrop && failedCrop.slug === select.value) showError(`The photo for ${failedCrop.name} could not be loaded.`);
+  });
   select.addEventListener("change", () => {
     const crop = crops.find((item) => item.slug === select.value);
     if (crop) renderCrop(crop);

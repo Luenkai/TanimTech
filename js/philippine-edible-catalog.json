@@ -11,7 +11,7 @@
       "scientific": "Brassica chinensis",
       "category": "Leafy and fruit vegetables",
       "lifeForm": "Herb",
-      "summary": "Pechay requirement profile from FAO ECOCROP.",
+      "summary": "Pechay is a quick-growing leafy brassica with broad leaves and crisp pale stalks, commonly harvested young for soups and stir-fries.",
       "growingDays": [
         40,
         90
@@ -45,7 +45,7 @@
       "scientific": "Ipomoea aquatica",
       "category": "Leafy and fruit vegetables",
       "lifeForm": "Vine",
-      "summary": "Kangkong requirement profile from FAO ECOCROP.",
+      "summary": "Also called water spinach, kangkong is a leafy vine with hollow stems and tender leaves, often grown near wet ground and cooked as a leafy vegetable.",
       "growingDays": [
         30,
         70
@@ -79,7 +79,7 @@
       "scientific": "Vigna radiata",
       "category": "Legumes",
       "lifeForm": "Herb",
-      "summary": "Mongo requirement profile from FAO ECOCROP.",
+      "summary": "Mongo, or mung bean, is a warm-season legume harvested for its small green seeds, sprouts, or pods.",
       "growingDays": [
         50,
         120
@@ -113,7 +113,7 @@
       "scientific": "Vigna unguiculata ssp. sesquipedalis",
       "category": "Legumes",
       "lifeForm": "Vine",
-      "summary": "Sitaw requirement profile from FAO ECOCROP.",
+      "summary": "Sitaw is a climbing legume known for its long, slender pods, which are commonly harvested while tender.",
       "growingDays": [
         50,
         150
@@ -147,7 +147,7 @@
       "scientific": "Solanum melongena",
       "category": "Leafy and fruit vegetables",
       "lifeForm": "Herb",
-      "summary": "Talong requirement profile from FAO ECOCROP.",
+      "summary": "Talong is a warm-season fruit vegetable that bears glossy, usually purple fruit, picked while firm and tender.",
       "growingDays": [
         70,
         120
@@ -181,7 +181,7 @@
       "scientific": "Ipomoea batatas",
       "category": "Root crops",
       "lifeForm": "Vine",
-      "summary": "Kamote requirement profile from FAO ECOCROP.",
+      "summary": "Kamote is a trailing vine grown for its starchy storage roots; its young leaves are also eaten as a leafy vegetable.",
       "growingDays": [
         80,
         170
@@ -215,7 +215,7 @@
       "scientific": "Zea mays",
       "category": "Grains",
       "lifeForm": "Herb",
-      "summary": "Mais requirement profile from FAO ECOCROP.",
+      "summary": "Mais is a cereal grass that produces ears of kernels, harvested young as fresh corn or mature as grain.",
       "growingDays": [
         65,
         365
@@ -249,7 +249,7 @@
       "scientific": "Oryza sativa",
       "category": "Grains",
       "lifeForm": "Herb",
-      "summary": "Palay requirement profile for Philippine crop planning.",
+      "summary": "Palay is rice before milling. The cereal is grown in flooded or rain-fed systems and harvested when its grain-bearing panicles mature.",
       "growingDays": [
         110,
         150
@@ -283,7 +283,7 @@
       "scientific": "Solanum lycopersicum",
       "category": "Leafy and fruit vegetables",
       "lifeForm": "Herb",
-      "summary": "Kamatis requirement profile for Philippine crop planning.",
+      "summary": "Kamatis is a fruiting plant whose fleshy tomatoes can be harvested green or ripe, depending on the variety and intended use.",
       "growingDays": [
         60,
         100
@@ -317,7 +317,7 @@
       "scientific": "Allium cepa",
       "category": "Bulbs and spices",
       "lifeForm": "Herb",
-      "summary": "Sibuyas requirement profile for Philippine crop planning.",
+      "summary": "Sibuyas forms layered storage bulbs with upright leaves; mature bulbs are lifted after the tops begin to dry.",
       "growingDays": [
         90,
         180
@@ -351,7 +351,7 @@
       "scientific": "Allium sativum",
       "category": "Bulbs and spices",
       "lifeForm": "Herb",
-      "summary": "Bawang requirement profile for Philippine crop planning.",
+      "summary": "Bawang is grown for its divided bulb, or cloves, which are widely used as a seasoning.",
       "growingDays": [
         90,
         180
@@ -385,7 +385,7 @@
       "scientific": "Brassica oleracea var. capitata",
       "category": "Leafy and fruit vegetables",
       "lifeForm": "Herb",
-      "summary": "Repolyo requirement profile for Philippine crop planning.",
+      "summary": "Repolyo forms a dense head of overlapping leaves; head size, maturity, and color vary by cultivar.",
       "growingDays": [
         70,
         120
@@ -419,7 +419,7 @@
       "scientific": "Daucus carota",
       "category": "Root crops",
       "lifeForm": "Herb",
-      "summary": "Karot requirement profile for Philippine crop planning.",
+      "summary": "Karot is a root vegetable grown for its edible taproot, which is commonly orange but can also be found in other colors.",
       "growingDays": [
         70,
         120
@@ -453,7 +453,7 @@
       "scientific": "Raphanus sativus",
       "category": "Root crops",
       "lifeForm": "Herb",
-      "summary": "Labanos requirement profile for Philippine crop planning.",
+      "summary": "Labanos includes long white daikon types as well as small round varieties; its crisp swollen root is often harvested young.",
       "growingDays": [
         25,
         60
@@ -487,7 +487,7 @@
       "scientific": "Cucumis sativus",
       "category": "Leafy and fruit vegetables",
       "lifeForm": "Vine",
-      "summary": "Pipino requirement profile for Philippine crop planning.",
+      "summary": "Pipino is a trailing or climbing vine that produces firm fruits, usually harvested while still immature.",
       "growingDays": [
         50,
         90
@@ -521,7 +521,7 @@
       "scientific": "Cucurbita moschata",
       "category": "Leafy and fruit vegetables",
       "lifeForm": "Vine",
-      "summary": "Kalabasa requirement profile for Philippine crop planning.",
+      "summary": "Kalabasa is a trailing squash vine that produces firm-skinned fruits with orange flesh, often used in soups and stews.",
       "growingDays": [
         90,
         150
@@ -555,7 +555,7 @@
       "scientific": "Momordica charantia",
       "category": "Leafy and fruit vegetables",
       "lifeForm": "Vine",
-      "summary": "Ampalaya requirement profile for Philippine crop planning.",
+      "summary": "Ampalaya is a climbing vine with ridged green fruits, harvested before full maturity and valued for its distinctive bitter flavor.",
       "growingDays": [
         60,
         120
@@ -589,7 +589,7 @@
       "scientific": "Abelmoschus esculentus",
       "category": "Leafy and fruit vegetables",
       "lifeForm": "Herb",
-      "summary": "Okra requirement profile for Philippine crop planning.",
+      "summary": "Okra is grown for its edible seed pods, which are picked while young and tender before they become fibrous.",
       "growingDays": [
         55,
         100
@@ -623,7 +623,7 @@
       "scientific": "Capsicum annuum",
       "category": "Leafy and fruit vegetables",
       "lifeForm": "Herb",
-      "summary": "Sili requirement profile for Philippine crop planning.",
+      "summary": "Sili plants produce peppers that vary in shape, color, and heat; fruits may be harvested green or red depending on the variety.",
       "growingDays": [
         80,
         150
@@ -657,7 +657,7 @@
       "scientific": "Sechium edule",
       "category": "Leafy and fruit vegetables",
       "lifeForm": "Vine",
-      "summary": "Sayote requirement profile for Philippine crop planning.",
+      "summary": "Sayote is a climbing cucurbit that produces pale-green, single-seeded fruits used in many cooked dishes.",
       "growingDays": [
         120,
         180
@@ -691,7 +691,7 @@
       "scientific": "Arachis hypogaea",
       "category": "Legumes",
       "lifeForm": "Herb",
-      "summary": "Mani requirement profile for Philippine crop planning.",
+      "summary": "Mani is a legume whose pods develop underground after flowering; its seeds are eaten or pressed for oil.",
       "growingDays": [
         90,
         150
@@ -725,7 +725,7 @@
       "scientific": "Glycine max",
       "category": "Legumes",
       "lifeForm": "Herb",
-      "summary": "Soya requirement profile for Philippine crop planning.",
+      "summary": "Soya is an annual legume grown for protein-rich seeds used as food and for oil; pods are harvested green or dry depending on use.",
       "growingDays": [
         90,
         150
@@ -759,7 +759,7 @@
       "scientific": "Cajanus cajan",
       "category": "Legumes",
       "lifeForm": "Shrub",
-      "summary": "Kadyos requirement profile for Philippine crop planning.",
+      "summary": "Kadyos is a shrubby legume whose pods contain round seeds, eaten fresh or dried.",
       "growingDays": [
         120,
         240
@@ -793,7 +793,7 @@
       "scientific": "Colocasia esculenta",
       "category": "Root crops",
       "lifeForm": "Herb",
-      "summary": "Gabi requirement profile for Philippine crop planning.",
+      "summary": "Gabi is grown for its edible corms and leaves. Taro must be thoroughly cooked because raw plant tissue can irritate the mouth and throat.",
       "growingDays": [
         180,
         300
@@ -827,7 +827,7 @@
       "scientific": "Manihot esculenta",
       "category": "Root crops",
       "lifeForm": "Shrub",
-      "summary": "Kamoteng kahoy requirement profile for Philippine crop planning.",
+      "summary": "Kamoteng kahoy is a tropical shrub grown for its starchy storage roots, which must be properly processed and cooked before eating.",
       "growingDays": [
         240,
         365
@@ -861,7 +861,7 @@
       "scientific": "Zingiber officinale",
       "category": "Root crops",
       "lifeForm": "Herb",
-      "summary": "Luya requirement profile for Philippine crop planning.",
+      "summary": "Luya is a rhizomatous herb cultivated for its aromatic underground stem, used fresh, dried, or cooked as a spice.",
       "growingDays": [
         240,
         300
@@ -895,7 +895,7 @@
       "scientific": "Curcuma longa",
       "category": "Root crops",
       "lifeForm": "Herb",
-      "summary": "Luyang dilaw requirement profile for Philippine crop planning.",
+      "summary": "Luyang dilaw is cultivated for its yellow-orange underground rhizome, used as a spice and natural coloring.",
       "growingDays": [
         240,
         365
@@ -929,7 +929,7 @@
       "scientific": "Musa acuminata",
       "category": "Fruit trees",
       "lifeForm": "Herb",
-      "summary": "Saging requirement profile for Philippine crop planning.",
+      "summary": "Saging is a large herb that bears fruit in clusters on a flowering stalk; cultivated bananas are harvested green or ripe, depending on use.",
       "growingDays": [
         240,
         365
@@ -963,7 +963,7 @@
       "scientific": "Ananas comosus",
       "category": "Fruit trees",
       "lifeForm": "Herb",
-      "summary": "Pinya requirement profile for Philippine crop planning.",
+      "summary": "Pinya is a compact tropical plant with a spiny leaf rosette and a single compound fruit formed from many flowers.",
       "growingDays": [
         365,
         540
@@ -997,7 +997,7 @@
       "scientific": "Mangifera indica",
       "category": "Fruit trees",
       "lifeForm": "Tree",
-      "summary": "Mangga requirement profile for Philippine crop planning.",
+      "summary": "Mangga is a tropical evergreen tree producing a single-seeded fruit; cultivars differ in shape, color, flavor, and harvest season.",
       "growingDays": [
         365,
         730
@@ -1031,7 +1031,7 @@
       "scientific": "Carica papaya",
       "category": "Fruit trees",
       "lifeForm": "Tree",
-      "summary": "Papaya requirement profile for Philippine crop planning.",
+      "summary": "Papaya is a fast-growing tropical tree-like herb with a hollow stem; ripe fruit is eaten fresh, while green fruit is also used in cooking.",
       "growingDays": [
         240,
         365

@@ -1,0 +1,219 @@
+{
+  "pechay": {
+    "src": "images/crops/pechay.jpg",
+    "creator": "smallislander",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/28722516@N02/3528380924"
+  },
+  "kangkong": {
+    "src": "images/crops/kangkong.jpg",
+    "creator": "Dinesh Valke",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/91314344@N00/5139211842"
+  },
+  "mongo": {
+    "src": "images/crops/mongo.jpg",
+    "creator": "conskeptical",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/32751486@N00/2343262086"
+  },
+  "sitaw": {
+    "src": "images/crops/sitaw.jpg",
+    "creator": "Rameshng",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/39107352@N08/5930575516"
+  },
+  "talong": {
+    "src": "images/crops/talong.jpg",
+    "creator": "AJ Photographic Art",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/82448203@N04/15176865379"
+  },
+  "kamote": {
+    "src": "images/crops/kamote.jpg",
+    "creator": "JeepersMedia",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/39160147@N03/14763854597"
+  },
+  "mais": {
+    "src": "images/crops/mais.jpg",
+    "creator": "enneafive",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/75612671@N03/49959217797"
+  },
+  "palay": {
+    "src": "images/crops/palay.jpg",
+    "creator": "cascade_of_rant",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/37086457@N00/8077028737"
+  },
+  "kamatis": {
+    "src": "images/crops/kamatis.jpg",
+    "creator": "drazz",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/12079360@N00/2791717800"
+  },
+  "sibuyas": {
+    "src": "images/crops/sibuyas.jpg",
+    "creator": "OakleyOriginals",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/47264866@N00/9098024774"
+  },
+  "bawang": {
+    "src": "images/crops/bawang.jpg",
+    "creator": "graibeard",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/8393288@N04/3517010684"
+  },
+  "repolyo": {
+    "src": "images/crops/repolyo.jpg",
+    "creator": "Muffet",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/53133240@N00/8076990249"
+  },
+  "karot": {
+    "src": "images/crops/karot.jpg",
+    "creator": "Nisha A",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/87718306@N00/2336528175"
+  },
+  "labanos": {
+    "src": "images/crops/labanos.jpg",
+    "creator": "avlxyz",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/10559879@N00/2553660622"
+  },
+  "pipino": {
+    "src": "images/crops/pipino.jpg",
+    "creator": "David Davies",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/44124390461@N01/4782586685"
+  },
+  "kalabasa": {
+    "src": "images/crops/kalabasa.jpg",
+    "creator": "-Jérôme-",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/76474448@N00/8436691142"
+  },
+  "ampalaya": {
+    "src": "images/crops/ampalaya.jpg",
+    "creator": "kuromeri",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/69082176@N02/6985022374"
+  },
+  "okra": {
+    "src": "images/crops/okra.jpg",
+    "creator": "ObsidianSoul",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/62412346@N07/5689483961"
+  },
+  "sili": {
+    "src": "images/crops/sili.jpg",
+    "creator": "cobblucas",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/25962164@N04/4780005097"
+  },
+  "sayote": {
+    "src": "images/crops/sayote.jpg",
+    "creator": "Thriving Vegetarian",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/90155432@N02/10118765553"
+  },
+  "mani": {
+    "src": "images/crops/mani.jpg",
+    "creator": "Alabama Extension",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://www.flickr.com/photos/184594136@N08/52303500397"
+  },
+  "soya": {
+    "src": "images/crops/soya.jpg",
+    "creator": "UnitedSoybeanBoard",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/95352257@N06/9624015808"
+  },
+  "kadyos": {
+    "src": "images/crops/kadyos.jpg",
+    "creator": "Satyam Vishwakarma (Satya)",
+    "license": "CC0 1.0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://wordpress.org/photos/photo/4806615844/"
+  },
+  "gabi": {
+    "src": "images/crops/gabi.jpg",
+    "creator": "jdnx",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/21442511@N08/5217007908"
+  },
+  "kamoteng-kahoy": {
+    "src": "images/crops/kamoteng-kahoy.jpg",
+    "creator": "CIAT International Center for Tropical Agriculture",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/38476503@N08/4627298692"
+  },
+  "luya": {
+    "src": "images/crops/luya.jpg",
+    "creator": "Kjokkenutstyr.net",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/146966953@N02/37310945730"
+  },
+  "luyang-dilaw": {
+    "src": "images/crops/luyang-dilaw.jpg",
+    "creator": "Steenbergs",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/50310535@N03/6865121460"
+  },
+  "saging": {
+    "src": "images/crops/saging.jpg",
+    "creator": "roger4336",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/24736216@N07/7209146878"
+  },
+  "pinya": {
+    "src": "images/crops/pinya.jpg",
+    "creator": "allisonmeier",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/7527891@N04/1501307125"
+  },
+  "mangga": {
+    "src": "images/crops/mangga.jpg",
+    "creator": "nutrilover",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/40994455@N06/3780443807"
+  },
+  "papaya": {
+    "src": "images/crops/papaya.jpg",
+    "creator": "markhillary",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "sourceUrl": "https://www.flickr.com/photos/56087830@N00/10759890526"
+  }
+}
