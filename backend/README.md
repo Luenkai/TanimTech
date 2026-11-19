@@ -27,6 +27,35 @@ python -m unittest -v           # run the tests
 | 12 Saved farm profiles | `GET/POST /api/profiles`, `GET/PUT/DELETE /api/profiles/<id>`, `GET/POST /api/profiles/<id>/shortlists` |
 | 13 Methodology | `GET /api/methodology` |
 
+## Simple linear regression
+
+`POST /api/ml/linear-regression` trains a one-feature `scikit-learn` linear
+regression from supplied samples and returns the coefficient, intercept, R²,
+mean squared error, and an optional prediction. Example:
+
+```json
+{
+  "samples": [
+    {"feature": 1, "target": 3},
+    {"feature": 2, "target": 5},
+    {"feature": 3, "target": 7}
+  ],
+  "predict": 4
+}
+```
+
+This is an advisory model trained only on the submitted samples; it is not a
+yield guarantee. The implementation lives in `tanimtech/linear_regression.py`.
+
+## Optional Supabase
+
+The browser already supports an optional publishable Supabase key through
+`js/supabase-config.js`. For server-side integrations, copy the values from
+`.env.example` into the backend environment, using `SUPABASE_URL` and
+`SUPABASE_SERVICE_ROLE_KEY` (never commit the service-role key). Check the
+configuration with `GET /api/supabase/status`. The existing local JSON storage
+remains the default until a persistence adapter is deliberately enabled.
+
 Example `POST /api/recommendations`:
 ```json
 { "soilPh": 6.4, "temperature": 27, "humidity": 78, "rainfall": 101, "soilType": "Loam", "soilTexture": "Loam", "drainage": "Well-drained", "organicMatter": 3.5, "soilTypeSource": "manual", "season": "Wet season" }
