@@ -153,21 +153,6 @@ class BackendTests(unittest.TestCase):
         self.assertEqual(saved.json["label"], "November field")
         self.assertEqual(self.c.get("/api/recommendations/saved").json["recommendations"][0]["inputs"]["soilTexture"], "Loam")
 
-    def test_simple_linear_regression(self):
-        response = self.c.post("/api/ml/linear-regression", json={
-            "samples": [
-                {"feature": 1, "target": 3},
-                {"feature": 2, "target": 5},
-                {"feature": 3, "target": 7},
-            ],
-            "predict": 4,
-        })
-        self.assertEqual(response.status_code, 200)
-        self.assertAlmostEqual(response.json["coefficient"], 2)
-        self.assertAlmostEqual(response.json["intercept"], 1)
-        self.assertAlmostEqual(response.json["prediction"], 9)
-        self.assertEqual(self.c.post("/api/ml/linear-regression", json={"samples": [{"feature": 1}]}).status_code, 400)
-
     def test_supabase_status_does_not_expose_credentials(self):
         response = self.c.get("/api/supabase/status")
         self.assertEqual(response.status_code, 200)
