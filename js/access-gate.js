@@ -5,7 +5,7 @@
   const loginPage = "index.html";
   const currentPage = window.location.pathname.split("/").pop() || "index.html";
   const nextPath = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-  const isPublicPage = currentPage === loginPage || currentPage === "login.html" || currentPage === "signup.html";
+  const isPublicPage = currentPage === loginPage || currentPage === "login.html" || currentPage === "signup.html" || currentPage === "signup";
   const redirectToLogin = () => {
     window.location.replace(`${loginPage}?next=${encodeURIComponent(nextPath)}`);
   };
