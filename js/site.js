@@ -590,20 +590,56 @@
     context.drawImage(image, 0, 0, 64, 64);
     image.close();
     const pixels = context.getImageData(0, 0, 64, 64).data;
-    let red = 0, green = 0, blue = 0, brightness = 0;
+    let red = 0, green = 0, blue = 0, brightness = 0, earthTonePixels = 0, textureEdges = 0, comparableEdges = 0;
     for (let i = 0; i < pixels.length; i += 4) {
-      red += pixels[i]; green += pixels[i + 1]; blue += pixels[i + 2];
-      brightness += (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
+      const pixelRed = pixels[i], pixelGreen = pixels[i + 1], pixelBlue = pixels[i + 2];
+      const luminance = (pixelRed + pixelGreen + pixelBlue) / 3;
+      red += pixelRed; green += pixelGreen; blue += pixelBlue; brightness += luminance;
+      if (pixelRed > pixelGreen * 1.04 && pixelGreen > pixelBlue * 1.04 && pixelRed > 20 && pixelRed < 230) earthTonePixels += 1;
+      const x = (i / 4) % 64, y = Math.floor(i / 4 / 64);
+      if (x > 0) {
+        const left = i - 4;
+        comparableEdges += 1;
+        if (Math.abs(luminance - (pixels[left] + pixels[left + 1] + pixels[left + 2]) / 3) > 18) textureEdges += 1;
+      }
+      if (y > 0) {
+        const above = i - 256;
+        comparableEdges += 1;
+        if (Math.abs(luminance - (pixels[above] + pixels[above + 1] + pixels[above + 2]) / 3) > 18) textureEdges += 1;
+      }
     }
     const count = pixels.length / 4;
     red /= count; green /= count; blue /= count; brightness /= count;
+    const earthToneRatio = earthTonePixels / count;
+    const textureRatio = textureEdges / Math.max(comparableEdges, 1);
+    const looksLikeSoil = earthToneRatio >= 0.16 && textureRatio >= 0.14;
+    if (!looksLikeSoil) {
+      return {
+        suggestedSoilType: "Unknown", confidence: "insufficient", inconclusive: true, observations: [
+          "The image does not show enough textured, earth-toned surface to verify a soil close-up.",
+          "No soil type is assigned from an unverified image, so this photo is not used to suggest crops.",
+        ],
+        recommendedCrops: [],
+        recommendedChecks: ["Retake the photo with soil filling most of the frame.", "Confirm texture by hand or with a soil test.", "Use measured soil and climate inputs for crop recommendations."],
+        localFallback: true,
+      };
+    }
+    const suggestedSoilType = brightness < 75 && red > blue * 1.18 ? "Loam" : red > blue * 1.25 && brightness > 105 ? "Sandy" : blue > red * 1.08 ? "Silty" : "Clay";
+    const cropGroups = {
+      Sandy: ["kamote", "mani", "pinya", "papaya", "sitaw"],
+      Clay: ["palay", "gabi", "kangkong", "kalabasa", "mais"],
+      Silty: ["pechay", "repolyo", "sibuyas", "labanos", "kamatis"],
+      Loam: ["pechay", "talong", "kamatis", "okra", "mongo"],
+    };
+    const dataset = await fetch("js/philippine-edible-catalog.json").then((response) => response.json());
+    const bySlug = new Map((dataset.crops || []).map((crop) => [crop.slug, crop]));
     return {
-      suggestedSoilType: "Unknown", confidence: "insufficient", inconclusive: true, observations: [
-        "The browser-only fallback cannot verify that the image is a clear soil close-up.",
-        "No soil type is assigned from color alone, so this photo is not used to suggest crops.",
+      suggestedSoilType, confidence: "low", observations: [
+        `The photo has a ${suggestedSoilType.toLowerCase()}-leaning color and texture profile.`,
+        "Image-only review cannot confirm texture, pH, nutrients, drainage, or organic matter.",
       ],
-      recommendedCrops: [],
-      recommendedChecks: ["Retake the photo with soil filling most of the frame.", "Confirm texture by hand or with a soil test.", "Use measured soil and climate inputs for crop recommendations."],
+      recommendedCrops: (cropGroups[suggestedSoilType] || []).map((slug) => bySlug.get(slug)).filter(Boolean).map((crop) => ({ slug: crop.slug, name: crop.name, category: crop.category, status: "possible" })),
+      recommendedChecks: ["Confirm texture by hand or with a soil test.", "Check drainage and organic matter before planting.", "Treat this as a screening suggestion, not a laboratory result."],
       localFallback: true,
     };
   };
