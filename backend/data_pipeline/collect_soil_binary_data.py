@@ -254,6 +254,43 @@ def _download_openverse(item: dict, label: str, query: str, root: Path, kind: st
     }
 
 
+def _add_user_provided_negative(source: Path, root: Path) -> dict:
+    source = source.expanduser().resolve()
+    if not source.is_file():
+        raise FileNotFoundError(f"User-provided image does not exist: {source}")
+    data = source.read_bytes()
+    if len(data) > MAX_IMAGE_BYTES:
+        raise ValueError(f"User-provided image exceeds {MAX_IMAGE_BYTES} bytes: {source}")
+    extension, width, height = _safe_image(data)
+    digest = _sha256(data)
+    relative = f"nonsoil/user_provided_non_soil_{digest[:12]}{extension}"
+    destination = root / relative
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    if destination.exists() and _sha256(destination.read_bytes()) != digest:
+        raise RuntimeError(f"User-provided image path collision: {relative}")
+    if not destination.exists():
+        destination.write_bytes(data)
+    return {
+        "file": relative,
+        "label": "non_soil",
+        "group": f"user_provided:{digest}",
+        "source": "User-provided image",
+        "source_url": None,
+        "license": "User-provided; underlying rights not independently verified",
+        "license_url": None,
+        "creator": None,
+        "creator_url": None,
+        "title": "User-provided non-soil example",
+        "query": "user-provided non-soil",
+        "provider": "User-provided",
+        "attribution": "Provided by the user for inclusion in this research dataset",
+        "width": width,
+        "height": height,
+        "sha256": digest,
+        "kind": "user-provided",
+    }
+
+
 def _collect_openverse(root: Path, per_query: int = 9) -> tuple[list[dict], list[dict]]:
     selected_ids: set[str] = set()
     negatives: list[dict] = []
@@ -304,6 +341,13 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output-dir", type=Path, default=Path("/tmp/tanimtech-soil-binary-data"))
     parser.add_argument("--per-query", type=int, default=9)
+    parser.add_argument(
+        "--additional-nonsoil",
+        type=Path,
+        action="append",
+        default=[],
+        help="User-provided non-soil image to include; may be supplied more than once.",
+    )
     args = parser.parse_args()
     output = args.output_dir.expanduser().resolve()
     output.mkdir(parents=True, exist_ok=True)
@@ -312,9 +356,24 @@ def main() -> None:
     soil = _download_zenodo(output)
     print(f"Zenodo soil images: {len(soil)} across {len({row['group'] for row in soil})} samples")
     negatives, hard_negatives = _collect_openverse(output, args.per_query)
-    manifest = soil + negatives
+    existing_hashes = {row.get("sha256"): row for row in soil + negatives if row.get("sha256")}
+    user_negatives = []
+    for source in args.additional_nonsoil:
+        row = _add_user_provided_negative(source, output)
+        existing = existing_hashes.get(row["sha256"])
+        if existing:
+            if existing["label"] != "non_soil":
+                raise RuntimeError(f"User-provided image hash conflicts with label {existing['label']}")
+            print(f"Skipping duplicate user-provided image: {row['sha256']}")
+            continue
+        user_negatives.append(row)
+        existing_hashes[row["sha256"]] = row
+    manifest = soil + negatives + user_negatives
     with (output / "manifest.jsonl").open("w", encoding="utf-8") as stream:
         for row in manifest:
+            stream.write(json.dumps(row, ensure_ascii=False) + "\n")
+    with (output / "user_provided_manifest.jsonl").open("w", encoding="utf-8") as stream:
+        for row in user_negatives:
             stream.write(json.dumps(row, ensure_ascii=False) + "\n")
     with (output / "hard_negative_tests.jsonl").open("w", encoding="utf-8") as stream:
         for row in hard_negatives:
@@ -323,7 +382,9 @@ def main() -> None:
         "zenodo_record": ZENODO_RECORD,
         "soil_image_count": len(soil),
         "soil_sample_count": len({row["group"] for row in soil}),
-        "nonsoil_image_count": len(negatives),
+        "nonsoil_image_count": len(negatives) + len(user_negatives),
+        "user_provided_nonsoil_count": len(user_negatives),
+        "total_training_image_count": len(manifest),
         "negative_queries": NEGATIVE_QUERIES,
         "hard_negative_count": len(hard_negatives),
         "curation_exclusions": [
@@ -331,11 +392,12 @@ def main() -> None:
             for image_id, reason in CURATION_EXCLUSIONS.items()
         ],
         "manifest": "manifest.jsonl",
+        "user_provided_manifest": "user_provided_manifest.jsonl",
         "hard_negative_manifest": "hard_negative_tests.jsonl",
         "note": "Research-only. No texture labels are used. All split logic must group soil images by sample ID.",
     }
     (output / "dataset_catalog.json").write_text(json.dumps(catalog, indent=2), encoding="utf-8")
-    if not negatives:
+    if not negatives and not user_negatives:
         raise SystemExit("No openly licensed non-soil images collected; do not train without negatives")
     print(json.dumps(catalog, indent=2))
 
