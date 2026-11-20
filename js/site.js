@@ -1148,6 +1148,10 @@
     if (error?.code === "invalid_credentials" || error?.code === "email_not_confirmed") return fallback;
     return message || fallback;
   };
+  const withTimeout = (promise, milliseconds, message) => Promise.race([
+    promise,
+    new Promise((_, reject) => window.setTimeout(() => reject(new Error(message)), milliseconds)),
+  ]);
   const supabaseConfigured = Boolean(window.tanimtechSupabaseConfigured);
   const getAuthenticatedSupabase = async () => {
     if (!supabaseConfigured) throw new Error("Supabase is not configured for this workspace.");
@@ -1560,11 +1564,16 @@
       try {
         const supabaseClient = await window.tanimtechGetSupabaseClient();
         if (!supabaseClient) throw new Error("Supabase Auth is unavailable.");
-        const { data, error } = await supabaseClient.auth.signUp({
-          email,
-          password,
-          options: { data: { username } },
-        });
+        const emailRedirectTo = new URL("index.html", window.location.href).href;
+        const { data, error } = await withTimeout(
+          supabaseClient.auth.signUp({
+            email,
+            password,
+            options: { data: { username }, emailRedirectTo },
+          }),
+          15000,
+          "Supabase did not respond within 15 seconds. Check your connection and try again once."
+        );
         if (error) throw error;
         if (!data.user) throw new Error("Supabase did not return a user after signup.");
         signupComplete = true;
