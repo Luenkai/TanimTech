@@ -82,10 +82,11 @@
     setText("[data-crop-source]", crop.dataSource);
     select.value = crop.slug;
     image.dataset.cropSlug = crop.slug;
-    image.alt = `Photograph of ${crop.name} (${crop.scientific})`;
-    imageCreator.textContent = `Photo: ${cropImage.creator}`;
+    image.alt = `${cropImage.type === "illustration" ? "Illustration" : "Photograph"} of ${crop.name} (${crop.scientific})`;
+    imageCreator.textContent = `${cropImage.type === "illustration" ? "Illustration" : "Photo"}: ${cropImage.creator}`;
     imageLicense.textContent = cropImage.license;
-    imageLicense.href = cropImage.licenseUrl;
+    if (cropImage.licenseUrl) imageLicense.href = cropImage.licenseUrl;
+    else imageLicense.removeAttribute("href");
     imageSource.href = cropImage.sourceUrl;
     image.src = cropImage.src;
     errorPanel.classList.add("hidden");
@@ -118,14 +119,14 @@
     try {
       const [response, imageCreditsResponse] = await Promise.all([
         fetch("js/philippine-edible-catalog.json"),
-        fetch("js/crop-image-credits.json?v=1"),
+        fetch("js/crop-image-credits.json?v=4"),
       ]);
       if (!response.ok) throw new Error(`Philippine crop dataset returned HTTP ${response.status}.`);
       if (!imageCreditsResponse.ok) throw new Error(`Crop image credits returned HTTP ${imageCreditsResponse.status}.`);
       const payload = await response.json();
       if (!Array.isArray(payload.crops) || !payload.crops.length) throw new Error("The Philippine crop dataset has no profiles.");
       const imageCredits = await imageCreditsResponse.json();
-      const missingImageCredits = payload.crops.find((crop) => !imageCredits[crop.slug]?.src || !imageCredits[crop.slug]?.creator || !imageCredits[crop.slug]?.licenseUrl || !imageCredits[crop.slug]?.sourceUrl);
+      const missingImageCredits = payload.crops.find((crop) => !imageCredits[crop.slug]?.src || !imageCredits[crop.slug]?.creator || !imageCredits[crop.slug]?.license || !imageCredits[crop.slug]?.sourceUrl);
       if (missingImageCredits) throw new Error(`The photo or attribution for ${missingImageCredits.name} is incomplete.`);
       crops = payload.crops;
       cropImages = imageCredits;

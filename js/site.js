@@ -119,6 +119,22 @@
     translatePage(saved);
   };
   addLanguageSelector();
+  const passwordEyeIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
+  const passwordEyeOffIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"></path><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"></path><path d="M9.9 5.2A11 11 0 0 1 12 5c6.4 0 10 7 10 7a15 15 0 0 1-3.1 3.8M6.2 6.2C3.6 8 2 12 2 12s3.6 7 10 7a10 10 0 0 0 4-.8"></path></svg>';
+  document.querySelectorAll("[data-password-toggle]").forEach((button) => {
+    const input = button.closest(".field-control")?.querySelector("input");
+    if (!input) return;
+    button.innerHTML = passwordEyeIcon;
+    button.addEventListener("click", () => {
+      const visible = input.type === "password";
+      input.type = visible ? "text" : "password";
+      const label = visible ? "Hide password" : "Show password";
+      button.setAttribute("aria-label", label);
+      button.title = label;
+      button.setAttribute("aria-pressed", String(visible));
+      button.innerHTML = visible ? passwordEyeOffIcon : passwordEyeIcon;
+    });
+  });
   const configuredApiBase = document.querySelector('meta[name="tanimtech-api-base"]')?.content || window.TANIMTECH_API_BASE || "";
   const apiUrl = (path) => `${String(configuredApiBase).replace(/\/$/, "")}${path}`;
   const storageKey = "tanimtech-field-inputs";
@@ -483,6 +499,35 @@
     if (analyzeSoilButton) analyzeSoilButton.disabled = !currentPhoto || !photoStored || !consentCheckbox.checked;
   });
 
+  const renderPhotoCropCards = async (recommendations) => {
+    if (!Array.isArray(recommendations) || !recommendations.length) {
+      return '<div class="notice mt-4 text-xs">No crop matches are available for this soil reference.</div>';
+    }
+    const [catalogResponse, creditsResponse] = await Promise.all([
+      fetch("js/philippine-edible-catalog.json"),
+      fetch("js/crop-image-credits.json?v=4"),
+    ]);
+    if (!catalogResponse.ok) throw new Error(`Crop details returned HTTP ${catalogResponse.status}.`);
+    if (!creditsResponse.ok) throw new Error(`Crop image credits returned HTTP ${creditsResponse.status}.`);
+    const [catalog, imageCredits] = await Promise.all([catalogResponse.json(), creditsResponse.json()]);
+    if (!Array.isArray(catalog.crops)) throw new Error("Crop details are unavailable.");
+    const cropsBySlug = new Map(catalog.crops.map((crop) => [crop.slug, crop]));
+    const escape = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+    }[character]));
+    const cards = recommendations.map((recommendation) => {
+      const crop = cropsBySlug.get(recommendation.slug);
+      const image = imageCredits[recommendation.slug];
+      if (!crop || !image?.src) throw new Error(`Details or image for ${recommendation.name || recommendation.slug} are unavailable.`);
+      const status = recommendation.status === "good" ? "Good soil fit"
+        : recommendation.status === "caution" ? "Use caution"
+          : "Possible soil fit";
+      const days = Array.isArray(crop.growingDays) ? `${crop.growingDays[0]}–${crop.growingDays[1]} days` : "Growing period varies";
+      return `<article class="card overflow-hidden"><img class="h-44 w-full bg-paper object-contain" src="${escape(image.src)}" alt="${escape(crop.name)}"><div class="p-5"><div class="flex items-center justify-between gap-3"><span class="badge">${escape(status)}</span><small class="muted">${escape(days)}</small></div><h3 class="serif mt-3 text-2xl">${escape(crop.name)}</h3><p class="muted mt-1 text-xs"><i>${escape(crop.scientific)}</i> · ${escape(crop.category)} · ${escape(crop.lifeForm)}</p><p class="mt-3 text-xs leading-5">${escape(crop.summary)}</p><a class="button mt-4" href="crop-guide.html?crop=${encodeURIComponent(crop.slug)}">Open crop guide ↗</a></div></article>`;
+    }).join("");
+    return `<div class="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">${cards}</div>`;
+  };
+
   const localSoilReview = async (blob) => {
     const image = await createImageBitmap(blob);
     const canvas = document.createElement("canvas");
@@ -550,9 +595,10 @@
       saveState();
       if (soilAnalysisResult) {
         const observations = (analysis.observations || []).map((item) => `<li>${htmlEscape(item)}</li>`).join("");
+        const limitations = (analysis.limitations || []).map((item) => `<li>${htmlEscape(item)}</li>`).join("");
         const checks = (analysis.recommendedChecks || []).map((item) => `<li>${htmlEscape(item)}</li>`).join("");
-        const cropMatches = (analysis.recommendedCrops || []).map((crop) => `<li><a class="font-bold text-forest" href="crop-guide.html?crop=${encodeURIComponent(crop.slug)}">${htmlEscape(crop.name)}</a> <span class="muted">· ${htmlEscape(crop.status)} soil fit · ${htmlEscape(crop.category)}</span></li>`).join("");
-        soilAnalysisResult.innerHTML = `<strong>Model suggestion: ${htmlEscape(analysis.suggestedSoilType)} · ${htmlEscape(analysis.confidence)} confidence</strong><p class="mt-2">Visible observations</p><ul class="mt-1 list-disc pl-5">${observations || "<li>No clear visual traits were returned.</li>"}</ul><p class="mt-2">Crops suited to this soil reference</p><ul class="mt-1 list-disc pl-5">${cropMatches || "<li>No crop match is available until the soil type is confirmed.</li>"}</ul><p class="mt-2">Recommended checks</p><ul class="mt-1 list-disc pl-5">${checks || "<li>Use a representative soil test before relying on this suggestion.</li>"}</ul><p class="mt-3 muted">This suggestion is saved as model-suggested context. Confirm or override it in the field conditions form. Soil matches are advisory and do not replace a soil test.</p>`;
+        const cropCards = await renderPhotoCropCards(analysis.recommendedCrops);
+        soilAnalysisResult.innerHTML = `<section class="card p-6"><div class="flex flex-wrap items-start justify-between gap-4"><div><p class="eyebrow">PHOTO-BASED SOIL SCREENING</p><h2 class="serif mt-2 text-2xl">Possible crops to explore</h2><p class="muted mt-2 text-xs">Suggested soil type: ${htmlEscape(analysis.suggestedSoilType)} · ${htmlEscape(analysis.confidence)} confidence</p></div><span class="badge">ADVISORY MATCHES</span></div><p class="muted mt-4 text-xs">Crop cards show qualitative soil-reference fit, not probability of success. A photo cannot assess climate or confirm soil pH.</p>${observations ? `<p class="eyebrow mt-5">VISIBLE OBSERVATIONS</p><ul class="mt-2 list-disc pl-5 text-xs">${observations}</ul>` : ""}${cropCards}<p class="eyebrow mt-5">LIMITATIONS</p><ul class="mt-2 list-disc pl-5 text-xs">${limitations || "<li>Photo review is not a soil test.</li>"}</ul><p class="eyebrow mt-5">RECOMMENDED CHECKS</p><ul class="mt-2 list-disc pl-5 text-xs">${checks || "<li>Confirm soil and climate conditions before planting.</li>"}</ul><p class="muted mt-4 text-xs">Confirm or override the soil suggestion in field conditions. Crop suitability depends on measured pH, climate, drainage, and local guidance.</p></section>`;
       }
       showToast("Soil review complete. Confirm the suggestion before using it.");
     } catch (error) {
@@ -564,9 +610,9 @@
         state.soilTypeSource = "local-photo-screening";
         saveState();
         const observations = fallback.observations.map((item) => `<li>${htmlEscape(item)}</li>`).join("");
-        const cropMatches = fallback.recommendedCrops.map((crop) => `<li><a class="font-bold text-forest" href="crop-guide.html?crop=${encodeURIComponent(crop.slug)}">${htmlEscape(crop.name)}</a> <span class="muted">· possible fit · ${htmlEscape(crop.category)}</span></li>`).join("");
+        const cropCards = await renderPhotoCropCards(fallback.recommendedCrops);
         const checks = fallback.recommendedChecks.map((item) => `<li>${htmlEscape(item)}</li>`).join("");
-        if (soilAnalysisResult) soilAnalysisResult.innerHTML = `<strong>Tentative local suggestion: ${htmlEscape(fallback.suggestedSoilType)} · low confidence</strong><p class="mt-2">Visible image screening</p><ul class="mt-1 list-disc pl-5">${observations}</ul><p class="mt-2">Possible crops from the Philippine list</p><ul class="mt-1 list-disc pl-5">${cropMatches}</ul><p class="mt-2">Recommended checks</p><ul class="mt-1 list-disc pl-5">${checks}</ul><p class="mt-3 muted">The model backend was unavailable, so this is a browser-only color screening. Confirm the soil type with a field or laboratory test.</p>`;
+        if (soilAnalysisResult) soilAnalysisResult.innerHTML = `<section class="card p-6"><div class="flex flex-wrap items-start justify-between gap-4"><div><p class="eyebrow">LOCAL PHOTO SCREENING</p><h2 class="serif mt-2 text-2xl">Possible crops to explore</h2><p class="muted mt-2 text-xs">Tentative soil type: ${htmlEscape(fallback.suggestedSoilType)} · low confidence</p></div><span class="badge">ADVISORY MATCHES</span></div><p class="muted mt-4 text-xs">These cards show qualitative soil-reference fit, not probability of success. This browser-only color screen cannot assess climate or soil pH.</p><p class="eyebrow mt-5">VISIBLE IMAGE SCREENING</p><ul class="mt-2 list-disc pl-5 text-xs">${observations}</ul>${cropCards}<p class="eyebrow mt-5">RECOMMENDED CHECKS</p><ul class="mt-2 list-disc pl-5 text-xs">${checks}</ul><p class="muted mt-4 text-xs">Confirm soil and climate conditions before planting.</p></section>`;
         showToast("Tentative local photo screening complete. Confirm the soil before planting.");
       } catch (fallbackError) {
         if (soilAnalysisResult) soilAnalysisResult.textContent = `Photo screening could not run: ${fallbackError.message}`;

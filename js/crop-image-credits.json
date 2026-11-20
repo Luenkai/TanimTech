@@ -7,11 +7,11 @@
     "sourceUrl": "https://www.flickr.com/photos/28722516@N02/3528380924"
   },
   "kangkong": {
-    "src": "images/crops/kangkong.jpg",
-    "creator": "Dinesh Valke",
-    "license": "CC BY-SA 2.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
-    "sourceUrl": "https://www.flickr.com/photos/91314344@N00/5139211842"
+    "src": "images/crops/kangkong-guide.png",
+    "creator": "Provided by user",
+    "license": "User-provided image",
+    "licenseUrl": "",
+    "sourceUrl": "images/crops/kangkong-guide.png"
   },
   "mongo": {
     "src": "images/crops/mongo.jpg",
@@ -21,11 +21,11 @@
     "sourceUrl": "https://www.flickr.com/photos/32751486@N00/2343262086"
   },
   "sitaw": {
-    "src": "images/crops/sitaw.jpg",
-    "creator": "Rameshng",
-    "license": "CC BY-SA 2.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
-    "sourceUrl": "https://www.flickr.com/photos/39107352@N08/5930575516"
+    "src": "images/crops/sitaw-guide-centered.jpg",
+    "creator": "David E Mead (cropped by TanimTech)",
+    "license": "CC0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Yard-long_beans_(marketed).jpg"
   },
   "talong": {
     "src": "images/crops/talong.jpg",
@@ -42,11 +42,11 @@
     "sourceUrl": "https://www.flickr.com/photos/39160147@N03/14763854597"
   },
   "mais": {
-    "src": "images/crops/mais.jpg",
-    "creator": "enneafive",
-    "license": "CC BY 2.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
-    "sourceUrl": "https://www.flickr.com/photos/75612671@N03/49959217797"
+    "src": "images/crops/mais-guide.jpg",
+    "creator": "Daderot",
+    "license": "CC0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Corn_on_the_cob_-_Massachusetts.jpg"
   },
   "palay": {
     "src": "images/crops/palay.jpg",
@@ -56,11 +56,11 @@
     "sourceUrl": "https://www.flickr.com/photos/37086457@N00/8077028737"
   },
   "kamatis": {
-    "src": "images/crops/kamatis.jpg",
-    "creator": "drazz",
-    "license": "CC BY-SA 2.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
-    "sourceUrl": "https://www.flickr.com/photos/12079360@N00/2791717800"
+    "src": "images/crops/kamatis-guide.jpg",
+    "creator": "Happie1Soul (cropped by TanimTech)",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Raw_Tomatoes.jpg"
   },
   "sibuyas": {
     "src": "images/crops/sibuyas.jpg",
@@ -70,11 +70,11 @@
     "sourceUrl": "https://www.flickr.com/photos/47264866@N00/9098024774"
   },
   "bawang": {
-    "src": "images/crops/bawang.jpg",
-    "creator": "graibeard",
+    "src": "images/crops/bawang-guide.jpg",
+    "creator": "Willis Lam",
     "license": "CC BY-SA 2.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
-    "sourceUrl": "https://www.flickr.com/photos/8393288@N04/3517010684"
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Garlic_Bulb_(17203047111).jpg"
   },
   "repolyo": {
     "src": "images/crops/repolyo.jpg",
@@ -84,18 +84,18 @@
     "sourceUrl": "https://www.flickr.com/photos/53133240@N00/8076990249"
   },
   "karot": {
-    "src": "images/crops/karot.jpg",
-    "creator": "Nisha A",
-    "license": "CC BY 2.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
-    "sourceUrl": "https://www.flickr.com/photos/87718306@N00/2336528175"
+    "src": "images/crops/karot-guide.jpg",
+    "creator": "Rei",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:ThreeRootCarrot.jpg"
   },
   "labanos": {
-    "src": "images/crops/labanos.jpg",
-    "creator": "avlxyz",
-    "license": "CC BY-SA 2.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
-    "sourceUrl": "https://www.flickr.com/photos/10559879@N00/2553660622"
+    "src": "images/crops/labanos-guide.png",
+    "creator": "Provided by user",
+    "license": "User-provided image",
+    "licenseUrl": "",
+    "sourceUrl": "images/crops/labanos-guide.png"
   },
   "pipino": {
     "src": "images/crops/pipino.jpg",
@@ -119,11 +119,11 @@
     "sourceUrl": "https://www.flickr.com/photos/69082176@N02/6985022374"
   },
   "okra": {
-    "src": "images/crops/okra.jpg",
-    "creator": "ObsidianSoul",
-    "license": "CC BY-SA 2.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
-    "sourceUrl": "https://www.flickr.com/photos/62412346@N07/5689483961"
+    "src": "images/crops/okra-guide.jpg",
+    "creator": "\u1005\u102c\u1000\u101c\u1031\u1038 (Sakalay)",
+    "license": "CC0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Okra_Ron-Pa-Ti-Tee.jpg"
   },
   "sili": {
     "src": "images/crops/sili.jpg",
@@ -161,11 +161,11 @@
     "sourceUrl": "https://wordpress.org/photos/photo/4806615844/"
   },
   "gabi": {
-    "src": "images/crops/gabi.jpg",
-    "creator": "jdnx",
-    "license": "CC BY 2.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by/2.0/",
-    "sourceUrl": "https://www.flickr.com/photos/21442511@N08/5217007908"
+    "src": "images/crops/gabi-guide.jpg",
+    "creator": "\u1005\u102c\u1000\u101c\u1031\u1038 (Sakalay)",
+    "license": "CC0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Taro_Root,_Eddoe_or_Colocasia_Esculenta.jpg"
   },
   "kamoteng-kahoy": {
     "src": "images/crops/kamoteng-kahoy.jpg",
@@ -189,11 +189,11 @@
     "sourceUrl": "https://www.flickr.com/photos/50310535@N03/6865121460"
   },
   "saging": {
-    "src": "images/crops/saging.jpg",
-    "creator": "roger4336",
-    "license": "CC BY-SA 2.0",
-    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
-    "sourceUrl": "https://www.flickr.com/photos/24736216@N07/7209146878"
+    "src": "images/crops/saging-guide.jpg",
+    "creator": "Wilfredor (cropped by TanimTech)",
+    "license": "CC0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bunch_of_bananas_on_sale.jpg"
   },
   "pinya": {
     "src": "images/crops/pinya.jpg",

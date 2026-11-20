@@ -84,6 +84,9 @@ button { cursor: pointer; color: inherit; }
 .field-control { min-height: 48px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border: 1px solid var(--line); border-radius: 3px; background: var(--paper-white); padding: 0 14px; color: var(--ink); }
 .field-control:focus-within { border-color: var(--forest); box-shadow: 0 0 0 3px rgb(23 75 58 / 10%); }
 .field-control input, .field-control select { min-width: 0; width: 100%; color: var(--ink); outline: none; }
+.password-toggle { display: grid; width: 28px; height: 32px; flex: 0 0 28px; place-items: center; border: 0; border-radius: 3px; background: transparent; color: var(--muted); }
+.password-toggle:hover { color: var(--forest); }
+.password-toggle svg { width: 20px; height: 20px; }
 .field-control input[type="number"] { appearance: textfield; }
 .field-control input[type="number"]::-webkit-inner-spin-button, .field-control input[type="number"]::-webkit-outer-spin-button { margin-left: 8px; opacity: 1; }
 .field-control select { appearance: none; cursor: pointer; background: transparent; }
@@ -96,6 +99,7 @@ button { cursor: pointer; color: inherit; }
 .warning { border-radius: 5px; background: var(--sand); padding: 16px 18px; }
 .photo-placeholder { display: grid; min-height: 220px; place-content: center; justify-items: center; border: 1px solid var(--line); border-radius: 4px; background: #eef0e9; color: var(--muted); text-align: center; }
 .photo-preview { width: 100%; max-height: 420px; border: 1px solid var(--line); border-radius: 5px; background: #eef0e9; object-fit: contain; }
+.crop-guide-photo { display: block; width: 100%; height: clamp(14rem, 38vw, 24rem); background: #eef0e9; object-fit: contain; object-position: center; }
 .camera-video { width: 100%; max-height: min(60vh, 560px); border-radius: 5px; background: #18251f; object-fit: contain; }
 .site-footer { border-top: 1px solid var(--line); padding: 34px 64px 28px; color: var(--muted); font-size: 12px; }
 .footer-inner { max-width: 1440px; margin: auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 28px; }

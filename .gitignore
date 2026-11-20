@@ -1,3 +1,6 @@
 .playwright-mcp/
+.pytest_cache/
+.venv/
+.cache/
 __pycache__/
-*.pyc
+*.py[cod]

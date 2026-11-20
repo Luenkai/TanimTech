@@ -6,7 +6,7 @@
   <script src="js/access-gate.js?v=6"></script>
   <script src="js/supabase-config.js?v=1"></script>
   <script src="https://cdn.tailwindcss.com"></script><script>tailwind.config={theme:{extend:{colors:{paper:'#f6f5ee',forest:'#174b3a',ink:'#274c3e',muted:'#788073',line:'#dce0d4',leaf:'#e9efdc',lime:'#d9e99b'}}}}</script>
-  <link rel="stylesheet" href="css/site.css?v=10">
+  <link rel="stylesheet" href="css/site.css?v=11">
 </head>
 <body>
   <header class="site-header"><div class="header-inner"><a class="brand" href="homepage.html"><span class="brand-mark">♧</span>tanimtech.</a><nav class="main-nav" aria-label="Main navigation">
@@ -34,8 +34,8 @@
       <form class="mt-6 grid gap-5 md:grid-cols-2" data-account-form>
         <label><span class="field-label">Username</span><span class="field-control"><input data-account-username type="text" minlength="3" maxlength="20" autocomplete="username" required></span></label>
         <label><span class="field-label">Gmail address</span><span class="field-control"><input data-account-email type="email" autocomplete="email" required></span></label>
-        <label><span class="field-label">New password</span><span class="field-control"><input data-account-password type="password" minlength="8" autocomplete="new-password" placeholder="Leave blank to keep current password"></span></label>
-        <label><span class="field-label">Confirm new password</span><span class="field-control"><input data-account-confirm type="password" autocomplete="new-password" placeholder="Re-enter new password"></span></label>
+        <label><span class="field-label">New password</span><span class="field-control"><input data-account-password type="password" minlength="8" autocomplete="new-password" placeholder="Leave blank to keep current password"><button class="password-toggle" type="button" data-password-toggle aria-label="Show password" title="Show password" aria-pressed="false"></button></span></label>
+        <label><span class="field-label">Confirm new password</span><span class="field-control"><input data-account-confirm type="password" autocomplete="new-password" placeholder="Re-enter new password"><button class="password-toggle" type="button" data-password-toggle aria-label="Show password" title="Show password" aria-pressed="false"></button></span></label>
         <div class="md:col-span-2"><p class="field-note">Username: 3–20 letters, numbers, or underscores. New passwords need uppercase, lowercase, a number, and a symbol.</p><button class="button button-primary mt-4" type="submit">Save account changes</button><p class="field-note mt-3" data-account-message aria-live="polite">Your email, username, and password are private account details.</p></div>
       </form>
     </section>
@@ -52,6 +52,6 @@
     </section>
   </main>
   <footer class="site-footer"><div class="footer-inner"><a class="footer-brand" href="homepage.html">tanimtech.</a><p>Plan from measured conditions and traceable sources.</p><nav class="footer-links"><a href="homepage.html#guide">How to use</a><a href="homepage.html#methodology">Sources</a><a href="conditions.html">Start planning</a></nav></div><div class="footer-bottom"><p>© 2026 TanimTech · Philippine crop planning</p><p>Private workspace · screening, not a yield guarantee.</p></div></footer>
-  <script src="js/site.js?v=20"></script>
+  <script src="js/site.js?v=21"></script>
 </body>
 </html>
