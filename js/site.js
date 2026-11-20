@@ -597,22 +597,13 @@
     }
     const count = pixels.length / 4;
     red /= count; green /= count; blue /= count; brightness /= count;
-    const suggestedSoilType = brightness < 75 && red > blue * 1.18 ? "Loam" : red > blue * 1.25 && brightness > 105 ? "Sandy" : blue > red * 1.08 ? "Silty" : "Clay";
-    const cropGroups = {
-      Sandy: ["kamote", "mani", "pinya", "papaya", "sitaw"],
-      Clay: ["palay", "gabi", "kangkong", "kalabasa", "mais"],
-      Silty: ["pechay", "repolyo", "sibuyas", "labanos", "kamatis"],
-      Loam: ["pechay", "talong", "kamatis", "okra", "mongo"],
-    };
-    const dataset = await fetch("js/philippine-edible-catalog.json").then((response) => response.json());
-    const bySlug = new Map((dataset.crops || []).map((crop) => [crop.slug, crop]));
     return {
-      suggestedSoilType, confidence: "low", observations: [
-        `The photo has a ${suggestedSoilType.toLowerCase()}-leaning color and brightness profile.`,
-        "Image-only review cannot confirm texture, pH, nutrients, drainage, or organic matter.",
+      suggestedSoilType: "Unknown", confidence: "insufficient", inconclusive: true, observations: [
+        "The browser-only fallback cannot verify that the image is a clear soil close-up.",
+        "No soil type is assigned from color alone, so this photo is not used to suggest crops.",
       ],
-      recommendedCrops: (cropGroups[suggestedSoilType] || []).map((slug) => bySlug.get(slug)).filter(Boolean).map((crop) => ({ slug: crop.slug, name: crop.name, category: crop.category, status: "possible" })),
-      recommendedChecks: ["Confirm texture by hand or with a soil test.", "Check drainage and organic matter before planting.", "Treat this as a screening suggestion, not a laboratory result."],
+      recommendedCrops: [],
+      recommendedChecks: ["Retake the photo with soil filling most of the frame.", "Confirm texture by hand or with a soil test.", "Use measured soil and climate inputs for crop recommendations."],
       localFallback: true,
     };
   };
@@ -693,9 +684,11 @@
           modelVersion: null,
         });
         const observations = fallback.observations.map((item) => `<li>${htmlEscape(item)}</li>`).join("");
-        const cropCards = await renderPhotoCropCards(fallback.recommendedCrops, runId);
+        const cropCards = fallback.inconclusive
+          ? '<div class="warning mt-5 text-xs"><strong>No crop recommendations were generated.</strong><p class="muted mt-2">Use a clear soil close-up or continue with manual soil and climate inputs.</p></div>'
+          : await renderPhotoCropCards(fallback.recommendedCrops, runId);
         const checks = fallback.recommendedChecks.map((item) => `<li>${htmlEscape(item)}</li>`).join("");
-        if (soilAnalysisResult) soilAnalysisResult.innerHTML = `<section class="card p-6"><div class="flex flex-wrap items-start justify-between gap-4"><div><p class="eyebrow">LOCAL PHOTO SCREENING</p><h2 class="serif mt-2 text-2xl">Possible crops to explore</h2><p class="muted mt-2 text-xs">Tentative soil type: ${htmlEscape(fallback.suggestedSoilType)} · low confidence</p></div><span class="badge">ADVISORY MATCHES</span></div><p class="muted mt-4 text-xs">These cards show qualitative soil-reference fit, not probability of success. This browser-only color screen cannot assess climate or soil pH.</p><p class="eyebrow mt-5">VISIBLE IMAGE SCREENING</p><ul class="mt-2 list-disc pl-5 text-xs">${observations}</ul>${cropCards}<p class="eyebrow mt-5">RECOMMENDED CHECKS</p><ul class="mt-2 list-disc pl-5 text-xs">${checks}</ul><p class="muted mt-4 text-xs">Confirm soil and climate conditions before planting.</p>${renderFeedbackForm("soil_image", runId)}</section>`;
+        if (soilAnalysisResult) soilAnalysisResult.innerHTML = `<section class="card p-6"><div class="flex flex-wrap items-start justify-between gap-4"><div><p class="eyebrow">LOCAL PHOTO SCREENING</p><h2 class="serif mt-2 text-2xl">${fallback.inconclusive ? "Unable to determine from this photo" : "Possible crops to explore"}</h2><p class="muted mt-2 text-xs">${fallback.inconclusive ? "No soil type assigned · insufficient evidence" : `Tentative soil type: ${htmlEscape(fallback.suggestedSoilType)} · low confidence`}</p></div><span class="badge">${fallback.inconclusive ? "INCONCLUSIVE PHOTO" : "ADVISORY MATCHES"}</span></div><p class="muted mt-4 text-xs">${fallback.inconclusive ? "The browser-only fallback will not guess from image color or treat an unverified object as soil." : "These cards show qualitative soil-reference fit, not probability of success. This browser-only color screen cannot assess climate or soil pH."}</p><p class="eyebrow mt-5">VISIBLE IMAGE SCREENING</p><ul class="mt-2 list-disc pl-5 text-xs">${observations}</ul>${cropCards}<p class="eyebrow mt-5">RECOMMENDED CHECKS</p><ul class="mt-2 list-disc pl-5 text-xs">${checks}</ul><p class="muted mt-4 text-xs">Confirm soil and climate conditions before planting.</p>${renderFeedbackForm("soil_image", runId)}</section>`;
         soilAnalysisResult?.querySelector("[data-result-feedback]")?.addEventListener("submit", submitFeedbackForm);
         showToast("Tentative local photo screening complete. Confirm the soil before planting.");
       } catch (fallbackError) {
