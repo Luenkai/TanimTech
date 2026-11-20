@@ -1,0 +1,35 @@
+{
+  "zenodo_record": "https://zenodo.org/api/records/14725633",
+  "soil_image_count": 136,
+  "soil_sample_count": 26,
+  "nonsoil_image_count": 45,
+  "negative_queries": {
+    "bottle": "plastic bottle",
+    "vehicle": "car vehicle",
+    "leaf": "green leaf",
+    "concrete": "concrete surface",
+    "person": "person portrait",
+    "building": "building exterior",
+    "food": "food close up",
+    "rock": "rock stone"
+  },
+  "hard_negative_count": 1,
+  "manifest": "user_provided_manifest.jsonl",
+  "note": "Training counts describe the model training set. This directory contains only the explicitly approved user-provided photo and its provenance row; source image rights were not independently verified.",
+  "curation_exclusions": [
+    {
+      "openverse_id": "fa33657f-e8df-4038-8d99-8b735bed83d3",
+      "reason": "The image is dominated by sandy ground, so its non-soil label is ambiguous."
+    }
+  ],
+  "user_provided_nonsoil_count": 1,
+  "total_training_image_count": 181,
+  "user_provided_manifest": "user_provided_manifest.jsonl",
+  "catalog_scope": "Supplemental repository payload for the user-provided non-soil example; not a complete copy of the training dataset.",
+  "manifest_scope": "One user-provided row only; the full 181-image training manifest is not included in this repository directory.",
+  "committed_image_count": 1,
+  "committed_image": "nonsoil/user_provided_non_soil_2cc7c08c2a98.jpg",
+  "complete_training_images_in_repo": false,
+  "zenodo_and_openverse_source_images_in_repo": false,
+  "hard_negative_image_in_repo": false
+}
