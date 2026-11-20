@@ -8,6 +8,7 @@ os.environ["TANIM_STORE_FILE"] = os.path.join(tempfile.mkdtemp(), "store.json")
 
 from tanimtech import create_app  # noqa: E402
 from tanimtech import store  # noqa: E402
+from tanimtech.crop_suitability import _percentile_targets, _yield_percentile  # noqa: E402
 
 SAMPLE = {"soilPh": 6.4, "temperature": 27, "humidity": 78, "rainfall": 1500}
 
@@ -24,9 +25,15 @@ class BackendTests(unittest.TestCase):
         self.assertEqual(self.c.get("/api/health").json, {"status": "ok"})
         m = self.c.get("/api/methodology").json
         self.assertEqual(sum(w["maxPoints"] for w in m["weights"]), 100)
+        self.assertIn("randomForest", m)
+        self.assertIn("Crop comparison when field conditions are supplied", m["randomForest"]["usedIn"])
         status = self.c.get("/api/recommendations/data-status")
         self.assertEqual(status.status_code, 200)
         self.assertTrue(status.json["available"])
+        self.assertEqual(
+            self.c.get("/api/recommendations/ranking-status").status_code,
+            200,
+        )
 
     def test_auth_status_and_protected_routes(self):
         self.assertTrue(self.c.get("/api/auth/me").json["authenticated"])
@@ -79,6 +86,8 @@ class BackendTests(unittest.TestCase):
         payload = response.json
         model = payload["rankingModel"]
         self.assertTrue(model["active"], model)
+        self.assertEqual(model["validation"]["folds"], 5)
+        self.assertEqual(model["validation"]["method"], "5-fold held-out-state cross-validation")
         self.assertLess(model["validation"]["modelMse"], model["validation"]["ruleBaselineMse"])
 
         results = {result["slug"]: result for result in payload["results"]}
@@ -96,6 +105,15 @@ class BackendTests(unittest.TestCase):
             else "CLOSEST FIT"
         )
         self.assertEqual(first["label"], expected_label)
+
+    def test_percentile_targets_use_training_reference_only(self):
+        train_rows = [
+            {"crop": "mais", "yield_value": value}
+            for value in (10, 20, 30)
+        ]
+        reference = {"mais": [10, 20, 30]}
+        self.assertEqual(_percentile_targets(train_rows, reference), [0, 0.5, 1])
+        self.assertEqual(_yield_percentile(1000, reference["mais"]), 1)
 
     def test_soil_dataset_and_optional_details(self):
         dataset = self.c.get("/api/soil/dataset")

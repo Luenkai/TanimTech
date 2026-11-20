@@ -11,6 +11,14 @@
     "Compare crops": "Ihambing ang mga pananim",
     "Climate inputs": "Datos ng klima",
     "My profile": "Aking profile",
+    "Account details": "Mga detalye ng account",
+    "Saved profiles & recommendations": "Mga naka-save na profile at rekomendasyon",
+    "Sign out": "Mag-sign out",
+    "Check your email to verify your account.": "Tingnan ang iyong email upang beripikahin ang account.",
+    "Your signup request was received. If a new account was created, Supabase sent a verification email. Check your inbox and spam folder before trying to sign up again.": "Natanggap ang iyong kahilingan sa pagpaparehistro. Kung may bagong account na ginawa, nagpadala ang Supabase ng email ng beripikasyon. Tingnan ang inbox at spam bago muling magparehistro.",
+    "If no email arrives, use Resend confirmation email from the sign-in page instead of submitting this form again.": "Kung walang dumating na email, gamitin ang Resend confirmation email sa pahina ng pag-sign in sa halip na isumite muli ang form na ito.",
+    "Go to sign in": "Pumunta sa pag-sign in",
+    "Use another email address": "Gumamit ng ibang email address",
     "How it works": "Paano ito gumagana",
     "Methodology": "Pamamaraan",
     "Soil photo": "Larawan ng lupa",
@@ -119,6 +127,51 @@
     translatePage(saved);
   };
   addLanguageSelector();
+  document.querySelectorAll("a[data-user-avatar]").forEach((avatar, index) => {
+    const menu = document.createElement("div");
+    menu.className = "profile-actions-menu";
+    menu.dataset.profileActions = "";
+
+    const trigger = document.createElement("button");
+    trigger.className = `${avatar.className} profile-menu-trigger`;
+    trigger.type = "button";
+    trigger.dataset.userAvatar = "";
+    trigger.dataset.profileMenuTrigger = "";
+    trigger.setAttribute("aria-expanded", "false");
+    trigger.setAttribute("aria-haspopup", "true");
+    trigger.setAttribute("aria-controls", `profile-actions-panel-${index + 1}`);
+    trigger.setAttribute("aria-label", "Open profile actions");
+    const initials = document.createElement("span");
+    initials.dataset.avatarInitials = "";
+    initials.textContent = avatar.textContent.trim();
+    trigger.append(initials);
+
+    const panel = document.createElement("nav");
+    panel.className = "profile-actions-panel";
+    panel.id = `profile-actions-panel-${index + 1}`;
+    panel.setAttribute("aria-label", "Profile actions");
+    panel.hidden = true;
+    [
+      ["My profile", "profile.html"],
+      ["Account details", "profile.html#account-details"],
+      ["Saved profiles & recommendations", "profile.html#profile-state"],
+    ].forEach(([label, href]) => {
+      const link = document.createElement("a");
+      link.href = href;
+      link.dataset.profileMenuClose = "";
+      link.textContent = label;
+      panel.append(link);
+    });
+    const signOutButton = document.createElement("button");
+    signOutButton.type = "button";
+    signOutButton.dataset.profileMenuSignout = "";
+    signOutButton.textContent = "Sign out";
+    panel.append(signOutButton);
+
+    menu.append(trigger, panel);
+    avatar.replaceWith(menu);
+  });
+  translatePage(localStorage.getItem(languageKey) || "en");
   const passwordEyeIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
   const passwordEyeOffIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"></path><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"></path><path d="M9.9 5.2A11 11 0 0 1 12 5c6.4 0 10 7 10 7a15 15 0 0 1-3.1 3.8M6.2 6.2C3.6 8 2 12 2 12s3.6 7 10 7a10 10 0 0 0 4-.8"></path></svg>';
   document.querySelectorAll("[data-password-toggle]").forEach((button) => {
@@ -499,7 +552,7 @@
     if (analyzeSoilButton) analyzeSoilButton.disabled = !currentPhoto || !photoStored || !consentCheckbox.checked;
   });
 
-  const renderPhotoCropCards = async (recommendations) => {
+  const renderPhotoCropCards = async (recommendations, runId = null) => {
     if (!Array.isArray(recommendations) || !recommendations.length) {
       return '<div class="notice mt-4 text-xs">No crop matches are available for this soil reference.</div>';
     }
@@ -523,7 +576,7 @@
         : recommendation.status === "caution" ? "Use caution"
           : "Possible soil fit";
       const days = Array.isArray(crop.growingDays) ? `${crop.growingDays[0]}–${crop.growingDays[1]} days` : "Growing period varies";
-      return `<article class="card overflow-hidden"><img class="h-44 w-full bg-paper object-contain" src="${escape(image.src)}" alt="${escape(crop.name)}"><div class="p-5"><div class="flex items-center justify-between gap-3"><span class="badge">${escape(status)}</span><small class="muted">${escape(days)}</small></div><h3 class="serif mt-3 text-2xl">${escape(crop.name)}</h3><p class="muted mt-1 text-xs"><i>${escape(crop.scientific)}</i> · ${escape(crop.category)} · ${escape(crop.lifeForm)}</p><p class="mt-3 text-xs leading-5">${escape(crop.summary)}</p><a class="button mt-4" href="crop-guide.html?crop=${encodeURIComponent(crop.slug)}">Open crop guide ↗</a></div></article>`;
+      return `<article class="card overflow-hidden"><img class="h-44 w-full bg-paper object-contain" src="${escape(image.src)}" alt="${escape(crop.name)}"><div class="p-5"><div class="flex items-center justify-between gap-3"><span class="badge">${escape(status)}</span><small class="muted">${escape(days)}</small></div><h3 class="serif mt-3 text-2xl">${escape(crop.name)}</h3><p class="muted mt-1 text-xs"><i>${escape(crop.scientific)}</i> · ${escape(crop.category)} · ${escape(crop.lifeForm)}</p><p class="mt-3 text-xs leading-5">${escape(crop.summary)}</p><a class="button mt-4" href="crop-guide.html?crop=${encodeURIComponent(crop.slug)}">Open crop guide ↗</a><button class="button mt-3 w-full" type="button" data-track-crop="${escape(crop.slug)}" data-crop-name="${escape(crop.name)}" data-crop-source="image" data-run-id="${escape(runId || "")}">Track as in progress</button></div></article>`;
     }).join("");
     return `<div class="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">${cards}</div>`;
   };
@@ -593,12 +646,28 @@
         state.soilTypeSource = "model-suggested";
       }
       saveState();
+      const soilDetailsForResult = Object.fromEntries(["soilTexture", "drainage", "moisture", "salinity", "organicMatter", "soilNotes"].map((key) => [key, state[key] || ""]));
+      const runId = await persistRecommendationRun({
+        inputMode: "image",
+        inputData: {
+          suggestedSoilType: analysis.suggestedSoilType || null,
+          confidence: analysis.confidence || null,
+          observations: analysis.observations || [],
+          limitations: analysis.limitations || [],
+          recommendedChecks: analysis.recommendedChecks || [],
+          soilDetails: soilDetailsForResult,
+        },
+        results: analysis.recommendedCrops || [],
+        modelName: "soil-photo-review",
+        modelVersion: analysis.modelVersion || null,
+      });
       if (soilAnalysisResult) {
         const observations = (analysis.observations || []).map((item) => `<li>${htmlEscape(item)}</li>`).join("");
         const limitations = (analysis.limitations || []).map((item) => `<li>${htmlEscape(item)}</li>`).join("");
         const checks = (analysis.recommendedChecks || []).map((item) => `<li>${htmlEscape(item)}</li>`).join("");
-        const cropCards = await renderPhotoCropCards(analysis.recommendedCrops);
-        soilAnalysisResult.innerHTML = `<section class="card p-6"><div class="flex flex-wrap items-start justify-between gap-4"><div><p class="eyebrow">PHOTO-BASED SOIL SCREENING</p><h2 class="serif mt-2 text-2xl">Possible crops to explore</h2><p class="muted mt-2 text-xs">Suggested soil type: ${htmlEscape(analysis.suggestedSoilType)} · ${htmlEscape(analysis.confidence)} confidence</p></div><span class="badge">ADVISORY MATCHES</span></div><p class="muted mt-4 text-xs">Crop cards show qualitative soil-reference fit, not probability of success. A photo cannot assess climate or confirm soil pH.</p>${observations ? `<p class="eyebrow mt-5">VISIBLE OBSERVATIONS</p><ul class="mt-2 list-disc pl-5 text-xs">${observations}</ul>` : ""}${cropCards}<p class="eyebrow mt-5">LIMITATIONS</p><ul class="mt-2 list-disc pl-5 text-xs">${limitations || "<li>Photo review is not a soil test.</li>"}</ul><p class="eyebrow mt-5">RECOMMENDED CHECKS</p><ul class="mt-2 list-disc pl-5 text-xs">${checks || "<li>Confirm soil and climate conditions before planting.</li>"}</ul><p class="muted mt-4 text-xs">Confirm or override the soil suggestion in field conditions. Crop suitability depends on measured pH, climate, drainage, and local guidance.</p></section>`;
+        const cropCards = await renderPhotoCropCards(analysis.recommendedCrops, runId);
+        soilAnalysisResult.innerHTML = `<section class="card p-6"><div class="flex flex-wrap items-start justify-between gap-4"><div><p class="eyebrow">PHOTO-BASED SOIL SCREENING</p><h2 class="serif mt-2 text-2xl">Possible crops to explore</h2><p class="muted mt-2 text-xs">Suggested soil type: ${htmlEscape(analysis.suggestedSoilType)} · ${htmlEscape(analysis.confidence)} confidence</p></div><span class="badge">ADVISORY MATCHES</span></div><p class="muted mt-4 text-xs">Crop cards show qualitative soil-reference fit, not probability of success. A photo cannot assess climate or confirm soil pH.</p>${observations ? `<p class="eyebrow mt-5">VISIBLE OBSERVATIONS</p><ul class="mt-2 list-disc pl-5 text-xs">${observations}</ul>` : ""}${cropCards}<p class="eyebrow mt-5">LIMITATIONS</p><ul class="mt-2 list-disc pl-5 text-xs">${limitations || "<li>Photo review is not a soil test.</li>"}</ul><p class="eyebrow mt-5">RECOMMENDED CHECKS</p><ul class="mt-2 list-disc pl-5 text-xs">${checks || "<li>Confirm soil and climate conditions before planting.</li>"}</ul><p class="muted mt-4 text-xs">Confirm or override the soil suggestion in field conditions. Crop suitability depends on measured pH, climate, drainage, and local guidance.</p>${renderFeedbackForm("soil_image", runId)}</section>`;
+        soilAnalysisResult.querySelector("[data-result-feedback]")?.addEventListener("submit", submitFeedbackForm);
       }
       showToast("Soil review complete. Confirm the suggestion before using it.");
     } catch (error) {
@@ -609,10 +678,25 @@
         state.soilTexture = fallback.suggestedSoilType;
         state.soilTypeSource = "local-photo-screening";
         saveState();
+        const soilDetailsForResult = Object.fromEntries(["soilTexture", "drainage", "moisture", "salinity", "organicMatter", "soilNotes"].map((key) => [key, state[key] || ""]));
+        const runId = await persistRecommendationRun({
+          inputMode: "image",
+          inputData: {
+            suggestedSoilType: fallback.suggestedSoilType,
+            confidence: fallback.confidence,
+            observations: fallback.observations,
+            recommendedChecks: fallback.recommendedChecks,
+            soilDetails: soilDetailsForResult,
+          },
+          results: fallback.recommendedCrops || [],
+          modelName: "local-photo-screening",
+          modelVersion: null,
+        });
         const observations = fallback.observations.map((item) => `<li>${htmlEscape(item)}</li>`).join("");
-        const cropCards = await renderPhotoCropCards(fallback.recommendedCrops);
+        const cropCards = await renderPhotoCropCards(fallback.recommendedCrops, runId);
         const checks = fallback.recommendedChecks.map((item) => `<li>${htmlEscape(item)}</li>`).join("");
-        if (soilAnalysisResult) soilAnalysisResult.innerHTML = `<section class="card p-6"><div class="flex flex-wrap items-start justify-between gap-4"><div><p class="eyebrow">LOCAL PHOTO SCREENING</p><h2 class="serif mt-2 text-2xl">Possible crops to explore</h2><p class="muted mt-2 text-xs">Tentative soil type: ${htmlEscape(fallback.suggestedSoilType)} · low confidence</p></div><span class="badge">ADVISORY MATCHES</span></div><p class="muted mt-4 text-xs">These cards show qualitative soil-reference fit, not probability of success. This browser-only color screen cannot assess climate or soil pH.</p><p class="eyebrow mt-5">VISIBLE IMAGE SCREENING</p><ul class="mt-2 list-disc pl-5 text-xs">${observations}</ul>${cropCards}<p class="eyebrow mt-5">RECOMMENDED CHECKS</p><ul class="mt-2 list-disc pl-5 text-xs">${checks}</ul><p class="muted mt-4 text-xs">Confirm soil and climate conditions before planting.</p></section>`;
+        if (soilAnalysisResult) soilAnalysisResult.innerHTML = `<section class="card p-6"><div class="flex flex-wrap items-start justify-between gap-4"><div><p class="eyebrow">LOCAL PHOTO SCREENING</p><h2 class="serif mt-2 text-2xl">Possible crops to explore</h2><p class="muted mt-2 text-xs">Tentative soil type: ${htmlEscape(fallback.suggestedSoilType)} · low confidence</p></div><span class="badge">ADVISORY MATCHES</span></div><p class="muted mt-4 text-xs">These cards show qualitative soil-reference fit, not probability of success. This browser-only color screen cannot assess climate or soil pH.</p><p class="eyebrow mt-5">VISIBLE IMAGE SCREENING</p><ul class="mt-2 list-disc pl-5 text-xs">${observations}</ul>${cropCards}<p class="eyebrow mt-5">RECOMMENDED CHECKS</p><ul class="mt-2 list-disc pl-5 text-xs">${checks}</ul><p class="muted mt-4 text-xs">Confirm soil and climate conditions before planting.</p>${renderFeedbackForm("soil_image", runId)}</section>`;
+        soilAnalysisResult?.querySelector("[data-result-feedback]")?.addEventListener("submit", submitFeedbackForm);
         showToast("Tentative local photo screening complete. Confirm the soil before planting.");
       } catch (fallbackError) {
         if (soilAnalysisResult) soilAnalysisResult.textContent = `Photo screening could not run: ${fallbackError.message}`;
@@ -895,18 +979,28 @@
     const profileData = Object.fromEntries(allInputs.map((input) => [input.dataset.inputKey, input.value]).filter(([, value]) => value !== ""));
     profileData.name = window.prompt("Name this field profile", `Field profile · ${state.region || "my field"}`);
     if (!profileData.name) return;
-    const localProfiles = (() => { try { return JSON.parse(localStorage.getItem("tanimtech-local-profiles") || "[]"); } catch { return []; } })();
-    localProfiles.unshift({ ...profileData, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
-    localStorage.setItem("tanimtech-local-profiles", JSON.stringify(localProfiles.slice(0, 12)));
     saveProfileButton.disabled = true;
     try {
-      const response = await fetch("/api/profiles", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(profileData) });
-      const payload = await readJsonResponse(response);
-      if (response.status === 401) throw new Error("Field profile saved locally on this device.");
-      if (!response.ok) throw new Error(payload.errors?.join(" ") || "The field profile could not be saved.");
+      if (supabaseConfigured) {
+        const { client, user } = await getAuthenticatedSupabase();
+        const { error } = await client.from("field_profiles").insert({
+          user_id: user.id,
+          name: profileData.name,
+          conditions: Object.fromEntries(Object.entries(profileData).filter(([key]) => key !== "name")),
+        });
+        if (error) throw error;
+      } else {
+        const localProfiles = (() => { try { const saved = JSON.parse(localStorage.getItem("tanimtech-local-profiles") || "[]"); return Array.isArray(saved) ? saved : []; } catch { return []; } })();
+        localProfiles.unshift({ ...profileData, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+        localStorage.setItem("tanimtech-local-profiles", JSON.stringify(localProfiles.slice(0, 12)));
+        const response = await fetch("/api/profiles", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(profileData) });
+        const payload = await readJsonResponse(response);
+        if (response.status === 401) throw new Error("Field profile saved locally on this device.");
+        if (!response.ok) throw new Error(payload.errors?.join(" ") || "The field profile could not be saved.");
+      }
       showToast("Field profile saved.");
     } catch (error) {
-      showToast(error.message.includes("locally") || error.message.includes("without the TanimTech API") ? error.message : "Field profile saved locally on this device.");
+      showToast(error.message || "The field profile could not be saved.");
     } finally {
       saveProfileButton.disabled = false;
     }
@@ -974,20 +1068,31 @@
     const formatBand = (band) => Array.isArray(band) ? `${band[0]}–${band[1]}` : "not available";
     const evidenceMarkup = (result) => result.dataEvidence?.available ? `<details class="mt-4"><summary class="text-xs font-bold" style="cursor:pointer">View cleaned profile evidence ↗</summary><div class="notice mt-3 text-xs"><p><b>Source</b><br>${escapeHtml(result.dataEvidence.source)}</p><p class="mt-2"><b>Soil profile</b><br>${escapeHtml(result.dataEvidence.soilProfile || "Available")}</p><p class="mt-2"><b>Yield profile</b><br>${escapeHtml(result.dataEvidence.yieldProfile || "Available")}</p></div></details>` : `<details class="mt-4"><summary class="text-xs font-bold" style="cursor:pointer">View data coverage note ↗</summary><div class="warning mt-3 text-xs">${escapeHtml(result.dataEvidence?.source || "No profile matched this crop.")} The fit uses the committed FAO ECOCROP requirement bands.</div></details>`;
     const guideMarkup = (result) => `<a class="button mt-4" href="crop-guide.html?crop=${encodeURIComponent(result.slug)}">Open crop guide ↗</a>`;
-    const renderRecommendations = (payload, mode = "API CONNECTED") => {
+    const renderRecommendations = (payload, mode = "API CONNECTED", runId = null) => {
       currentResults = Array.isArray(payload.results) ? [...payload.results] : [];
       if (sortMode === "name") currentResults.sort((a, b) => a.name.localeCompare(b.name)); else currentResults.sort((a, b) => b.fit - a.fit);
       if (!currentResults.length) { recommendationPage.innerHTML = '<section class="warning mt-8"><strong>No crops matched the selected filters.</strong><p class="muted mt-2 text-xs">Return to your conditions and broaden the category or life-form filters.</p></section>'; return; }
       const first = currentResults[0];
       const evidenceCount = currentResults.filter((result) => result.dataEvidence?.available).length;
       const shownCount = conditions.catalog === "extended" ? 6 : 3;
-      const cards = currentResults.slice(0, shownCount).map((result, index) => `<article class="card overflow-hidden"><img class="h-52 w-full object-cover" src="images/${escapeHtml(cropImage[result.slug] || "hero-farm.jpg")}" alt="${escapeHtml(result.name)}"><div class="p-6"><div class="flex items-center justify-between"><span class="badge" ${index ? 'style="background:#edf0e9"' : ""}>${index ? "ALTERNATIVE" : "CLOSEST FIT"}</span><small class="muted">${result.growingDays ? result.growingDays[0] : result.days[0]}–${result.growingDays ? result.growingDays[1] : result.days[1]} days</small></div><div class="mt-3 flex items-center justify-between"><h2 class="serif text-3xl">${escapeHtml(result.name)}</h2><span class="serif text-3xl">${result.fit}</span></div><p class="muted text-xs">Fit / 100 · not a probability of success</p><div class="score-line my-4"><span style="width:${result.fit}%"></span></div><p class="eyebrow">WHY IT APPEARS</p><p class="mt-2 text-xs">${escapeHtml(result.whyItAppears)}</p><p class="eyebrow mt-4">WHAT TO CHECK</p><p class="mt-2 text-xs">${escapeHtml(result.whatToCheck)}</p><span class="badge mt-4">${result.dataEvidence?.available ? "CLEANED KAGGLE PROFILE" : "ECOCROP REQUIREMENTS"}</span>${result.scientific && result.source === "extended" ? `<p class="muted mt-3 text-xs"><i>${escapeHtml(result.scientific)}</i> · ${escapeHtml(result.category)} · ${escapeHtml(result.lifeForm)}</p>` : ""}${result.soilMatch?.status && result.soilMatch.status !== "unknown" ? `<p class="muted mt-3 text-xs">Soil reference: <b>${escapeHtml(result.soilMatch.status)}</b> for ${escapeHtml(result.soilMatch.label)} texture.</p>` : ""}${evidenceMarkup(result)}${guideMarkup(result)}</div></article>`).join("");
+      const cards = currentResults.slice(0, shownCount).map((result, index) => `<article class="card overflow-hidden"><img class="h-52 w-full object-cover" src="images/${escapeHtml(cropImage[result.slug] || "hero-farm.jpg")}" alt="${escapeHtml(result.name)}"><div class="p-6"><div class="flex items-center justify-between"><span class="badge" ${index ? 'style="background:#edf0e9"' : ""}>${index ? "ALTERNATIVE" : "CLOSEST FIT"}</span><small class="muted">${result.growingDays ? result.growingDays[0] : result.days[0]}–${result.growingDays ? result.growingDays[1] : result.days[1]} days</small></div><div class="mt-3 flex items-center justify-between"><h2 class="serif text-3xl">${escapeHtml(result.name)}</h2><span class="serif text-3xl">${result.fit}</span></div><p class="muted text-xs">Fit / 100 · not a probability of success</p><div class="score-line my-4"><span style="width:${result.fit}%"></span></div><p class="eyebrow">WHY IT APPEARS</p><p class="mt-2 text-xs">${escapeHtml(result.whyItAppears)}</p><p class="eyebrow mt-4">WHAT TO CHECK</p><p class="mt-2 text-xs">${escapeHtml(result.whatToCheck)}</p><span class="badge mt-4">${result.dataEvidence?.available ? "CLEANED KAGGLE PROFILE" : "ECOCROP REQUIREMENTS"}</span>${result.scientific && result.source === "extended" ? `<p class="muted mt-3 text-xs"><i>${escapeHtml(result.scientific)}</i> · ${escapeHtml(result.category)} · ${escapeHtml(result.lifeForm)}</p>` : ""}${result.soilMatch?.status && result.soilMatch.status !== "unknown" ? `<p class="muted mt-3 text-xs">Soil reference: <b>${escapeHtml(result.soilMatch.status)}</b> for ${escapeHtml(result.soilMatch.label)} texture.</p>` : ""}${evidenceMarkup(result)}${guideMarkup(result)}<button class="button mt-3 w-full" type="button" data-track-crop="${escapeHtml(result.slug)}" data-crop-name="${escapeHtml(result.name)}" data-crop-source="manual" data-crop-fit="${Number.isFinite(Number(result.fit)) ? result.fit : ""}" data-run-id="${escapeHtml(runId || "")}">Track as in progress</button></div></article>`).join("");
       const breakdown = (first.breakdown || []).map((item) => `<div class="mini-row"><b>${escapeHtml(item.label)}<br><small class="muted font-normal">${item.value}</small></b><span>${formatBand(item.band)}<br><small class="muted">Reference band</small></span><span class="badge">${item.points} / ${item.maxPoints}</span></div>`).join("");
-      const saved = localStorage.getItem("tanimtech-saved-shortlist") === "true";
-      recommendationPage.innerHTML = `<p class="eyebrow">CROP PLANNING / ${mode === "API CONNECTED" ? "API SHORTLIST" : "LOCAL CALCULATION"}</p><div class="flex flex-wrap items-end justify-between gap-5"><div><h1 class="section-heading mt-3">Crops worth a closer look.</h1><p class="muted mt-3">${mode === "API CONNECTED" ? "Live fit scores from the recommendation API." : "Fit scores calculated from your entries while the API is unavailable."}</p></div><a class="button button-primary" href="conditions.html">Edit conditions ↗</a></div><div class="notice mt-6 grid grid-cols-2 gap-3 text-xs sm:grid-cols-5"><span>pH ${conditions.soilPh}</span><span>${conditions.temperature} °C mean</span><span>${conditions.humidity}% RH</span><span>${conditions.rainfall} mm / year</span><span>${escapeHtml(conditions.planningMonth)} <span class="badge ml-2">${mode === "API CONNECTED" ? "API RESULTS" : "LOCAL RESULTS"}</span></span></div><div class="mt-6 flex flex-wrap items-center justify-between gap-4"><p class="muted text-xs">${currentResults.length} matches${conditions.catalog === "extended" ? " from the extended edible catalog" : ""} · ${evidenceCount} backed by cleaned Kaggle profiles · ${escapeHtml(conditions.region)}</p><div class="flex flex-wrap gap-3"><button class="field-control min-h-10 text-xs" type="button" data-sort-results>Sort: ${sortMode === "fit" ? "highest fit" : "crop name"} ↕</button><button class="button button-primary" type="button" data-scroll-compare>Compare top ${shownCount} ↗</button></div></div><div class="mt-6 grid gap-5 lg:grid-cols-3">${cards}</div><p class="muted mt-4 text-xs">${escapeHtml(payload.note || "Fit is a transparent screening score, not a yield prediction.")} Cleaned Kaggle profiles are evidence context; they do not turn fit into a forecast.</p><div id="compare" class="mt-10 grid items-start gap-6 lg:grid-cols-[2fr_1fr]"><section class="card p-7"><p class="eyebrow">EXPLAIN THE FIT / ${first.fit} OF 100</p><h2 class="serif mt-3">Why ${escapeHtml(first.name)} ranks first</h2><p class="muted mt-3">The recommendation engine keeps the four weighted core factors visible. Add-on context provides guidance and never adds score points.</p><div class="mt-5">${breakdown}</div><p class="muted mt-4 text-xs">${escapeHtml(first.dataEvidence?.source || "FAO ECOCROP requirement bands")}</p></section><aside class="card p-7"><p class="eyebrow">FIT ≠ CERTAINTY</p><h2 class="serif mt-3 text-3xl">What the score can’t tell you</h2><div class="mt-4"><div class="mini-row"><span class="muted">Input completeness</span><b>4 / 4 core values<br><small class="muted font-normal">Entered, not independently verified</small></b></div><div class="mini-row"><span class="muted">Field blind spots</span><b>Drainage · pests · seed quality<br><small class="muted font-normal">Not included in the score</small></b></div></div><div class="warning mt-5"><strong class="text-xs">⚠ Seasonal risk stays visible</strong><p class="muted mt-2 text-xs">A high fit score must not override current local advisories.</p></div></aside></div><section class="mt-8 flex flex-wrap items-center justify-between gap-6 rounded bg-forest px-8 py-7 text-white"><div><h2 class="serif text-2xl">Take the shortlist back to the field.</h2><p class="mt-2 text-sm text-white/75">Save this shortlist on your device, then verify drainage and local conditions before planting at scale.</p></div><button class="button" type="button" data-save-shortlist>${saved ? "Saved on this device ✓" : "Save this shortlist ↗"}</button></section>`;
-      recommendationPage.querySelector("[data-sort-results]").addEventListener("click", () => { sortMode = sortMode === "fit" ? "name" : "fit"; renderRecommendations(payload, mode); });
+      const saved = !supabaseConfigured && localStorage.getItem("tanimtech-saved-shortlist") === "true";
+      recommendationPage.innerHTML = `<p class="eyebrow">CROP PLANNING / ${mode === "API CONNECTED" ? "API SHORTLIST" : "LOCAL CALCULATION"}</p><div class="flex flex-wrap items-end justify-between gap-5"><div><h1 class="section-heading mt-3">Crops worth a closer look.</h1><p class="muted mt-3">${mode === "API CONNECTED" ? "Live fit scores from the recommendation API." : "Fit scores calculated from your entries while the API is unavailable."}</p></div><a class="button button-primary" href="conditions.html">Edit conditions ↗</a></div><div class="notice mt-6 grid grid-cols-2 gap-3 text-xs sm:grid-cols-5"><span>pH ${conditions.soilPh}</span><span>${conditions.temperature} °C mean</span><span>${conditions.humidity}% RH</span><span>${conditions.rainfall} mm / year</span><span>${escapeHtml(conditions.planningMonth)} <span class="badge ml-2">${mode === "API CONNECTED" ? "API RESULTS" : "LOCAL RESULTS"}</span></span></div><div class="mt-6 flex flex-wrap items-center justify-between gap-4"><p class="muted text-xs">${currentResults.length} matches${conditions.catalog === "extended" ? " from the extended edible catalog" : ""} · ${evidenceCount} backed by cleaned Kaggle profiles · ${escapeHtml(conditions.region)}</p><div class="flex flex-wrap gap-3"><button class="field-control min-h-10 text-xs" type="button" data-sort-results>Sort: ${sortMode === "fit" ? "highest fit" : "crop name"} ↕</button><button class="button button-primary" type="button" data-scroll-compare>Compare top ${shownCount} ↗</button></div></div><div class="mt-6 grid gap-5 lg:grid-cols-3">${cards}</div><p class="muted mt-4 text-xs">${escapeHtml(payload.note || "Fit is a transparent screening score, not a yield prediction.")} Cleaned Kaggle profiles are evidence context; they do not turn fit into a forecast.</p><div id="compare" class="mt-10 grid items-start gap-6 lg:grid-cols-[2fr_1fr]"><section class="card p-7"><p class="eyebrow">EXPLAIN THE FIT / ${first.fit} OF 100</p><h2 class="serif mt-3">Why ${escapeHtml(first.name)} ranks first</h2><p class="muted mt-3">The recommendation engine keeps the four weighted core factors visible. Add-on context provides guidance and never adds score points.</p><div class="mt-5">${breakdown}</div><p class="muted mt-4 text-xs">${escapeHtml(first.dataEvidence?.source || "FAO ECOCROP requirement bands")}</p></section><aside class="card p-7"><p class="eyebrow">FIT ≠ CERTAINTY</p><h2 class="serif mt-3 text-3xl">What the score can’t tell you</h2><div class="mt-4"><div class="mini-row"><span class="muted">Input completeness</span><b>4 / 4 core values<br><small class="muted font-normal">Entered, not independently verified</small></b></div><div class="mini-row"><span class="muted">Field blind spots</span><b>Drainage · pests · seed quality<br><small class="muted font-normal">Not included in the score</small></b></div></div><div class="warning mt-5"><strong class="text-xs">⚠ Seasonal risk stays visible</strong><p class="muted mt-2 text-xs">A high fit score must not override current local advisories.</p></div></aside></div>      ${renderFeedbackForm("recommendation", runId)}<section class="mt-8 flex flex-wrap items-center justify-between gap-6 rounded bg-forest px-8 py-7 text-white"><div><h2 class="serif text-2xl">Take the shortlist back to the field.</h2><p class="mt-2 text-sm text-white/75">Save this shortlist on your device, then verify drainage and local conditions before planting at scale.</p></div><button class="button" type="button" data-save-shortlist>${saved ? "Saved on this device ✓" : "Save this shortlist ↗"}</button></section>`;
+      recommendationPage.querySelector("[data-result-feedback]")?.addEventListener("submit", submitFeedbackForm);
+      recommendationPage.querySelector("[data-sort-results]").addEventListener("click", () => { sortMode = sortMode === "fit" ? "name" : "fit"; renderRecommendations(payload, mode, runId); });
       recommendationPage.querySelector("[data-scroll-compare]").addEventListener("click", () => document.querySelector("#compare")?.scrollIntoView({ behavior: "smooth", block: "start" }));
       recommendationPage.querySelector("[data-save-shortlist]").addEventListener("click", async (event) => {
+        if (supabaseConfigured) {
+          if (!runId) {
+            showToast("This shortlist could not be saved to your Supabase profile. Try again after checking your connection.");
+            return;
+          }
+          event.currentTarget.disabled = true;
+          event.currentTarget.textContent = "Saved to profile ✓";
+          showToast("This shortlist is saved in your private recommendation history.");
+          return;
+        }
         localStorage.setItem("tanimtech-saved-shortlist", "true");
         const localSaved = (() => { try { return JSON.parse(localStorage.getItem("tanimtech-saved-recommendations") || "[]"); } catch { return []; } })();
         localSaved.unshift({ label: `Shortlist · ${conditions.region || "my field"}`, inputs: conditions, results: currentResults, createdAt: new Date().toISOString() });
@@ -1007,79 +1112,351 @@
     };
     fetch("/api/recommendations", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(conditions) })
       .then((response) => response.ok ? response.json() : Promise.reject(new Error("Recommendation API unavailable")))
-      .then((payload) => renderRecommendations(payload, "API CONNECTED"))
-      .catch(() => { renderRecommendations({ results: localRecommend(), note: "The API is unavailable on this static deployment; the same transparent ECOCROP screening calculation is running locally." }, "LOCAL CALCULATION"); });
+      .then(async (payload) => {
+        const runId = await persistRecommendationRun({
+          inputMode: "manual",
+          inputData: conditions,
+          results: (payload.results || []).slice(0, 20),
+          modelName: payload.rankingModel?.name || "crop-fit-recommendations",
+          modelVersion: payload.rankingModel?.version || null,
+        });
+        renderRecommendations(payload, "API CONNECTED", runId);
+      })
+      .catch(async () => {
+        const results = localRecommend();
+        const runId = await persistRecommendationRun({
+          inputMode: "manual",
+          inputData: conditions,
+          results: results.slice(0, 20),
+          modelName: "local-crop-fit",
+          modelVersion: null,
+        });
+        renderRecommendations({ results, note: "The API is unavailable on this static deployment; the same transparent ECOCROP screening calculation is running locally." }, "LOCAL CALCULATION", runId);
+      });
   }
 
   const loginPage = document.querySelector("[data-login-page]");
-  const accountStoreKey = "tanimtech-local-accounts";
-  const readLocalAccounts = () => {
-    const stored = localStorage.getItem(accountStoreKey);
-    if (!stored) return [];
-    const accounts = JSON.parse(stored);
-    if (!Array.isArray(accounts)) throw new Error("Saved account data is unreadable. Clear this browser's saved account data and try again.");
-    return accounts;
-  };
-  const bytesToHex = (bytes) => Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
-  const hashPassword = async (password, saltHex) => {
-    if (!window.crypto?.subtle) throw new Error("Secure password storage is unavailable in this browser. Open TanimTech over HTTPS or localhost.");
-    const salt = new Uint8Array(saltHex.match(/.{2}/g).map((byte) => Number.parseInt(byte, 16)));
-    const key = await window.crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
-    const bits = await window.crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations: 120000, hash: "SHA-256" }, key, 256);
-    return bytesToHex(new Uint8Array(bits));
-  };
   const showAuthMessage = (element, text) => {
     if (element) element.textContent = text;
   };
+  const isValidEmailAddress = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const authErrorMessage = (error, fallback) => {
+    const message = String(error?.message || "");
+    if (error?.code === "over_email_send_rate_limit" || /email.*rate.?limit|rate.?limit.*email/i.test(message)) {
+      return "Supabase's default email service is rate-limited (currently 2 emails per hour) and only sends to project-team addresses. Avoid retrying for now; configure a custom SMTP provider in Supabase Dashboard → Authentication → SMTP Settings to send to other addresses.";
+    }
+    if (error?.code === "invalid_credentials" || error?.code === "email_not_confirmed") return fallback;
+    return message || fallback;
+  };
   const supabaseConfigured = Boolean(window.tanimtechSupabaseConfigured);
+  const getAuthenticatedSupabase = async () => {
+    if (!supabaseConfigured) throw new Error("Supabase is not configured for this workspace.");
+    const client = await window.tanimtechGetSupabaseClient();
+    if (!client) throw new Error("Supabase is unavailable.");
+    const { data, error } = await client.auth.getUser();
+    if (error) throw error;
+    if (!data.user) throw new Error("Sign in again before saving account data.");
+    return { client, user: data.user };
+  };
+  const persistRecommendationRun = async ({ inputMode, inputData, results, modelName, modelVersion }) => {
+    if (!supabaseConfigured) return null;
+    try {
+      const { client, user } = await getAuthenticatedSupabase();
+      const { data, error } = await client.from("recommendation_runs").insert({
+        user_id: user.id,
+        input_mode: inputMode,
+        input_data: inputData,
+        results,
+        model_name: modelName,
+        model_version: modelVersion,
+      }).select("id").single();
+      if (error) throw error;
+      return data.id;
+    } catch (error) {
+      showToast(`Result is available, but could not be synced to your profile: ${error.message}`);
+      return null;
+    }
+  };
+  const saveTrackedCrop = async (slug, name, sourceMode, runId, fitScore) => {
+    if (!slug || !name) throw new Error("This crop result is incomplete and cannot be saved.");
+    const score = fitScore === "" || fitScore === undefined ? null : Number(fitScore);
+    if (supabaseConfigured) {
+      const { client, user } = await getAuthenticatedSupabase();
+      const { error } = await client.from("crop_plans").upsert({
+        user_id: user.id,
+        crop_slug: slug,
+        crop_name: name,
+        status: "in_progress",
+        source_mode: sourceMode === "image" ? "image" : "manual",
+        recommendation_run_id: runId || null,
+        fit_score: Number.isFinite(score) ? score : null,
+      }, { onConflict: "user_id,crop_slug" });
+      if (error) throw error;
+    } else {
+      const saved = (() => {
+        try {
+          const value = JSON.parse(localStorage.getItem("tanimtech-crop-plans") || "[]");
+          return Array.isArray(value) ? value : [];
+        } catch {
+          return [];
+        }
+      })();
+      const plan = {
+        id: slug,
+        crop_slug: slug,
+        crop_name: name,
+        status: "in_progress",
+        source_mode: sourceMode === "image" ? "image" : "manual",
+        fit_score: Number.isFinite(score) ? score : null,
+        updated_at: new Date().toISOString(),
+      };
+      const existing = saved.findIndex((item) => item.crop_slug === slug);
+      if (existing >= 0) saved[existing] = { ...saved[existing], ...plan };
+      else saved.unshift(plan);
+      localStorage.setItem("tanimtech-crop-plans", JSON.stringify(saved));
+    }
+    showToast(`${name} added to your crop tracker.`);
+  };
+  const renderFeedbackForm = (kind, runId) => {
+    const esc = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+    }[character]));
+    const correctionField = kind === "soil_image"
+      ? `<label class="mt-4 block"><span class="field-label">If it was wrong, what soil type is closer?</span><span class="field-control"><select name="corrected_soil_type"><option value="">No correction</option>${["Clay", "Loam", "Sandy", "Silty", "Peaty", "Unknown"].map((soilType) => `<option value="${soilType}">${soilType}</option>`).join("")}</select></span></label>`
+      : `<label class="mt-4 block"><span class="field-label">Which crop should have ranked higher? (optional)</span><span class="field-control"><input name="corrected_crop_slug" type="text" maxlength="120" placeholder="Crop name or slug"></span></label>`;
+    return `<section class="card mt-8 p-6"><p class="eyebrow">HELP IMPROVE FUTURE RESULTS</p><h2 class="serif mt-2 text-2xl">${kind === "soil_image" ? "Was the soil suggestion useful?" : "How accurate was this crop shortlist?"}</h2><p class="muted mt-2 text-xs">Your feedback is saved with this result for later review. It does not automatically change the live model.</p><form class="mt-4" data-result-feedback data-feedback-kind="${kind}" data-run-id="${esc(runId || "")}"><label class="block"><span class="field-label">${kind === "soil_image" ? "Was the suggestion accurate?" : "Was this shortlist helpful?"}</span><span class="field-control"><select name="helpful" required><option value="">Choose one</option><option value="true">Yes</option><option value="false">No</option></select></span></label>${correctionField}<label class="mt-4 block"><span class="field-label">Additional details (optional)</span><span class="field-control"><textarea name="comment" maxlength="1000" rows="3" placeholder="What should the result have considered?"></textarea></span></label><button class="button button-primary mt-4" type="submit" ${runId ? "" : "disabled"}>Send feedback</button><p class="field-note mt-3" data-feedback-status aria-live="polite">${runId ? "Feedback is private to your account." : "This result could not be synced, so feedback cannot be attached to it."}</p></form></section>`;
+  };
+  const submitFeedbackForm = async (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const runId = form.dataset.runId;
+    const status = form.querySelector("[data-feedback-status]");
+    if (!runId) {
+      showAuthMessage(status, "This result is not synced to your account. Feedback could not be saved.");
+      return;
+    }
+    const values = new FormData(form);
+    const feedbackKind = form.dataset.feedbackKind;
+    const helpfulValue = values.get("helpful");
+    const feedback = {
+      recommendation_run_id: runId,
+      feedback_kind: feedbackKind,
+      helpful: helpfulValue === "" ? null : helpfulValue === "true",
+      corrected_crop_slug: feedbackKind === "recommendation" ? values.get("corrected_crop_slug") || null : null,
+      corrected_soil_type: feedbackKind === "soil_image" ? values.get("corrected_soil_type") || null : null,
+      comment: String(values.get("comment") || "").trim(),
+    };
+    const button = form.querySelector('button[type="submit"]');
+    if (button) button.disabled = true;
+    try {
+      const { client, user } = await getAuthenticatedSupabase();
+      feedback.user_id = user.id;
+      const { error } = await client.from("model_feedback").upsert(feedback, {
+        onConflict: "recommendation_run_id,user_id,feedback_kind",
+      });
+      if (error) throw error;
+      showAuthMessage(status, "Thank you. Your feedback was saved for later review.");
+      showToast("Feedback saved.");
+    } catch (error) {
+      showAuthMessage(status, error.message || "Feedback could not be saved.");
+      showToast(error.message || "Feedback could not be saved.");
+    } finally {
+      if (button) button.disabled = false;
+    }
+  };
+  const updateCropPlanStatus = async (planId, status) => {
+    if (supabaseConfigured) {
+      const { client, user } = await getAuthenticatedSupabase();
+      const { error } = await client.from("crop_plans").update({ status }).eq("id", planId).eq("user_id", user.id);
+      if (error) throw error;
+      return;
+    }
+    const plans = (() => {
+      try {
+        const value = JSON.parse(localStorage.getItem("tanimtech-crop-plans") || "[]");
+        return Array.isArray(value) ? value : [];
+      } catch {
+        return [];
+      }
+    })();
+    const plan = plans.find((item) => item.id === planId);
+    if (!plan) throw new Error("The saved crop could not be found.");
+    plan.status = status;
+    plan.updated_at = new Date().toISOString();
+    localStorage.setItem("tanimtech-crop-plans", JSON.stringify(plans));
+  };
+  document.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-track-crop]");
+    if (!button || button.disabled) return;
+    button.disabled = true;
+    try {
+      await saveTrackedCrop(
+        button.dataset.trackCrop,
+        button.dataset.cropName,
+        button.dataset.cropSource,
+        button.dataset.runId,
+        button.dataset.cropFit
+      );
+      button.textContent = "In your crop tracker ✓";
+    } catch (error) {
+      button.disabled = false;
+      showToast(error.message || "The crop could not be saved.");
+    }
+  });
   if (loginPage) {
     const message = loginPage.querySelector("[data-login-message]");
-    const demoNotice = loginPage.querySelector("[data-demo-account-notice]");
+    const loginForm = loginPage.querySelector("[data-login-form]");
+    const forgotPasswordButton = loginPage.querySelector("[data-forgot-password]");
+    const resendConfirmationButton = loginPage.querySelector("[data-resend-confirmation]");
+    const resetRequestForm = loginPage.querySelector("[data-password-reset-request-form]");
+    const resetRequestMessage = loginPage.querySelector("[data-reset-request-message]");
+    const confirmationForm = loginPage.querySelector("[data-confirmation-form]");
+    const confirmationMessage = loginPage.querySelector("[data-confirmation-message]");
+    const resetPasswordForm = loginPage.querySelector("[data-password-reset-form]");
+    const resetPasswordMessage = loginPage.querySelector("[data-reset-password-message]");
+    const recoveryLink = new URLSearchParams(window.location.search).has("recovery");
+    const setAuthView = (view) => {
+      if (loginForm) loginForm.hidden = view !== "login";
+      if (forgotPasswordButton) forgotPasswordButton.hidden = view !== "login";
+      if (resendConfirmationButton) resendConfirmationButton.hidden = view !== "login";
+      if (resetRequestForm) resetRequestForm.classList.toggle("hidden", view !== "request");
+      if (confirmationForm) confirmationForm.classList.toggle("hidden", view !== "confirmation");
+      if (resetPasswordForm) resetPasswordForm.classList.toggle("hidden", view !== "reset");
+    };
     if (supabaseConfigured) {
-      if (demoNotice) demoNotice.hidden = true;
-      const identifierLabel = loginPage.querySelector("[data-login-identifier-label]");
-      if (identifierLabel) identifierLabel.textContent = "Gmail address";
       if (!new URLSearchParams(window.location.search).has("registered")) {
-        showAuthMessage(message, "Use your Gmail address and Supabase password to sign in.");
+        showAuthMessage(message, "Use your email address and Supabase password to sign in.");
       }
     }
     if (new URLSearchParams(window.location.search).has("registered")) {
       showAuthMessage(message, supabaseConfigured
-        ? "Account created. If email confirmation is enabled, confirm your Gmail address before signing in."
-        : "Account created. Sign in with your username or Gmail address.");
+        ? "Signup request received. If a new account was created, Supabase sent a verification email. Check your inbox and spam folder before trying to sign up again. Use Resend confirmation email if needed."
+        : "Secure sign-in is unavailable because Supabase Auth is not configured.");
     }
-    loginPage.querySelector("[data-login-form]")?.addEventListener("submit", async (event) => {
+    if (new URLSearchParams(window.location.search).has("password-reset")) {
+      showAuthMessage(message, "Your password was updated. Sign in with your new password.");
+    }
+    if (recoveryLink) {
+      setAuthView("reset");
+      (async () => {
+        try {
+          if (!supabaseConfigured) throw new Error("Supabase Auth is not configured.");
+          const client = await window.tanimtechGetSupabaseClient();
+          const { data, error } = await client.auth.getSession();
+          if (error) throw error;
+          if (!data.session) throw new Error("This reset link is invalid or expired. Request a new one.");
+        } catch (error) {
+          showAuthMessage(resetPasswordMessage, error.message || "Could not validate this reset link.");
+          const submit = resetPasswordForm?.querySelector('button[type="submit"]');
+          if (submit) submit.disabled = true;
+        }
+      })();
+    }
+    forgotPasswordButton?.addEventListener("click", () => {
+      setAuthView("request");
+      loginPage.querySelector("[data-reset-email]").value = loginPage.querySelector("[data-login-username]")?.value.trim() || "";
+      resetRequestMessage.textContent = "";
+    });
+    resendConfirmationButton?.addEventListener("click", () => {
+      setAuthView("confirmation");
+      loginPage.querySelector("[data-confirmation-email]").value = loginPage.querySelector("[data-login-username]")?.value.trim() || "";
+      confirmationMessage.textContent = "";
+    });
+    loginPage.querySelectorAll("[data-cancel-password-reset]").forEach((button) => {
+      button.addEventListener("click", () => {
+        setAuthView("login");
+        showAuthMessage(message, "Use your email address and Supabase password to sign in.");
+      });
+    });
+    resetRequestForm?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const email = loginPage.querySelector("[data-reset-email]")?.value.trim().toLowerCase() || "";
+      if (!isValidEmailAddress(email)) {
+        showAuthMessage(resetRequestMessage, "Enter a valid email address for this account.");
+        return;
+      }
+      const button = resetRequestForm.querySelector('button[type="submit"]');
+      if (button) button.disabled = true;
+      try {
+        if (!supabaseConfigured) throw new Error("Supabase Auth is not configured.");
+        const client = await window.tanimtechGetSupabaseClient();
+        const redirectTo = new URL("index.html?recovery=1", window.location.href).href;
+        const { error } = await client.auth.resetPasswordForEmail(email, { redirectTo });
+        if (error) throw error;
+        showAuthMessage(resetRequestMessage, "If an account exists for that address, Supabase will email a password reset link. Check your inbox and spam folder.");
+      } catch (error) {
+        showAuthMessage(resetRequestMessage, authErrorMessage(error, "The reset email could not be sent."));
+      } finally {
+        if (button) button.disabled = false;
+      }
+    });
+    confirmationForm?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const email = loginPage.querySelector("[data-confirmation-email]")?.value.trim().toLowerCase() || "";
+      if (!isValidEmailAddress(email)) {
+        showAuthMessage(confirmationMessage, "Enter a valid email address for this account.");
+        return;
+      }
+      const button = confirmationForm.querySelector('button[type="submit"]');
+      if (button) button.disabled = true;
+      try {
+        if (!supabaseConfigured) throw new Error("Supabase Auth is not configured.");
+        const client = await window.tanimtechGetSupabaseClient();
+        const emailRedirectTo = new URL("index.html", window.location.href).href;
+        const { error } = await client.auth.resend({
+          type: "signup",
+          email,
+          options: { emailRedirectTo },
+        });
+        if (error) throw error;
+        showAuthMessage(confirmationMessage, "If this address has an unconfirmed account, Supabase will resend its confirmation email. Check your inbox and spam folder.");
+      } catch (error) {
+        showAuthMessage(confirmationMessage, authErrorMessage(error, "The confirmation email could not be resent."));
+      } finally {
+        if (button) button.disabled = false;
+      }
+    });
+    resetPasswordForm?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const password = loginPage.querySelector("[data-reset-password]")?.value || "";
+      const confirmed = loginPage.querySelector("[data-reset-confirm]")?.value || "";
+      if (!Object.values(passwordChecks).every((check) => check(password))) {
+        showAuthMessage(resetPasswordMessage, "Use at least 8 characters with uppercase, lowercase, a number, and a symbol.");
+        return;
+      }
+      if (password !== confirmed) {
+        showAuthMessage(resetPasswordMessage, "The new passwords do not match.");
+        return;
+      }
+      const button = resetPasswordForm.querySelector('button[type="submit"]');
+      if (button) button.disabled = true;
+      try {
+        const client = await window.tanimtechGetSupabaseClient();
+        const { error } = await client.auth.updateUser({ password });
+        if (error) throw error;
+        window.location.replace("homepage.html");
+      } catch (error) {
+        showAuthMessage(resetPasswordMessage, error.message || "The password could not be updated.");
+        if (button) button.disabled = false;
+      }
+    });
+    loginForm?.addEventListener("submit", async (event) => {
       event.preventDefault();
       const username = loginPage.querySelector("[data-login-username]")?.value.trim();
       const password = loginPage.querySelector("[data-login-password]")?.value;
-      if (!supabaseConfigured && username === "admin" && password === "TanimTech2026!") {
-        localStorage.setItem("tanimtech-login-session", "true");
-        saveCurrentUser({ username: "admin" });
-        const requested = new URLSearchParams(window.location.search).get("next") || "homepage.html";
-        const next = requested.startsWith("/") && !requested.startsWith("//") ? requested : "homepage.html";
-        window.location.href = next;
+      if (!supabaseConfigured) {
+        showAuthMessage(message, "Secure sign-in is unavailable because Supabase Auth is not configured.");
         return;
       }
       try {
-        const supabaseClient = await window.tanimtechGetSupabaseClient?.();
-        let signedInUser;
-        if (supabaseClient) {
-          if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(username || "")) {
-            throw new Error("Enter the Gmail address used when you signed up with Supabase.");
-          }
-          const { data, error } = await supabaseClient.auth.signInWithPassword({ email: username.toLowerCase(), password });
-          if (error) throw error;
-          signedInUser = data.user;
-        } else {
-          const account = readLocalAccounts().find((item) => item && typeof item.username === "string" && typeof item.email === "string" && (item.username.toLowerCase() === username?.toLowerCase() || item.email.toLowerCase() === username?.toLowerCase()));
-          if (!account || await hashPassword(password || "", account.salt) !== account.passwordHash) {
-            showAuthMessage(message, "That username or password is incorrect.");
-            showToast("Incorrect sign-in details.");
-            return;
-          }
-          signedInUser = account;
+        const supabaseClient = await window.tanimtechGetSupabaseClient();
+        if (!supabaseClient) throw new Error("Supabase Auth is unavailable.");
+        if (!isValidEmailAddress(username || "")) {
+          throw new Error("Enter the email address used when you signed up with Supabase.");
         }
-        localStorage.setItem("tanimtech-login-session", "true");
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email: username.toLowerCase(), password });
+        if (error) throw error;
+        const signedInUser = data.user;
         saveCurrentUser({
           email: signedInUser?.email || "",
           username: signedInUser?.username || signedInUser?.user_metadata?.username || signedInUser?.email?.split("@")[0] || "",
@@ -1088,8 +1465,13 @@
         const next = requested.startsWith("/") && !requested.startsWith("//") ? requested : "homepage.html";
         window.location.href = next;
       } catch (error) {
-        showAuthMessage(message, error.message || "Sign-in failed.");
-        showToast(error.message || "Sign-in failed.");
+        const detail = error.code === "invalid_credentials"
+          ? "Supabase did not recognize that email/password combination. Check that you confirmed the signup email and use Forgot your password? if needed."
+          : error.code === "email_not_confirmed"
+            ? "Confirm your email from the Supabase message before signing in. Check your inbox and spam folder."
+            : error.message || "Sign-in failed.";
+        showAuthMessage(message, authErrorMessage(error, detail));
+        showToast(authErrorMessage(error, detail));
       }
     });
   }
@@ -1102,7 +1484,30 @@
     const passwordInput = signupPage.querySelector("[data-signup-password]");
     const confirmInput = signupPage.querySelector("[data-signup-confirm]");
     const message = signupPage.querySelector("[data-signup-message]");
+    const successNotice = signupPage.querySelector("[data-signup-success]");
     const storageMessage = signupPage.querySelector("[data-account-storage-message]");
+    const submitButton = form?.querySelector('button[type="submit"]');
+    const newAccountButton = signupPage.querySelector("[data-signup-new-account]");
+    const originalSubmitLabel = submitButton?.innerHTML || "";
+    const verificationPendingKey = "tanimtech-signup-verification-pending";
+    let signupPending = false;
+    let signupComplete = sessionStorage.getItem(verificationPendingKey) === "true";
+    if (signupComplete) {
+      if (form) form.hidden = true;
+      if (successNotice) successNotice.hidden = false;
+      if (submitButton) submitButton.disabled = true;
+    }
+    newAccountButton?.addEventListener("click", () => {
+      sessionStorage.removeItem(verificationPendingKey);
+      signupComplete = false;
+      if (form) form.hidden = false;
+      if (successNotice) successNotice.hidden = true;
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.innerHTML = originalSubmitLabel;
+      }
+      emailInput?.focus();
+    });
     if (supabaseConfigured && storageMessage) {
       const storageTitle = signupPage.querySelector("[data-account-storage-title]");
       if (storageTitle) storageTitle.textContent = "Supabase account";
@@ -1121,13 +1526,14 @@
     passwordInput?.addEventListener("input", updatePasswordRules);
     form?.addEventListener("submit", async (event) => {
       event.preventDefault();
+      if (signupPending || signupComplete) return;
       const email = emailInput?.value.trim().toLowerCase() || "";
       const username = usernameInput?.value.trim() || "";
       const password = passwordInput?.value || "";
       const confirmed = confirmInput?.value || "";
       updatePasswordRules();
-      if (!/^[A-Z0-9._%+-]+@gmail\.com$/i.test(email)) {
-        showAuthMessage(message, "Enter a valid Gmail address ending in @gmail.com.");
+      if (!isValidEmailAddress(email)) {
+        showAuthMessage(message, "Enter a valid email address.");
         return;
       }
       if (!/^[A-Za-z0-9_]{3,20}$/.test(username)) {
@@ -1142,85 +1548,122 @@
         showAuthMessage(message, "The passwords do not match.");
         return;
       }
+      if (!supabaseConfigured) {
+        showAuthMessage(message, "Secure account creation is unavailable because Supabase Auth is not configured.");
+        return;
+      }
+      signupPending = true;
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = "Creating account…";
+      }
       try {
-        const supabaseClient = await window.tanimtechGetSupabaseClient?.();
-        if (supabaseClient) {
-          const { data, error } = await supabaseClient.auth.signUp({
-            email,
-            password,
-            options: { data: { username } },
+        const supabaseClient = await window.tanimtechGetSupabaseClient();
+        if (!supabaseClient) throw new Error("Supabase Auth is unavailable.");
+        const { data, error } = await supabaseClient.auth.signUp({
+          email,
+          password,
+          options: { data: { username } },
+        });
+        if (error) throw error;
+        if (!data.user) throw new Error("Supabase did not return a user after signup.");
+        signupComplete = true;
+        if (data.session) {
+          saveCurrentUser({
+            email: data.user.email || "",
+            username: data.user.user_metadata?.username || data.user.email?.split("@")[0] || "",
           });
-          if (error) throw error;
-          if (!data.user) throw new Error("Supabase did not return a user after signup.");
-          if (data.session) {
-            localStorage.setItem("tanimtech-login-session", "true");
-            saveCurrentUser({
-              email: data.user.email || "",
-              username: data.user.user_metadata?.username || data.user.email?.split("@")[0] || "",
-            });
-            window.location.href = "homepage.html";
-          } else {
-            window.location.href = "index.html?registered=1";
+          window.location.href = "homepage.html";
+        } else {
+          try {
+            sessionStorage.setItem(verificationPendingKey, "true");
+          } catch (storageError) {
+            showToast("Signup was accepted, but this tab could not remember the verification state. Do not submit signup again.");
           }
-          return;
+          passwordInput.value = "";
+          confirmInput.value = "";
+          if (successNotice) {
+            form.hidden = true;
+            successNotice.hidden = false;
+          } else {
+            showAuthMessage(message, "Signup request received. If a new account was created, Supabase sent a verification email. Check your inbox and spam folder before trying to sign up again.");
+          }
+          showToast("Signup request received. Check your email for verification.");
         }
-
-        const accounts = readLocalAccounts();
-        const duplicate = accounts.some((item) => item && typeof item.username === "string" && typeof item.email === "string" && (item.username.toLowerCase() === username.toLowerCase() || item.email.toLowerCase() === email));
-        if (duplicate) {
-          showAuthMessage(message, "That username or Gmail address is already registered in this browser.");
-          return;
-        }
-        const salt = bytesToHex(window.crypto.getRandomValues(new Uint8Array(16)));
-        const passwordHash = await hashPassword(password, salt);
-        accounts.push({ email, username, salt, passwordHash });
-        localStorage.setItem(accountStoreKey, JSON.stringify(accounts));
-        window.location.href = "index.html?registered=1";
       } catch (error) {
-        showAuthMessage(message, error.message || "Could not create the account in this browser.");
-        showToast(error.message || "Could not create the account.");
+        signupComplete = false;
+        const detail = authErrorMessage(error, "Could not create the account.");
+        showAuthMessage(message, detail);
+        showToast(detail);
+      } finally {
+        signupPending = false;
+        if (!signupComplete && submitButton) {
+          submitButton.disabled = false;
+          submitButton.innerHTML = originalSubmitLabel;
+        }
       }
     });
   }
 
+  const profileMenus = Array.from(document.querySelectorAll("[data-profile-actions]"));
+  const setProfileMenuOpen = (profileMenu, isOpen) => {
+    const trigger = profileMenu?.querySelector("[data-profile-menu-trigger]");
+    const panel = profileMenu?.querySelector(".profile-actions-panel");
+    if (!trigger || !panel) return;
+    trigger.setAttribute("aria-expanded", String(isOpen));
+    panel.hidden = !isOpen;
+  };
+  profileMenus.forEach((profileMenu) => {
+    const trigger = profileMenu.querySelector("[data-profile-menu-trigger]");
+    const panel = profileMenu.querySelector(".profile-actions-panel");
+    trigger?.addEventListener("click", () => setProfileMenuOpen(profileMenu, trigger.getAttribute("aria-expanded") !== "true"));
+    panel?.querySelectorAll("[data-profile-menu-close]").forEach((link) => link.addEventListener("click", () => {
+      setProfileMenuOpen(profileMenu, false);
+      const href = link.getAttribute("href") || "";
+      const destination = href.startsWith("#") ? document.querySelector(href) : null;
+      if (destination) window.setTimeout(() => destination.focus({ preventScroll: true }), 0);
+    }));
+    profileMenu.addEventListener("focusout", (event) => {
+      if (!profileMenu.contains(event.relatedTarget)) setProfileMenuOpen(profileMenu, false);
+    });
+    profileMenu.querySelector("[data-profile-menu-signout]")?.addEventListener("click", async () => {
+      setProfileMenuOpen(profileMenu, false);
+      try {
+        await window.tanimtechAuth?.signOut();
+      } catch (error) {
+        showToast(error.message || "Could not sign out.");
+      }
+    });
+  });
+  document.addEventListener("click", (event) => {
+    profileMenus.forEach((profileMenu) => {
+      if (!profileMenu.contains(event.target)) setProfileMenuOpen(profileMenu, false);
+    });
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    profileMenus.forEach((profileMenu) => {
+      const trigger = profileMenu.querySelector("[data-profile-menu-trigger]");
+      if (trigger?.getAttribute("aria-expanded") !== "true") return;
+      setProfileMenuOpen(profileMenu, false);
+      trigger.focus();
+    });
+  });
   const profilePage = document.querySelector("[data-profile-page]");
   if (profilePage) {
     const profileState = profilePage.querySelector("[data-profile-state]");
     const profileMenu = document.querySelector("[data-profile-actions]");
     const profileMenuTrigger = profileMenu?.querySelector("[data-profile-menu-trigger]");
-    const profileMenuPanel = profileMenu?.querySelector(".profile-actions-panel");
-    const setProfileMenuOpen = (isOpen) => {
-      if (!profileMenuTrigger || !profileMenuPanel) return;
-      profileMenuTrigger.setAttribute("aria-expanded", String(isOpen));
-      profileMenuPanel.hidden = !isOpen;
-    };
-    profileMenuTrigger?.addEventListener("click", () => setProfileMenuOpen(profileMenuTrigger.getAttribute("aria-expanded") !== "true"));
-    profileMenuPanel?.querySelectorAll("[data-profile-menu-close]").forEach((link) => link.addEventListener("click", () => {
-      setProfileMenuOpen(false);
-      const destination = document.querySelector(link.getAttribute("href"));
-      if (destination) window.setTimeout(() => destination.focus({ preventScroll: true }), 0);
-    }));
-    profileMenu?.addEventListener("focusout", (event) => {
-      if (!profileMenu.contains(event.relatedTarget)) setProfileMenuOpen(false);
-    });
-    document.addEventListener("click", (event) => {
-      if (profileMenu && !profileMenu.contains(event.target)) setProfileMenuOpen(false);
-    });
-    document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && profileMenuTrigger?.getAttribute("aria-expanded") === "true") {
-        setProfileMenuOpen(false);
-        profileMenuTrigger.focus();
-      }
-    });
     const profileEscape = (value) => String(value ?? "").replace(/[&<>\"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[character]));
     const readLocal = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); } catch { return fallback; } };
     const asList = (value) => Array.isArray(value) ? value : [];
-    const localProfiles = asList(readLocal("tanimtech-local-profiles", []));
-    const localRecommendations = asList(readLocal("tanimtech-saved-recommendations", []));
+    const localProfiles = supabaseConfigured ? [] : asList(readLocal("tanimtech-local-profiles", []));
+    const localRecommendations = supabaseConfigured ? [] : asList(readLocal("tanimtech-saved-recommendations", []));
+    const localCropPlans = supabaseConfigured ? [] : asList(readLocal("tanimtech-crop-plans", []));
     let displayedProfiles = localProfiles;
     let displayedRecommendations = localRecommendations;
     const nameInput = profilePage.querySelector("[data-profile-name]");
-    const savedName = localStorage.getItem("tanimtech-profile-name") || "Field planner";
+    let savedName = localStorage.getItem("tanimtech-profile-name") || "Field planner";
     if (nameInput) nameInput.value = savedName;
     const accountForm = profilePage.querySelector("[data-account-form]");
     const accountUsernameInput = profilePage.querySelector("[data-account-username]");
@@ -1231,56 +1674,37 @@
     const accountSource = profilePage.querySelector("[data-account-source]");
     let profileSupabaseClient = null;
     let profileSupabaseUser = null;
-    let profileLocalAccount = null;
     const fillAccountFields = (user) => {
       if (accountUsernameInput) accountUsernameInput.value = user.username || user.user_metadata?.username || "";
       if (accountEmailInput) accountEmailInput.value = user.email || "";
     };
     const loadAccountDetails = async () => {
-      const savedIdentity = readCurrentUser();
-      fillAccountFields(savedIdentity);
-      if (supabaseConfigured) {
-        profileSupabaseClient = await window.tanimtechGetSupabaseClient();
-        const { data, error } = await profileSupabaseClient.auth.getUser();
-        if (error) throw error;
-        if (!data.user) throw new Error("No signed-in Supabase user was found. Sign in again.");
-        profileSupabaseUser = data.user;
-        fillAccountFields({
-          email: data.user.email || "",
-          username: data.user.user_metadata?.username || data.user.email?.split("@")[0] || "",
-        });
-        saveCurrentUser({
-          email: data.user.email || "",
-          username: data.user.user_metadata?.username || data.user.email?.split("@")[0] || "",
-        });
-        if (accountSource) accountSource.textContent = "Supabase account. Email changes may require confirmation.";
-        return;
+      if (!supabaseConfigured) throw new Error("Supabase Auth is required to manage account details.");
+      profileSupabaseClient = await window.tanimtechGetSupabaseClient();
+      if (!profileSupabaseClient) throw new Error("Supabase Auth is unavailable.");
+      const { data, error } = await profileSupabaseClient.auth.getUser();
+      if (error) throw error;
+      if (!data.user) throw new Error("No signed-in Supabase user was found. Sign in again.");
+      profileSupabaseUser = data.user;
+      const { data: profile, error: profileError } = await profileSupabaseClient
+        .from("profiles")
+        .select("workspace_name")
+        .eq("id", data.user.id)
+        .maybeSingle();
+      if (profileError) throw profileError;
+      if (profile?.workspace_name) {
+        savedName = profile.workspace_name;
+        if (nameInput) nameInput.value = savedName;
       }
-
-      const accounts = readLocalAccounts();
-      profileLocalAccount = accounts.find((account) => account && (
-        (savedIdentity.email && account.email?.toLowerCase() === savedIdentity.email.toLowerCase())
-        || (savedIdentity.username && account.username?.toLowerCase() === savedIdentity.username.toLowerCase())
-      ));
-      if (!profileLocalAccount && accounts.length === 1 && !savedIdentity.username) profileLocalAccount = accounts[0];
-      if (profileLocalAccount) {
-        fillAccountFields(profileLocalAccount);
-        saveCurrentUser(profileLocalAccount);
-        if (accountSource) accountSource.textContent = "Local demo account. Changes stay in this browser.";
-        return;
-      }
-      if (savedIdentity.username === "admin" || (!savedIdentity.username && accounts.length === 0)) {
-        fillAccountFields({ username: "admin", email: "" });
-        saveCurrentUser({ username: "admin" });
-        [accountUsernameInput, accountEmailInput, accountPasswordInput, accountConfirmInput].forEach((input) => {
-          if (input) input.disabled = true;
-        });
-        const saveButton = accountForm?.querySelector("button[type=submit]");
-        if (saveButton) saveButton.disabled = true;
-        if (accountSource) accountSource.textContent = "Built-in demo admin account. Create a personal account to edit account details.";
-        return;
-      }
-      throw new Error("Could not match this session to a saved account. Sign in again to manage account details.");
+      fillAccountFields({
+        email: data.user.email || "",
+        username: data.user.user_metadata?.username || data.user.email?.split("@")[0] || "",
+      });
+      saveCurrentUser({
+        email: data.user.email || "",
+        username: data.user.user_metadata?.username || data.user.email?.split("@")[0] || "",
+      });
+      if (accountSource) accountSource.textContent = "Supabase account. Email changes may require confirmation.";
     };
     loadAccountDetails().catch((error) => {
       if (accountSource) accountSource.textContent = "Account details could not be loaded.";
@@ -1296,8 +1720,8 @@
         showAuthMessage(accountMessage, "Username must be 3–20 letters, numbers, or underscores.");
         return;
       }
-      if (!/^[A-Z0-9._%+-]+@gmail\.com$/i.test(email)) {
-        showAuthMessage(accountMessage, "Enter a valid Gmail address ending in @gmail.com.");
+      if (!isValidEmailAddress(email)) {
+        showAuthMessage(accountMessage, "Enter a valid email address.");
         return;
       }
       if (password && !Object.values(passwordChecks).every((check) => check(password))) {
@@ -1309,55 +1733,43 @@
         return;
       }
       try {
-        if (supabaseConfigured) {
-          if (!profileSupabaseClient || !profileSupabaseUser) throw new Error("Account details are still loading. Try again in a moment.");
-          const emailChanged = email !== (profileSupabaseUser.email || "").toLowerCase();
-          const updates = {
-            data: { ...(profileSupabaseUser.user_metadata || {}), username },
-          };
-          if (emailChanged) updates.email = email;
-          if (password) updates.password = password;
-          const { data, error } = await profileSupabaseClient.auth.updateUser(updates);
-          if (error) throw error;
-          if (!data.user) throw new Error("Supabase did not return updated account details.");
-          profileSupabaseUser = data.user;
-          fillAccountFields({
-            email: data.user.email || email,
-            username: data.user.user_metadata?.username || username,
-          });
-          saveCurrentUser({
-            email: data.user.email || email,
-            username: data.user.user_metadata?.username || username,
-          });
-          showAuthMessage(accountMessage, emailChanged
-            ? "Username updated. Check your new Gmail inbox to confirm the email change."
-            : "Account details updated.");
-        } else {
-          if (!profileLocalAccount) throw new Error("This demo account cannot be changed. Create a personal account to edit account details.");
-          const accounts = readLocalAccounts();
-          const account = accounts.find((item) => item.email?.toLowerCase() === profileLocalAccount.email.toLowerCase());
-          if (!account) throw new Error("Saved account was not found. Sign in again and retry.");
-          const duplicate = accounts.some((item) => item !== account && (
-            item.username?.toLowerCase() === username.toLowerCase() || item.email?.toLowerCase() === email
-          ));
-          if (duplicate) throw new Error("That username or Gmail address is already registered in this browser.");
-          if (password) {
-            account.salt = bytesToHex(window.crypto.getRandomValues(new Uint8Array(16)));
-            account.passwordHash = await hashPassword(password, account.salt);
-          }
-          account.username = username;
-          account.email = email;
-          localStorage.setItem(accountStoreKey, JSON.stringify(accounts));
-          profileLocalAccount = account;
-          saveCurrentUser(account);
-          showAuthMessage(accountMessage, "Account details updated in this browser.");
+        if (!profileSupabaseClient || !profileSupabaseUser) throw new Error("Account details are still loading. Try again in a moment.");
+        const emailChanged = email !== (profileSupabaseUser.email || "").toLowerCase();
+        const usernameChanged = username !== (profileSupabaseUser.user_metadata?.username || "").trim();
+        const updates = {
+          data: { ...(profileSupabaseUser.user_metadata || {}), username },
+        };
+        if (emailChanged) updates.email = email;
+        if (password) updates.password = password;
+        const { data, error } = await profileSupabaseClient.auth.updateUser(updates);
+        if (error) throw error;
+        if (!data.user) throw new Error("Supabase did not return updated account details.");
+        profileSupabaseUser = data.user;
+        if (usernameChanged) {
+          const { error: profileUpdateError } = await profileSupabaseClient
+            .from("profiles")
+            .update({ username })
+            .eq("id", profileSupabaseUser.id);
+          if (profileUpdateError) throw profileUpdateError;
         }
+        fillAccountFields({
+          email: data.user.email || email,
+          username: data.user.user_metadata?.username || username,
+        });
+        saveCurrentUser({
+          email: data.user.email || email,
+          username: data.user.user_metadata?.username || username,
+        });
+        showAuthMessage(accountMessage, emailChanged
+          ? "Username updated. Check your new email inbox to confirm the email change."
+          : "Account details updated.");
         if (accountPasswordInput) accountPasswordInput.value = "";
         if (accountConfirmInput) accountConfirmInput.value = "";
         showToast("Account details saved.");
       } catch (error) {
-        showAuthMessage(accountMessage, error.message || "Could not save account details.");
-        showToast(error.message || "Could not save account details.");
+        const detail = authErrorMessage(error, "Could not save account details.");
+        showAuthMessage(accountMessage, detail);
+        showToast(detail);
       }
     });
     const pdfSafe = (value) => String(value ?? "").replace(/[^\x20-\x7E]/g, "?").replace(/[\\()]/g, "\\$&");
@@ -1379,41 +1791,89 @@
       const blob = new Blob([pdf], { type: "application/pdf" }); const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url; link.download = `${(nameInput?.value || "tanimtech-profile").toLowerCase().replace(/[^a-z0-9]+/g, "-")}-report.pdf`; link.click(); window.setTimeout(() => URL.revokeObjectURL(url), 1000); showToast("PDF report downloaded.");
     };
     profileMenu?.querySelector("[data-profile-menu-export]")?.addEventListener("click", () => {
-      setProfileMenuOpen(false);
+      setProfileMenuOpen(profileMenu, false);
       profileMenuTrigger?.focus();
       downloadReport(displayedProfiles, displayedRecommendations);
     });
-    profileMenu?.querySelector("[data-profile-menu-signout]")?.addEventListener("click", async () => {
-      setProfileMenuOpen(false);
+    profilePage.querySelector("[data-save-profile-name]")?.addEventListener("click", async () => {
+      const name = nameInput?.value.trim() || "Field planner";
       try {
-        await window.tanimtechAuth?.signOut();
+        if (supabaseConfigured) {
+          const { client, user } = await getAuthenticatedSupabase();
+          const { error } = await client.from("profiles").update({ workspace_name: name }).eq("id", user.id);
+          if (error) throw error;
+          const heading = profileState.querySelector("[data-profile-heading]");
+          if (heading) heading.textContent = name;
+          showToast("Workspace name saved to your account.");
+        } else {
+          localStorage.setItem("tanimtech-profile-name", name);
+          const heading = profileState.querySelector("[data-profile-heading]");
+          if (heading) heading.textContent = name;
+          showToast("Profile name saved on this device.");
+        }
       } catch (error) {
-        showToast(error.message || "Could not sign out.");
+        showToast(error.message || "The workspace name could not be saved.");
       }
     });
-    profilePage.querySelector("[data-save-profile-name]")?.addEventListener("click", () => {
-      const name = nameInput?.value.trim() || "Field planner";
-      localStorage.setItem("tanimtech-profile-name", name);
-      const heading = profileState.querySelector("[data-profile-heading]");
-      if (heading) heading.textContent = name;
-      showToast("Profile name saved on this device.");
-    });
-    const renderLocalProfile = (profiles, saved, note = "Saved locally. Clearing browser storage removes this profile and its history.") => {
+    const renderLocalProfile = (profiles, saved, note = "Saved locally. Clearing browser storage removes this profile and its history.", cropPlans = localCropPlans) => {
       displayedProfiles = asList(profiles);
       displayedRecommendations = asList(saved);
+      cropPlans = asList(cropPlans);
       profiles = displayedProfiles;
       saved = displayedRecommendations;
       const profileCards = profiles.length ? profiles.map((item) => `<article class="card p-6"><div class="flex items-center justify-between gap-3"><span class="badge">FIELD PROFILE</span><small class="muted">${profileEscape((item.updatedAt || item.createdAt || "").slice(0, 10))}</small></div><h3 class="serif mt-4 text-2xl">${profileEscape(item.name)}</h3><p class="muted mt-2 text-xs">pH ${profileEscape(item.soilPh)} · ${profileEscape(item.temperature)} °C · ${profileEscape(item.rainfall)} mm/year</p></article>`).join("") : '<div class="notice text-xs">No saved farm profiles yet. Save field conditions from the conditions page to see them here.</div>';
       const recommendationCards = saved.length ? saved.slice(0, 6).map((item) => { const top = item.results?.[0]; return `<article class="card p-6"><div class="flex items-center justify-between gap-3"><span class="badge">SAVED SHORTLIST</span><small class="muted">${profileEscape((item.createdAt || "").slice(0, 10))}</small></div><h3 class="serif mt-4 text-2xl">${profileEscape(item.label)}</h3><p class="muted mt-2 text-xs">${top ? `Closest fit: ${profileEscape(top.name)} · ${top.fit}/100` : "No crop result saved"}</p><div class="mt-4 flex flex-wrap gap-2">${(item.results || []).slice(0, 3).map((result) => `<span class="badge">${profileEscape(result.name)}</span>`).join("")}</div></article>`; }).join("") : '<div class="notice text-xs">No saved recommendation shortlists yet. Generate a shortlist, then choose “Save this shortlist”.</div>';
-      profileState.innerHTML = `<div class="flex flex-wrap items-start justify-between gap-5"><div><p class="eyebrow">LOCAL PROFILE</p><h2 class="serif mt-3 text-3xl" data-profile-heading>${profileEscape(nameInput?.value || savedName)}</h2><p class="muted mt-2 text-sm">This device</p></div><span class="badge">PRIVATE LOCAL SPACE</span></div><p class="field-note mt-4">${profileEscape(note)}</p><div class="divider my-7"></div><p class="eyebrow">YOUR FARM PROFILES</p><h2 class="serif mt-3 text-3xl">Saved field conditions.</h2><div class="mt-5 grid gap-5 md:grid-cols-2">${profileCards}</div><div class="divider my-8"></div><p class="eyebrow">YOUR RECOMMENDATION HISTORY</p><h2 class="serif mt-3 text-3xl">Shortlists made for you.</h2><div class="mt-5 grid gap-5 md:grid-cols-2">${recommendationCards}</div><p class="field-note mt-6">Recommendations are screening results based on the inputs saved at the time. They are not forecasts or guarantees.</p>`;
+      const cropPlanCards = cropPlans.length ? cropPlans.map((plan) => `<article class="card p-6"><div class="flex items-center justify-between gap-3"><span class="badge">${profileEscape(plan.source_mode === "image" ? "PHOTO RESULT" : "MANUAL RESULT")}</span><small class="muted">${profileEscape((plan.updated_at || "").slice(0, 10))}</small></div><h3 class="serif mt-4 text-2xl">${profileEscape(plan.crop_name)}</h3><p class="muted mt-2 text-xs">${plan.fit_score === null || plan.fit_score === undefined ? "Soil-reference suggestion" : `Fit score ${profileEscape(plan.fit_score)}/100`}</p><label class="mt-4 block"><span class="field-label">Crop status</span><span class="field-control"><select data-crop-plan-status="${profileEscape(plan.id)}"><option value="planned" ${plan.status === "planned" ? "selected" : ""}>Planned</option><option value="in_progress" ${plan.status === "in_progress" ? "selected" : ""}>In progress</option><option value="completed" ${plan.status === "completed" ? "selected" : ""}>Completed</option><option value="skipped" ${plan.status === "skipped" ? "selected" : ""}>Skipped</option></select></span></label></article>`).join("") : '<div class="notice text-xs">No crops tracked yet. Save a crop from a manual or photo-based result to get started.</div>';
+      profileState.innerHTML = `<div class="flex flex-wrap items-start justify-between gap-5"><div><p class="eyebrow">PRIVATE PROFILE</p><h2 class="serif mt-3 text-3xl" data-profile-heading>${profileEscape(nameInput?.value || savedName)}</h2><p class="muted mt-2 text-sm">${supabaseConfigured ? "Your Supabase account" : "This device"}</p></div><span class="badge">${supabaseConfigured ? "PRIVATE ACCOUNT" : "PRIVATE LOCAL SPACE"}</span></div><p class="field-note mt-4">${profileEscape(note)}</p><div class="divider my-7"></div><p class="eyebrow">YOUR FIELD PROFILES</p><h2 class="serif mt-3 text-3xl">Saved field conditions.</h2><div class="mt-5 grid gap-5 md:grid-cols-2">${profileCards}</div><div class="divider my-8"></div><p class="eyebrow">CROP TRACKER</p><h2 class="serif mt-3 text-3xl">Crops in progress.</h2><div class="mt-5 grid gap-5 md:grid-cols-2">${cropPlanCards}</div><div class="divider my-8"></div><p class="eyebrow">YOUR RECOMMENDATION HISTORY</p><h2 class="serif mt-3 text-3xl">Shortlists made for you.</h2><div class="mt-5 grid gap-5 md:grid-cols-2">${recommendationCards}</div><p class="field-note mt-6">Recommendations are screening results based on the inputs saved at the time. They are not forecasts or guarantees.</p>`;
+      profileState.querySelectorAll("[data-crop-plan-status]").forEach((select) => {
+        select.addEventListener("change", async () => {
+          select.disabled = true;
+          try {
+            await updateCropPlanStatus(select.dataset.cropPlanStatus, select.value);
+            showToast("Crop status updated.");
+          } catch (error) {
+            showToast(error.message || "Crop status could not be updated.");
+          } finally {
+            select.disabled = false;
+          }
+        });
+      });
     };
-    renderLocalProfile(localProfiles, localRecommendations);
-    fetch("/api/auth/me").then(readJsonResponse).then(async (authState) => {
+    renderLocalProfile(localProfiles, localRecommendations, undefined, localCropPlans);
+    if (supabaseConfigured) {
+      (async () => {
+        const { client, user } = await getAuthenticatedSupabase();
+        const [profileResponse, planResponse, runResponse] = await Promise.all([
+          client.from("field_profiles").select("id,name,conditions,created_at,updated_at").eq("user_id", user.id).order("updated_at", { ascending: false }),
+          client.from("crop_plans").select("id,crop_slug,crop_name,status,source_mode,fit_score,updated_at").eq("user_id", user.id).order("updated_at", { ascending: false }),
+          client.from("recommendation_runs").select("id,input_mode,results,created_at").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
+        ]);
+        if (profileResponse.error) throw profileResponse.error;
+        if (planResponse.error) throw planResponse.error;
+        if (runResponse.error) throw runResponse.error;
+        const profiles = (profileResponse.data || []).map((item) => ({
+          ...item.conditions,
+          id: item.id,
+          name: item.name,
+          createdAt: item.created_at,
+          updatedAt: item.updated_at,
+        }));
+        const recommendations = (runResponse.data || []).map((run) => ({
+          id: run.id,
+          label: run.input_mode === "image" ? "Photo-based soil result" : "Manual crop recommendation",
+          createdAt: run.created_at,
+          results: Array.isArray(run.results) ? run.results : [],
+        }));
+        renderLocalProfile(profiles, recommendations, "Profile data synced securely to your Supabase account.", planResponse.data || []);
+      })().catch((error) => {
+        showToast(`Your profile data could not be loaded from Supabase: ${error.message}`);
+      });
+    } else fetch("/api/auth/me").then(readJsonResponse).then(async (authState) => {
       if (!authState.authenticated) return;
       const [profileResponse, savedResponse] = await Promise.all([fetch("/api/profiles"), fetch("/api/recommendations/saved")]);
       const profiles = profileResponse.ok ? (await readJsonResponse(profileResponse)).profiles : localProfiles;
       const saved = savedResponse.ok ? (await readJsonResponse(savedResponse)).recommendations : localRecommendations;
-      renderLocalProfile(profiles, saved, "Account data loaded from the TanimTech API.");
+      renderLocalProfile(profiles, saved, "Account data loaded from the TanimTech API.", localCropPlans);
     }).catch(() => { /* Static deployments use the local profile above. */ });
   }
   if (new URLSearchParams(window.location.search).has("results")) {

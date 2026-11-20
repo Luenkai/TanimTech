@@ -96,6 +96,22 @@ def _feature(row, crop_slug):
     }
 
 
+def _yield_percentile(value, reference_yields):
+    if len(reference_yields) < 2:
+        return 0.5
+    low = bisect_left(reference_yields, value)
+    high = bisect_right(reference_yields, value)
+    percentile = ((low + high - 1) / 2) / (len(reference_yields) - 1)
+    return max(0.0, min(1.0, percentile))
+
+
+def _percentile_targets(rows, reference_yields):
+    return [
+        _yield_percentile(row["yield_value"], reference_yields[row["crop"]])
+        for row in rows
+    ]
+
+
 def _load_state(path, modified_ns):
     del modified_ns
     if not os.path.isfile(path):
@@ -103,7 +119,7 @@ def _load_state(path, modified_ns):
     try:
         from sklearn.ensemble import RandomForestRegressor
         from sklearn.feature_extraction import DictVectorizer
-        from sklearn.model_selection import GroupShuffleSplit
+        from sklearn.model_selection import GroupKFold
     except ImportError:
         return _inactive("unavailable", "Install scikit-learn from backend/requirements.txt to enable ML ranking.")
 
@@ -168,77 +184,122 @@ def _load_state(path, modified_ns):
             excludedRows=excluded,
         )
 
-    yields_by_crop = {}
-    for row in rows:
-        yields_by_crop.setdefault(row["crop"], []).append(row["yield_value"])
-    for yields in yields_by_crop.values():
-        yields.sort()
-    targets = []
-    for row in rows:
-        yields = yields_by_crop[row["crop"]]
-        low, high = bisect_left(yields, row["yield_value"]), bisect_right(yields, row["yield_value"])
-        targets.append(((low + high - 1) / 2) / (len(yields) - 1))
-
-    vectorizer = DictVectorizer(sparse=False)
-    features = vectorizer.fit_transform([_feature(row, row["crop"]) for row in rows])
     groups = [row["state"] for row in rows]
-    train_indices, test_indices = next(GroupShuffleSplit(
-        n_splits=1, test_size=0.2, random_state=42,
-    ).split(features, targets, groups))
-    train_crops = {rows[index]["crop"] for index in train_indices}
-    test_indices = [index for index in test_indices if rows[index]["crop"] in train_crops]
-    if len(test_indices) < 50:
+    cross_validator = GroupKFold(n_splits=5)
+    validation_indices = []
+    model_predictions = []
+    baseline_predictions = []
+    actual = []
+    validation_states = set()
+    model_options = {
+        "n_estimators": 60,
+        "min_samples_leaf": 8,
+        "random_state": 42,
+        "n_jobs": 1,
+    }
+    completed_folds = 0
+
+    for train_indices, held_out_indices in cross_validator.split(rows, groups=groups):
+        train_crops = {rows[index]["crop"] for index in train_indices}
+        test_indices = [
+            index for index in held_out_indices
+            if rows[index]["crop"] in train_crops
+        ]
+        if not test_indices:
+            continue
+        completed_folds += 1
+
+        train_rows = [rows[index] for index in train_indices]
+        test_rows = [rows[index] for index in test_indices]
+        train_yields = {}
+        for row in train_rows:
+            train_yields.setdefault(row["crop"], []).append(row["yield_value"])
+        for yields in train_yields.values():
+            yields.sort()
+
+        vectorizer = DictVectorizer(sparse=False)
+        train_features = vectorizer.fit_transform([
+            _feature(row, row["crop"]) for row in train_rows
+        ])
+        test_features = vectorizer.transform([
+            _feature(row, row["crop"]) for row in test_rows
+        ])
+        train_targets = _percentile_targets(train_rows, train_yields)
+        test_targets = _percentile_targets(test_rows, train_yields)
+        validation_model = RandomForestRegressor(**model_options)
+        validation_model.fit(train_features, train_targets)
+        model_predictions.extend(validation_model.predict(test_features))
+        actual.extend(test_targets)
+        validation_indices.extend(test_indices)
+        validation_states.update(row["state"] for row in test_rows)
+
+        from .scoring import score_crop
+
+        for row in test_rows:
+            crop = profiles[row["crop"]]
+            baseline_predictions.append(score_crop(crop, {
+                "soilPh": row["soil_ph"],
+                "temperature": row["temperature_c"],
+                "rainfall": row["rainfall_mm"],
+                "humidity": row["humidity_pct"],
+            })["fit"] / 100)
+
+    if completed_folds < 5 or len(validation_indices) < 50:
         return _inactive(
             "unavailable",
-            "The held-out-state validation set is too small to enable ML ranking.",
+            "The complete five-fold held-out-state validation set is too small to enable ML ranking.",
             trainingRows=len(rows),
             matchedCrops=len(crop_counts),
             excludedRows=excluded,
         )
 
-    model_options = {
-        "n_estimators": 120,
-        "min_samples_leaf": 8,
-        "random_state": 42,
-        "n_jobs": 1,
-    }
-    validation_model = RandomForestRegressor(**model_options)
-    validation_model.fit(features[train_indices], [targets[index] for index in train_indices])
-    predictions = validation_model.predict(features[test_indices])
-
-    from .scoring import score_crop
-
-    baseline = []
-    for index in test_indices:
-        row = rows[index]
-        crop = profiles[row["crop"]]
-        baseline.append(score_crop(crop, {
-            "soilPh": row["soil_ph"],
-            "temperature": row["temperature_c"],
-            "rainfall": row["rainfall_mm"],
-            "humidity": row["humidity_pct"],
-        })["fit"] / 100)
-    actual = [targets[index] for index in test_indices]
-    model_mse = sum((target - prediction) ** 2 for target, prediction in zip(actual, predictions)) / len(actual)
-    baseline_mse = sum((target - prediction) ** 2 for target, prediction in zip(actual, baseline)) / len(actual)
+    model_mse = sum(
+        (target - prediction) ** 2
+        for target, prediction in zip(actual, model_predictions)
+    ) / len(actual)
+    baseline_mse = sum(
+        (target - prediction) ** 2
+        for target, prediction in zip(actual, baseline_predictions)
+    ) / len(actual)
+    model_mae = sum(
+        abs(target - prediction)
+        for target, prediction in zip(actual, model_predictions)
+    ) / len(actual)
+    baseline_mae = sum(
+        abs(target - prediction)
+        for target, prediction in zip(actual, baseline_predictions)
+    ) / len(actual)
     validation = {
-        "method": "held-out states",
-        "rows": len(test_indices),
-        "states": len({groups[index] for index in test_indices}),
+        "method": "5-fold held-out-state cross-validation",
+        "rows": len(validation_indices),
+        "states": len(validation_states),
+        "folds": completed_folds,
         "modelMse": round(model_mse, 5),
         "ruleBaselineMse": round(baseline_mse, 5),
+        "modelMae": round(model_mae, 5),
+        "ruleBaselineMae": round(baseline_mae, 5),
     }
     if model_mse >= baseline_mse:
         return _inactive(
             "baseline_preferred",
-            "ML did not outperform the transparent rule score on held-out states; rule-based ordering is retained.",
+            "ML did not outperform the transparent rule score across held-out states; rule-based ordering is retained.",
             trainingRows=len(rows),
             matchedCrops=len(crop_counts),
             excludedRows=excluded,
             validation=validation,
         )
 
-    model = RandomForestRegressor(**model_options)
+    yields_by_crop = {}
+    for row in rows:
+        yields_by_crop.setdefault(row["crop"], []).append(row["yield_value"])
+    for yields in yields_by_crop.values():
+        yields.sort()
+    targets = _percentile_targets(rows, yields_by_crop)
+    vectorizer = DictVectorizer(sparse=False)
+    features = vectorizer.fit_transform([
+        _feature(row, row["crop"]) for row in rows
+    ])
+    model = RandomForestRegressor(**{**model_options, "n_estimators": 120})
     model.fit(features, targets)
     return {
         "model": model,
@@ -253,7 +314,7 @@ def _load_state(path, modified_ns):
             "excludedRows": excluded,
             "source": SOURCE_NOTE,
             "validation": validation,
-            "note": "The final rank blends 80% transparent ECOCROP fit with a 20% ML advisory, only for crops represented in the validated training data.",
+            "note": "Only matched crops represented in the training data receive an advisory. Their rank blends 80% transparent ECOCROP fit with 20% Random Forest suitability; all other crops remain rule-based.",
         },
     }
 

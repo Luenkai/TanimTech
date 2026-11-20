@@ -4,6 +4,7 @@ from .. import plant_catalog, store
 from ..scoring import recommend
 from ..validate import validate_conditions
 from ..kaggle_data import status as kaggle_status
+from ..crop_suitability import ranking_status
 from .. import auth
 
 bp = Blueprint("recommendations", __name__)
@@ -36,8 +37,15 @@ def create_recommendations():
         "inputs": core, "context": context,
         "poolSize": len(pool),
         "results": recommend(pool, core, context),
+        "rankingModel": ranking_status(),
         "note": "Illustrative demo scoring. Not a forecast, planting instruction or yield guarantee.",
     })
+
+
+@bp.get("/ranking-status")
+def ranking_model_status():
+    """Report whether the validated Random Forest ranking advisory is active."""
+    return jsonify(ranking_status())
 
 
 @bp.get("/saved")

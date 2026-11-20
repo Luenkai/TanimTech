@@ -30,7 +30,9 @@ python -m unittest -v           # run the tests
 ## Optional Supabase
 
 The browser already supports an optional publishable Supabase key through
-`js/supabase-config.js`. For server-side integrations, copy the values from
+`js/supabase-config.js`. The static website uses Supabase Auth and the private
+profile/crop/feedback tables in [`../supabase/schema.sql`](../supabase/schema.sql);
+run that schema in the Supabase SQL Editor to enable those features. For server-side integrations, copy the values from
 `.env.example` into the backend environment, using `SUPABASE_URL` and
 `SUPABASE_SERVICE_ROLE_KEY` (never commit the service-role key). Check the
 configuration with `GET /api/supabase/status`. The existing local JSON storage
@@ -77,9 +79,38 @@ cleaned Kaggle profile. `GET /api/recommendations/data-status` reports which pro
 are available. The four-factor fit score remains transparent and the cleaned data is shown as evidence,
 not converted into a false confidence estimate.
 
+## Random Forest recommendation advisory
+
+The recommendation pipeline can apply a Random Forest regression advisory in
+`tanimtech/crop_suitability.py`. It uses crop identity, soil pH, temperature,
+rainfall, and humidity to estimate a crop's **within-crop yield percentile** from
+complete, reconciled yield observations. This percentile is only a provisional
+suitability proxy: the model does not forecast a farm's yield or probability of
+success.
+
+Before it is enabled, the model is compared with the transparent rule-based fit
+using five-fold cross-validation that holds out entire states. Each fold fits
+its crop encoding and percentile targets on training states only, preventing
+held-out yields from leaking into validation labels. The advisory is enabled
+only when its held-out mean squared error beats the rule-score baseline; the
+validation method and MSE/MAE metrics are available from the `rankingModel`
+field returned by recommendations, crop comparison, and profile recommendation
+endpoints, and the approach is described by `GET /api/methodology`.
+
+For a supported crop (at least 30 matched observations), the advisory affects
+**ordering only**: 80% transparent crop-fit score plus 20% Random Forest
+percentile. The displayed `fit` and its factor breakdown are unchanged.
+Unsupported crops keep rule-based ordering, and soil-match points remain an
+ordering tie-breaker. This applies to recommendations, saved lists, farm-profile
+recommendations, and comparisons supplied with field conditions because each
+uses the shared `scoring.recommend` flow. Current model availability and
+validation metrics are also available at `GET /api/recommendations/ranking-status`.
+The source data is state-level India (1997–2020), not Philippine farm trials,
+so local verification remains important.
+
 ## Accounts and saved planning work
 
-The profile workspace uses Manus OAuth. Configure `MANUS_PROJECT_ID`, `MANUS_OAUTH_PORTAL_URL`,
+The Flask API's profile endpoints use Manus OAuth. Configure `MANUS_PROJECT_ID`, `MANUS_OAUTH_PORTAL_URL`,
 `MANUS_OAUTH_API_URL`, and `MANUS_JWT_SECRET` in the deployment environment. The application session
 uses the reserved-compatible `webdev_app_session` cookie name and protects farm profiles and saved
 recommendation history by user. `GET /api/auth/me` reports the current account, while
