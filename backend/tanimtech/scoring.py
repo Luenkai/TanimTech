@@ -5,6 +5,7 @@ requirement for these profiles. Add-on context never adds points."""
 from .util import round_half_up
 from .kaggle_data import evidence_for
 from .soil_analysis import soil_matches
+from .crop_suitability import rank_results
 
 FACTORS = [
     {"key": "soilPh",      "label": "Soil pH",     "weight": 35, "min": "ph_min",       "max": "ph_max"},
@@ -100,8 +101,17 @@ def recommend(crops, data, ctx=None):
             "dataSource": crop.get("data_source", "FAO ECOCROP crop requirement profile"),
             "scientific": crop.get("scientific", ""),
         })
-    # Soil suitability narrows ordering only; the displayed fit remains the core score out of 100.
-    results.sort(key=lambda r: (-r["fit"], -(r["soilMatch"].get("points") or 0)))
+    # Soil suitability and the validated ML signal affect ordering, never displayed core fit.
+    results, _ = rank_results(results, data)
+    results.sort(key=lambda r: (
+        -r.get("rankScore", r["fit"]),
+        -(r["soilMatch"].get("points") or 0),
+        -r["fit"],
+    ))
     for i, r in enumerate(results):
-        r["label"] = "CLOSEST FIT" if i == 0 else "ALTERNATIVE"
+        r["label"] = (
+            "BEST MODEL-ASSISTED MATCH"
+            if i == 0 and r.get("rankingMethod") == "rule-plus-ml-advisory"
+            else "CLOSEST FIT" if i == 0 else "ALTERNATIVE"
+        )
     return results

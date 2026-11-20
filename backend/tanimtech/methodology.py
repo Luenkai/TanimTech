@@ -15,6 +15,13 @@ def get_methodology():
                          "Typhoon or flood risk", "Plant category", "Life form"],
         "notScored": ["Drainage", "Pests and disease", "Seed quality", "Sunlight", "Land area",
                       "Soil photo (never analysed)"],
+        "randomForest": {
+            "method": "Random Forest regression of within-crop yield percentile",
+            "source": "Cleaned Kaggle crop-yield observations from India (1997–2020)",
+            "usedIn": "Crop recommendation ordering as a 20% advisory blend for crops represented in validated data",
+            "validation": "Five-fold cross-validation with held-out states; enabled only when it beats the rule baseline",
+            "limitation": "Not a Philippine yield forecast; crops without matched observations remain rule-based",
+        },
         "limitations": [
             "Fit is not a probability of success or a yield forecast.",
             "Reference bands are illustrative demo data, not a verified ECOCROP connection.",

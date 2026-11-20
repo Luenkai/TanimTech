@@ -8,6 +8,7 @@ os.environ["TANIM_STORE_FILE"] = os.path.join(tempfile.mkdtemp(), "store.json")
 
 from tanimtech import create_app  # noqa: E402
 from tanimtech import store  # noqa: E402
+from tanimtech.crop_suitability import _percentile_targets, _yield_percentile  # noqa: E402
 
 SAMPLE = {"soilPh": 6.4, "temperature": 27, "humidity": 78, "rainfall": 1500}
 
@@ -65,6 +66,31 @@ class BackendTests(unittest.TestCase):
                 "humidity": [source["humidity_min"], source["humidity_max"]],
             })
             self.assertEqual(crop["dataSource"], source["data_source"])
+
+    def test_validated_ml_advisory_is_separate_from_fit(self):
+        response = self.c.post("/api/recommendations", json={**SAMPLE, "catalog": "extended"})
+        self.assertEqual(response.status_code, 200)
+        payload = response.json
+        model = payload["rankingModel"]
+        self.assertTrue(model["active"], model)
+        self.assertEqual(model["validation"]["folds"], 5)
+        self.assertEqual(model["validation"]["method"], "5-fold held-out-state cross-validation")
+        self.assertLess(model["validation"]["modelMse"], model["validation"]["ruleBaselineMse"])
+        results = {result["slug"]: result for result in payload["results"]}
+        maize = results["mais"]
+        self.assertIn("mlSuitability", maize)
+        self.assertEqual(maize["rankingMethod"], "rule-plus-ml-advisory")
+        expected = 0.8 * maize["fit"] + 0.2 * maize["mlSuitability"]
+        self.assertLessEqual(abs(maize["rankScore"] - expected), 0.5)
+        self.assertEqual(results["pechay"]["rankingMethod"], "rule-based")
+        self.assertEqual(results["pechay"]["rankScore"], results["pechay"]["fit"])
+        self.assertEqual(self.c.get("/api/recommendations/ranking-status").status_code, 200)
+
+    def test_percentile_targets_use_training_reference_only(self):
+        rows = [{"crop": "mais", "yield_value": value} for value in (10, 20, 30)]
+        reference = {"mais": [10, 20, 30]}
+        self.assertEqual(_percentile_targets(rows, reference), [0, 0.5, 1])
+        self.assertEqual(_yield_percentile(1000, reference["mais"]), 1)
 
     def test_recommendations(self):
         r = self.c.post("/api/recommendations", json={**SAMPLE, "season": "Wet season"})
